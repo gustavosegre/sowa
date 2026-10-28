@@ -4,2622 +4,3108 @@
  */
 
 export interface paths {
-  "/health": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/health": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Health */
+        get: operations["health_health_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /** Health */
-    get: operations["health_health_get"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/nodes": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/nodes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Node Types
+         * @description Node catalog with the JSON schema of each config.
+         */
+        get: operations["node_types_nodes_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /**
-     * Node Types
-     * @description Node catalog with the JSON schema of each config.
-     */
-    get: operations["node_types_nodes_get"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/projects": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/projects": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Projects */
+        get: operations["list_projects_projects_get"];
+        put?: never;
+        /** Create Project */
+        post: operations["create_project_projects_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /** List Projects */
-    get: operations["list_projects_projects_get"];
-    put?: never;
-    /** Create Project */
-    post: operations["create_project_projects_post"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/projects/{project_id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/projects/{project_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Project */
+        get: operations["get_project_projects__project_id__get"];
+        put?: never;
+        post?: never;
+        /** Delete Project */
+        delete: operations["delete_project_projects__project_id__delete"];
+        options?: never;
+        head?: never;
+        /** Rename Project */
+        patch: operations["rename_project_projects__project_id__patch"];
+        trace?: never;
     };
-    /** Get Project */
-    get: operations["get_project_projects__project_id__get"];
-    put?: never;
-    post?: never;
-    /** Delete Project */
-    delete: operations["delete_project_projects__project_id__delete"];
-    options?: never;
-    head?: never;
-    /** Rename Project */
-    patch: operations["rename_project_projects__project_id__patch"];
-    trace?: never;
-  };
-  "/projects/{project_id}/pipeline": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/projects/{project_id}/pipeline": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Load Pipeline */
+        get: operations["load_pipeline_projects__project_id__pipeline_get"];
+        /** Save Pipeline */
+        put: operations["save_pipeline_projects__project_id__pipeline_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /** Load Pipeline */
-    get: operations["load_pipeline_projects__project_id__pipeline_get"];
-    /** Save Pipeline */
-    put: operations["save_pipeline_projects__project_id__pipeline_put"];
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/sources": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/sources": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Sources */
+        get: operations["list_sources_sources_get"];
+        put?: never;
+        /**
+         * Upload
+         * @description Upload a file. Returns detected import settings and a sample (wizard step 2).
+         */
+        post: operations["upload_sources_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /** List Sources */
-    get: operations["list_sources_sources_get"];
-    put?: never;
-    /**
-     * Upload
-     * @description Upload a file. Returns detected import settings and a sample (wizard step 2).
-     */
-    post: operations["upload_sources_post"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/sources/{source_id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/sources/{source_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Source */
+        get: operations["get_source_sources__source_id__get"];
+        put?: never;
+        post?: never;
+        /** Delete Source */
+        delete: operations["delete_source_sources__source_id__delete"];
+        options?: never;
+        head?: never;
+        /** Rename Source */
+        patch: operations["rename_source_sources__source_id__patch"];
+        trace?: never;
     };
-    /** Get Source */
-    get: operations["get_source_sources__source_id__get"];
-    put?: never;
-    post?: never;
-    /** Delete Source */
-    delete: operations["delete_source_sources__source_id__delete"];
-    options?: never;
-    head?: never;
-    /** Rename Source */
-    patch: operations["rename_source_sources__source_id__patch"];
-    trace?: never;
-  };
-  "/sources/{source_id}/detection": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/sources/{source_id}/detection": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Detection */
+        get: operations["get_detection_sources__source_id__detection_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /** Get Detection */
-    get: operations["get_detection_sources__source_id__detection_get"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/sources/{source_id}/detect": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/sources/{source_id}/detect": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Redetect
+         * @description Re-read the sample with edited settings (encoding, delimiter, header, sheet…).
+         */
+        post: operations["redetect_sources__source_id__detect_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /**
-     * Redetect
-     * @description Re-read the sample with edited settings (encoding, delimiter, header, sheet…).
-     */
-    post: operations["redetect_sources__source_id__detect_post"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/sources/{source_id}/confirm": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/sources/{source_id}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Confirm Import
+         * @description Confirm import options and column types -> normalized Parquet (zstd).
+         */
+        post: operations["confirm_import_sources__source_id__confirm_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /**
-     * Confirm Import
-     * @description Confirm import options and column types -> normalized Parquet (zstd).
-     */
-    post: operations["confirm_import_sources__source_id__confirm_post"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/sources/{source_id}/replace": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/sources/{source_id}/replace": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Replace File
+         * @description Replace the file ("Substituir fonte"), keeping the pipeline. The import must be confirmed again.
+         */
+        post: operations["replace_file_sources__source_id__replace_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /**
-     * Replace File
-     * @description Replace the file ("Substituir fonte"), keeping the pipeline. The import must be confirmed again.
-     */
-    post: operations["replace_file_sources__source_id__replace_post"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/pipeline/schema": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/pipeline/schema": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Pipeline Schema
+         * @description Schemas and issues of every node, without executing data. Called on every edit.
+         */
+        post: operations["pipeline_schema_pipeline_schema_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /**
-     * Pipeline Schema
-     * @description Schemas and issues of every node, without executing data. Called on every edit.
-     */
-    post: operations["pipeline_schema_pipeline_schema_post"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/pipeline/preview": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/pipeline/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Pipeline Preview */
+        post: operations["pipeline_preview_pipeline_preview_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /** Pipeline Preview */
-    post: operations["pipeline_preview_pipeline_preview_post"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/pipeline/stats": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/pipeline/stats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Pipeline Stats
+         * @description Row counts (node + inputs) and data-dependent warnings. Runs in the background from the UI.
+         */
+        post: operations["pipeline_stats_pipeline_stats_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /**
-     * Pipeline Stats
-     * @description Row counts (node + inputs) and data-dependent warnings. Runs in the background from the UI.
-     */
-    post: operations["pipeline_stats_pipeline_stats_post"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/pipeline/profile": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/pipeline/profile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Pipeline Profile */
+        post: operations["pipeline_profile_pipeline_profile_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /** Pipeline Profile */
-    post: operations["pipeline_profile_pipeline_profile_post"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/pipeline/sql": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/pipeline/sql": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Pipeline Sql
+         * @description SQL compiled up to the node ("Copiar como SQL").
+         */
+        post: operations["pipeline_sql_pipeline_sql_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /**
-     * Pipeline Sql
-     * @description SQL compiled up to the node ("Copiar como SQL").
-     */
-    post: operations["pipeline_sql_pipeline_sql_post"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/pipeline/distinct-values": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/pipeline/distinct-values": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Distinct Values
+         * @description Distinct values of a column, from the node's input (pivot/filter config) or output.
+         */
+        post: operations["distinct_values_pipeline_distinct_values_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /**
-     * Distinct Values
-     * @description Distinct values of a column, from the node's input (pivot/filter config) or output.
-     */
-    post: operations["distinct_values_pipeline_distinct_values_post"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/pivot/distinct-values": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/pivot/distinct-values": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Distinct Values
+         * @description Distinct values of a column, from the node's input (pivot/filter config) or output.
+         */
+        post: operations["distinct_values_pivot_distinct_values_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /**
-     * Distinct Values
-     * @description Distinct values of a column, from the node's input (pivot/filter config) or output.
-     */
-    post: operations["distinct_values_pivot_distinct_values_post"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/formula/functions": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/formula/functions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Functions
+         * @description Function catalog (autocomplete and help).
+         */
+        get: operations["functions_formula_functions_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /**
-     * Functions
-     * @description Function catalog (autocomplete and help).
-     */
-    get: operations["functions_formula_functions_get"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/formula/check": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/formula/check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Check
+         * @description Validate a formula: result type, positioned errors and up to 10 example values.
+         */
+        post: operations["check_formula_check_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /**
-     * Check
-     * @description Validate a formula: result type, positioned errors and up to 10 example values.
-     */
-    post: operations["check_formula_check_post"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/formula/render": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/formula/render": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Render Formula
+         * @description Re-render a formula in another locale (argument and decimal separators, function names).
+         */
+        post: operations["render_formula_formula_render_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /**
-     * Render Formula
-     * @description Re-render a formula in another locale (argument and decimal separators, function names).
-     */
-    post: operations["render_formula_formula_render_post"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/exports": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/exports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Start Export
+         * @description Start an export job for an `output` node.
+         */
+        post: operations["start_export_exports_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /**
-     * Start Export
-     * @description Start an export job for an `output` node.
-     */
-    post: operations["start_export_exports_post"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/exports/{job_id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/exports/{job_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Export */
+        get: operations["get_export_exports__job_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /** Get Export */
-    get: operations["get_export_exports__job_id__get"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/exports/{job_id}/download": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/exports/{job_id}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Download */
+        get: operations["download_exports__job_id__download_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /** Download */
-    get: operations["download_exports__job_id__download_get"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-  schemas: {
-    /** ApiError */
-    ApiError: {
-      /** Code */
-      code: string;
-      /** Message */
-      message: string;
-      /** Hint */
-      hint?: string | null;
-      /** Detail */
-      detail?: string | null;
-      /**
-       * Issues
-       * @default []
-       */
-      issues: components["schemas"]["Issue"][];
-    };
-    /** Body_replace_file_sources__source_id__replace_post */
-    Body_replace_file_sources__source_id__replace_post: {
-      /** File */
-      file: string;
-    };
-    /** Body_upload_sources_post */
-    Body_upload_sources_post: {
-      /** File */
-      file: string;
-      /** Project Id */
-      project_id?: string | null;
-    };
-    /** Column */
-    Column: {
-      /** Name */
-      name: string;
-      type: components["schemas"]["LogicalType"];
-    };
-    /** ColumnGuess */
-    ColumnGuess: {
-      /** Name */
-      name: string;
-      original_type: components["schemas"]["LogicalType"];
-      suggested_type: components["schemas"]["LogicalType"];
-      /** Format */
-      format?: string | null;
-      /** Decimal Separator */
-      decimal_separator?: ("," | ".") | null;
-      /**
-       * Examples
-       * @default []
-       */
-      examples: (string | null)[];
-    };
-    /** ColumnPlan */
-    ColumnPlan: {
-      /** Source */
-      source: string;
-      /** Name */
-      name: string;
-      /** @default text */
-      type: components["schemas"]["LogicalType"];
-      /** Format */
-      format?: string | null;
-      /** Decimal Separator */
-      decimal_separator?: ("," | ".") | null;
-      /**
-       * Include
-       * @default true
-       */
-      include: boolean;
-    };
-    /** ConfirmOut */
-    ConfirmOut: {
-      source: components["schemas"]["SourceOut"];
-      report: components["schemas"]["ImportReport"];
-    };
-    /** CsvImportOptions */
-    CsvImportOptions: {
-      /**
-       * Encoding
-       * @default utf-8
-       */
-      encoding: string;
-      /**
-       * Delimiter
-       * @default ,
-       */
-      delimiter: string;
-      /**
-       * Quote
-       * @default "
-       */
-      quote: string;
-      /**
-       * Header
-       * @default true
-       */
-      header: boolean;
-      /**
-       * Skip Rows
-       * @default 0
-       */
-      skip_rows: number;
-      /**
-       * Decimal Separator
-       * @default .
-       * @enum {string}
-       */
-      decimal_separator: "," | ".";
-      /** Date Format */
-      date_format?: string | null;
-    };
-    /** DetectRequest */
-    DetectRequest: {
-      options: components["schemas"]["ImportOptions"];
-    };
-    /** Detection */
-    Detection: {
-      options: components["schemas"]["ImportOptions"];
-      /** Columns */
-      columns: components["schemas"]["ColumnGuess"][];
-      /** Sample Rows */
-      sample_rows: (string | null)[][];
-      /**
-       * Sheets
-       * @default []
-       */
-      sheets: string[];
-      /** Encoding Confidence */
-      encoding_confidence?: number | null;
-      /**
-       * Notes
-       * @default []
-       */
-      notes: string[];
-    };
-    /** DistinctOut */
-    DistinctOut: {
-      /** Values */
-      values: unknown[];
-      /** Truncated */
-      truncated: boolean;
-    };
-    /** DistinctRequest */
-    DistinctRequest: {
-      pipeline: components["schemas"]["Pipeline"];
-      /** Node Id */
-      node_id: string;
-      /** Column */
-      column: string;
-      /**
-       * Limit
-       * @default 200
-       */
-      limit: number;
-      /**
-       * Of Input
-       * @default true
-       */
-      of_input: boolean;
-    };
-    /** Edge */
-    Edge: {
-      /** Id */
-      id: string;
-      /** Source */
-      source: string;
-      /** Target */
-      target: string;
-      /**
-       * Source Handle
-       * @default out
-       */
-      source_handle: string;
-      /**
-       * Target Handle
-       * @default in
-       */
-      target_handle: string;
-    };
-    /** ExportJobOut */
-    ExportJobOut: {
-      /** Id */
-      id: string;
-      /** Node Id */
-      node_id: string;
-      /**
-       * Status
-       * @enum {string}
-       */
-      status: "pending" | "running" | "done" | "error";
-      /** Progress */
-      progress: number;
-      /** Format */
-      format: string;
-      /** Filename */
-      filename: string;
-      /** Rows */
-      rows: number | null;
-      /** Size Bytes */
-      size_bytes: number | null;
-      error: components["schemas"]["Issue"] | null;
-      /**
-       * Created At
-       * Format: date-time
-       */
-      created_at: string;
-      /** Finished At */
-      finished_at: string | null;
-    };
-    /** ExportRequest */
-    ExportRequest: {
-      pipeline: components["schemas"]["Pipeline"];
-      /** Node Id */
-      node_id: string;
-      /** Project Id */
-      project_id?: string | null;
-    };
-    /** FormulaCheckOut */
-    FormulaCheckOut: {
-      /** Ok */
-      ok: boolean;
-      type?: components["schemas"]["LogicalType"] | null;
-      /** Type Label */
-      type_label?: string | null;
-      /**
-       * Issues
-       * @default []
-       */
-      issues: components["schemas"]["Issue"][];
-      /**
-       * Examples
-       * @default []
-       */
-      examples: (string | null)[];
-      /**
-       * Columns
-       * @default []
-       */
-      columns: string[];
-    };
-    /** FormulaCheckRequest */
-    FormulaCheckRequest: {
-      /** Formula */
-      formula: string;
-      /**
-       * Locale
-       * @default pt-BR
-       * @enum {string}
-       */
-      locale: "pt-BR" | "en-US";
-      /**
-       * Context
-       * @default row
-       * @enum {string}
-       */
-      context: "row" | "aggregate";
-      /**
-       * Group Keys
-       * @default []
-       */
-      group_keys: string[];
-      pipeline?: components["schemas"]["Pipeline"] | null;
-      /** Node Id */
-      node_id?: string | null;
-      /** Columns */
-      columns?: components["schemas"]["Column"][] | null;
-    };
-    /** FormulaRenderRequest */
-    FormulaRenderRequest: {
-      /** Formula */
-      formula: string;
-      /**
-       * From Locale
-       * @enum {string}
-       */
-      from_locale: "pt-BR" | "en-US";
-      /**
-       * To Locale
-       * @enum {string}
-       */
-      to_locale: "pt-BR" | "en-US";
-    };
-    /** FunctionOut */
-    FunctionOut: {
-      /** Name */
-      name: string;
-      /** Aliases */
-      aliases: string[];
-      /** Category */
-      category: string;
-      /**
-       * Context
-       * @enum {string}
-       */
-      context: "row" | "aggregate";
-      /** Signature */
-      signature: string;
-      /** Signature En */
-      signature_en: string;
-      /** Params */
-      params: components["schemas"]["FunctionParamOut"][];
-      /** Returns */
-      returns: string | null;
-      /** Description */
-      description: string;
-      /** Example */
-      example: string;
-      /** Excel */
-      excel: boolean;
-    };
-    /** FunctionParamOut */
-    FunctionParamOut: {
-      /** Name */
-      name: string;
-      /** Type */
-      type: string;
-      /** Optional */
-      optional: boolean;
-      /** Variadic */
-      variadic: boolean;
-    };
-    /** HTTPValidationError */
-    HTTPValidationError: {
-      /** Detail */
-      detail?: components["schemas"]["ValidationError"][];
-    };
-    /** ImportOptions */
-    ImportOptions: {
-      /**
-       * Format
-       * @enum {string}
-       */
-      format: "csv" | "parquet" | "xlsx" | "json" | "ndjson";
-      csv?: components["schemas"]["CsvImportOptions"] | null;
-      xlsx?: components["schemas"]["XlsxOptions"] | null;
-      /**
-       * Columns
-       * @default []
-       */
-      columns: components["schemas"]["ColumnPlan"][];
-    };
-    /** ImportReport */
-    ImportReport: {
-      /** Row Count */
-      row_count: number;
-      /**
-       * Failures
-       * @default {}
-       */
-      failures: {
-        [key: string]: number;
-      };
-    };
-    /** Issue */
-    Issue: {
-      /** Node Id */
-      node_id?: string | null;
-      /**
-       * Severity
-       * @default error
-       * @enum {string}
-       */
-      severity: "error" | "warning" | "info";
-      code: components["schemas"]["IssueCode"];
-      /** Column */
-      column?: string | null;
-      /** Message */
-      message: string;
-      /** Hint */
-      hint?: string | null;
-      /** Detail */
-      detail?: string | null;
-      position?: components["schemas"]["Position"] | null;
-      /** Count */
-      count?: number | null;
-      /** Examples */
-      examples?: string[] | null;
-    };
-    /**
-     * IssueCode
-     * @enum {string}
-     */
-    IssueCode:
-      | "CYCLE"
-      | "MISSING_INPUT"
-      | "UNKNOWN_NODE_TYPE"
-      | "INVALID_CONFIG"
-      | "UPSTREAM_ERROR"
-      | "NODE_NOT_FOUND"
-      | "COLUMN_NOT_FOUND"
-      | "DUPLICATE_COLUMN"
-      | "EMPTY_NAME"
-      | "TYPE_MISMATCH"
-      | "NO_COLUMNS"
-      | "SOURCE_NOT_FOUND"
-      | "SOURCE_NOT_READY"
-      | "FORMULA_SYNTAX"
-      | "FORMULA_TYPE"
-      | "FORMULA_UNKNOWN_FUNCTION"
-      | "FORMULA_ARGUMENTS"
-      | "FORMULA_CONTEXT"
-      | "CAST_FAILURES"
-      | "DIVISION_BY_ZERO"
-      | "JOIN_ROW_MULTIPLICATION"
-      | "PIVOT_NEW_VALUES"
-      | "PIVOT_TOO_MANY_VALUES"
-      | "XLSX_LIMIT"
-      | "LOOKUP_MULTIPLE_MATCHES"
-      | "TIMEOUT"
-      | "ENGINE_ERROR"
-      | "SQL_NOT_ALLOWED";
-    /**
-     * LogicalType
-     * @enum {string}
-     */
-    LogicalType: "text" | "integer" | "decimal" | "boolean" | "date" | "datetime" | "time" | "other";
-    /** Node */
-    Node: {
-      /** Id */
-      id: string;
-      /** Type */
-      type: string;
-      /**
-       * Config
-       * @default {}
-       */
-      config: {
-        [key: string]: unknown;
-      };
-      /**
-       * @default {
-       *       "x": 0,
-       *       "y": 0
-       *     }
-       */
-      ui: components["schemas"]["NodeUI"];
-    };
-    /** NodeAnalysisOut */
-    NodeAnalysisOut: {
-      /**
-       * Status
-       * @enum {string}
-       */
-      status: "ok" | "warning" | "error" | "blocked";
-      /** Columns */
-      columns: components["schemas"]["Column"][] | null;
-      /** Issues */
-      issues: components["schemas"]["Issue"][];
-      /**
-       * Changed Columns
-       * @default []
-       */
-      changed_columns: string[];
-      /**
-       * Input Columns
-       * @default {}
-       */
-      input_columns: {
-        [key: string]: components["schemas"]["Column"][];
-      };
-      /** Hash */
-      hash?: string | null;
-    };
-    /** NodeRequest */
-    NodeRequest: {
-      pipeline: components["schemas"]["Pipeline"];
-      /** Node Id */
-      node_id: string;
-    };
-    /** NodeTypeOut */
-    NodeTypeOut: {
-      /** Type */
-      type: string;
-      /** Label */
-      label: string;
-      /** Category */
-      category: string;
-      /** Description */
-      description: string;
-      /** Inputs */
-      inputs: string[];
-      /** Variadic Inputs */
-      variadic_inputs: boolean;
-      /** Has Output */
-      has_output: boolean;
-      /** Annotation */
-      annotation: boolean;
-      /** Config Schema */
-      config_schema: {
-        [key: string]: unknown;
-      };
-    };
-    /** NodeUI */
-    NodeUI: {
-      /**
-       * X
-       * @default 0
-       */
-      x: number;
-      /**
-       * Y
-       * @default 0
-       */
-      y: number;
-      /** Label */
-      label?: string | null;
-      /** Color */
-      color?: string | null;
-      /** Width */
-      width?: number | null;
-      /** Height */
-      height?: number | null;
-    } & {
-      [key: string]: unknown;
-    };
-    /** Pipeline */
-    Pipeline: {
-      /**
-       * Schema Version
-       * @default 1
-       */
-      schema_version: number;
-      /**
-       * @default {
-       *       "locale": "pt-BR"
-       *     }
-       */
-      settings: components["schemas"]["PipelineSettings"];
-      /**
-       * Nodes
-       * @default []
-       */
-      nodes: components["schemas"]["Node"][];
-      /**
-       * Edges
-       * @default []
-       */
-      edges: components["schemas"]["Edge"][];
-    };
-    /** PipelineRequest */
-    PipelineRequest: {
-      pipeline: components["schemas"]["Pipeline"];
-    };
-    /** PipelineSettings */
-    PipelineSettings: {
-      /**
-       * Locale
-       * @default pt-BR
-       * @enum {string}
-       */
-      locale: "pt-BR" | "en-US";
-    };
-    /** Position */
-    Position: {
-      /** Start */
-      start: number;
-      /** End */
-      end: number;
-    };
-    /** PreviewRequest */
-    PreviewRequest: {
-      pipeline: components["schemas"]["Pipeline"];
-      /** Node Id */
-      node_id: string;
-      /**
-       * Limit
-       * @default 500
-       */
-      limit: number;
-      /**
-       * Offset
-       * @default 0
-       */
-      offset: number;
-    };
-    /** ProfileBucket */
-    ProfileBucket: {
-      /** From */
-      from: number | string;
-      /** To */
-      to: number | string;
-      /** Count */
-      count: number;
-    };
-    /** ProfileOut */
-    ProfileOut: {
-      /** Column */
-      column: string;
-      type: components["schemas"]["LogicalType"];
-      /** Rows */
-      rows: number;
-      /** Total Rows */
-      total_rows: number;
-      /** Sampled */
-      sampled: boolean;
-      /** Nulls */
-      nulls: number;
-      /** Null Pct */
-      null_pct: number;
-      /** Distinct */
-      distinct: number;
-      /** Min */
-      min: string | null;
-      /** Max */
-      max: string | null;
-      /** Mean */
-      mean: number | null;
-      /** Top */
-      top: components["schemas"]["ProfileTop"][];
-      /** Histogram */
-      histogram: components["schemas"]["ProfileBucket"][];
-    };
-    /** ProfileRequest */
-    ProfileRequest: {
-      pipeline: components["schemas"]["Pipeline"];
-      /** Node Id */
-      node_id: string;
-      /** Column */
-      column: string;
-    };
-    /** ProfileTop */
-    ProfileTop: {
-      /** Value */
-      value: string | null;
-      /** Count */
-      count: number;
-    };
-    /** ProjectCreate */
-    ProjectCreate: {
-      /** Name */
-      name: string;
-      pipeline?: components["schemas"]["Pipeline"] | null;
-    };
-    /** ProjectOut */
-    ProjectOut: {
-      /** Id */
-      id: string;
-      /** Name */
-      name: string;
-      /** Version */
-      version: number;
-      /**
-       * Created At
-       * Format: date-time
-       */
-      created_at: string;
-      /**
-       * Updated At
-       * Format: date-time
-       */
-      updated_at: string;
-      /**
-       * Node Count
-       * @default 0
-       */
-      node_count: number;
-    };
-    /** ProjectUpdate */
-    ProjectUpdate: {
-      /** Name */
-      name: string;
-    };
-    /** SavedPipeline */
-    SavedPipeline: {
-      pipeline: components["schemas"]["Pipeline"];
-      /** Version */
-      version: number;
-      /**
-       * Updated At
-       * Format: date-time
-       */
-      updated_at: string;
-    };
-    /** SchemaResponse */
-    SchemaResponse: {
-      /** Nodes */
-      nodes: {
-        [key: string]: components["schemas"]["NodeAnalysisOut"];
-      };
-    };
-    /** SourceOut */
-    SourceOut: {
-      /** Id */
-      id: string;
-      /** Project Id */
-      project_id: string | null;
-      /** Name */
-      name: string;
-      /** Filename */
-      filename: string;
-      /** Format */
-      format: string;
-      /** Size Bytes */
-      size_bytes: number;
-      /** Status */
-      status: string;
-      /** Row Count */
-      row_count: number | null;
-      /** Columns */
-      columns: components["schemas"]["Column"][] | null;
-      options: components["schemas"]["ImportOptions"] | null;
-      /** Error */
-      error: string | null;
-      /**
-       * Created At
-       * Format: date-time
-       */
-      created_at: string;
-    };
-    /** SourceRename */
-    SourceRename: {
-      /** Name */
-      name: string;
-    };
-    /** SqlOut */
-    SqlOut: {
-      /** Sql */
-      sql: string;
-    };
-    /** StatsOut */
-    StatsOut: {
-      /** Row Count */
-      row_count: number | null;
-      /** Input Row Counts */
-      input_row_counts: {
-        [key: string]: number;
-      };
-      /** Issues */
-      issues: components["schemas"]["Issue"][];
-    };
-    /** UploadOut */
-    UploadOut: {
-      source: components["schemas"]["SourceOut"];
-      detection: components["schemas"]["Detection"] | null;
-      error?: components["schemas"]["ApiError"] | null;
-    };
-    /** ValidationError */
-    ValidationError: {
-      /** Location */
-      loc: (string | number)[];
-      /** Message */
-      msg: string;
-      /** Error Type */
-      type: string;
-      /** Input */
-      input?: unknown;
-      /** Context */
-      ctx?: Record<string, never>;
-    };
-    /** XlsxOptions */
-    XlsxOptions: {
-      /** Sheet */
-      sheet?: string | null;
-      /**
-       * Header
-       * @default true
-       */
-      header: boolean;
-      /**
-       * Skip Rows
-       * @default 0
-       */
-      skip_rows: number;
-    };
-    /** CsvExportOptions */
-    CsvExportOptions: {
-      /**
-       * Delimiter
-       * @default ,
-       */
-      delimiter: string;
-      /**
-       * Encoding
-       * @default utf-8
-       * @enum {string}
-       */
-      encoding: "utf-8" | "utf-8-sig" | "latin-1";
-      /**
-       * Decimal Separator
-       * @default .
-       * @enum {string}
-       */
-      decimal_separator: "." | ",";
-      /**
-       * Date Format
-       * @default %Y-%m-%d
-       */
-      date_format: string;
-      /**
-       * Datetime Format
-       * @default %Y-%m-%d %H:%M:%S
-       */
-      datetime_format: string;
-      /**
-       * Header
-       * @default true
-       */
-      header: boolean;
-      /**
-       * Quote
-       * @default "
-       */
-      quote: string;
-    };
-    /** ParquetOptions */
-    ParquetOptions: {
-      /**
-       * Compression
-       * @default zstd
-       * @enum {string}
-       */
-      compression: "zstd" | "snappy" | "none";
-      /**
-       * Row Group Size
-       * @default null
-       */
-      row_group_size: number | null;
-    };
-    /** OutputConfig */
-    OutputConfig: {
-      /**
-       * Format
-       * @default csv
-       * @enum {string}
-       */
-      format: "csv" | "parquet" | "xlsx" | "json" | "ndjson";
-      /**
-       * Filename
-       * @default dataset
-       */
-      filename: string;
-      /**
-       * Preset
-       * @default null
-       */
-      preset: ("excel_br" | "custom") | null;
-      /**
-       * @default {
-       *       "delimiter": ",",
-       *       "encoding": "utf-8",
-       *       "decimal_separator": ".",
-       *       "date_format": "%Y-%m-%d",
-       *       "datetime_format": "%Y-%m-%d %H:%M:%S",
-       *       "header": true,
-       *       "quote": "\""
-       *     }
-       */
-      csv: components["schemas"]["CsvExportOptions"];
-      /**
-       * @default {
-       *       "compression": "zstd",
-       *       "row_group_size": null
-       *     }
-       */
-      parquet: components["schemas"]["ParquetOptions"];
-    };
-    /** CalculatedConfig */
-    CalculatedConfig: {
-      /**
-       * Name
-       * @default
-       */
-      name: string;
-      /**
-       * Mode
-       * @default new
-       * @enum {string}
-       */
-      mode: "new" | "replace";
-      /**
-       * Formula
-       * @default
-       */
-      formula: string;
-    };
-    /** CastRule */
-    CastRule: {
-      /** Column */
-      column: string;
-      to: components["schemas"]["LogicalType"];
-      /**
-       * Format
-       * @default null
-       */
-      format: string | null;
-      /**
-       * Decimal Separator
-       * @default null
-       */
-      decimal_separator: ("," | ".") | null;
-      /**
-       * Precision
-       * @default null
-       */
-      precision: number | null;
-      /**
-       * Scale
-       * @default null
-       */
-      scale: number | null;
-      /**
-       * On Error
-       * @default null
-       * @enum {string}
-       */
-      on_error: "null" | "error";
-    };
-    /** CastConfig */
-    CastConfig: {
-      /**
-       * Casts
-       * @default []
-       */
-      casts: components["schemas"]["CastRule"][];
-    };
-    /** Condition */
-    Condition: {
-      /**
-       * Kind
-       * @default condition
-       * @constant
-       */
-      kind: "condition";
-      /** Column */
-      column: string;
-      /**
-       * Operator
-       * @default eq
-       * @enum {string}
-       */
-      operator:
-        | "eq"
-        | "neq"
-        | "gt"
-        | "gte"
-        | "lt"
-        | "lte"
-        | "between"
-        | "contains"
-        | "not_contains"
-        | "starts_with"
-        | "ends_with"
-        | "in"
-        | "not_in"
-        | "is_null"
-        | "is_not_null"
-        | "is_true"
-        | "is_false";
-      /**
-       * Value
-       * @default null
-       */
-      value: string | number | boolean | null;
-      /**
-       * Value2
-       * @default null
-       */
-      value2: string | number | boolean | null;
-      /**
-       * Values
-       * @default []
-       */
-      values: (string | number | boolean | null)[];
-      /**
-       * Case Sensitive
-       * @default false
-       */
-      case_sensitive: boolean;
-    };
-    /** ConditionGroup */
-    ConditionGroup: {
-      /**
-       * Kind
-       * @default group
-       * @constant
-       */
-      kind: "group";
-      /**
-       * Op
-       * @default and
-       * @enum {string}
-       */
-      op: "and" | "or";
-      /**
-       * Conditions
-       * @default []
-       */
-      conditions: (components["schemas"]["Condition"] | components["schemas"]["ConditionGroup"])[];
-    };
-    /** FilterConfig */
-    FilterConfig: {
-      /**
-       * Mode
-       * @default rules
-       * @enum {string}
-       */
-      mode: "rules" | "formula";
-      /**
-       * @default {
-       *       "kind": "group",
-       *       "op": "and",
-       *       "conditions": []
-       *     }
-       */
-      rules: components["schemas"]["ConditionGroup"];
-      /**
-       * Formula
-       * @default
-       */
-      formula: string;
-    };
-    /** Aggregation */
-    Aggregation: {
-      /**
-       * Column
-       * @default null
-       */
-      column: string | null;
-      /**
-       * Fn
-       * @default sum
-       * @enum {string}
-       */
-      fn:
-        | "count"
-        | "count_non_null"
-        | "count_distinct"
-        | "sum"
-        | "avg"
-        | "median"
-        | "min"
-        | "max"
-        | "stddev"
-        | "variance"
-        | "percentile"
-        | "mode"
-        | "first"
-        | "last"
-        | "concat";
-      /**
-       * As
-       * @default
-       */
-      as: string;
-      /**
-       * Percentile
-       * @default 0.5
-       */
-      percentile: number;
-      /**
-       * Separator
-       * @default ,
-       */
-      separator: string;
-      /**
-       * Order By
-       * @default null
-       */
-      order_by: string | null;
-    };
-    /**
-     * Measure
-     * @description Calculated measure: a formula in aggregate context, e.g. SOMA([receita]) / SOMA([qtd]).
-     */
-    Measure: {
-      /** Name */
-      name: string;
-      /** Formula */
-      formula: string;
-    };
-    /** GroupByConfig */
-    GroupByConfig: {
-      /**
-       * Keys
-       * @default []
-       */
-      keys: string[];
-      /**
-       * Aggs
-       * @default []
-       */
-      aggs: components["schemas"]["Aggregation"][];
-      /**
-       * Measures
-       * @default []
-       */
-      measures: components["schemas"]["Measure"][];
-    };
-    /** NoteConfig */
-    NoteConfig: {
-      /**
-       * Text
-       * @default
-       */
-      text: string;
-    };
-    /** FrameConfig */
-    FrameConfig: {
-      /**
-       * Title
-       * @default
-       */
-      title: string;
-      /**
-       * Color
-       * @default slate
-       */
-      color: string;
-    };
-    /** SelectConfig */
-    SelectConfig: {
-      /**
-       * Mode
-       * @default keep
-       * @enum {string}
-       */
-      mode: "keep" | "drop";
-      /**
-       * Columns
-       * @default []
-       */
-      columns: string[];
-      /**
-       * Renames
-       * @default {}
-       */
-      renames: {
-        [key: string]: string;
-      };
-    };
-    /** SortKey */
-    SortKey: {
-      /** Column */
-      column: string;
-      /**
-       * Direction
-       * @default asc
-       * @enum {string}
-       */
-      direction: "asc" | "desc";
-      /**
-       * Nulls
-       * @default last
-       * @enum {string}
-       */
-      nulls: "first" | "last";
-      /**
-       * Case Sensitive
-       * @default false
-       */
-      case_sensitive: boolean;
-    };
-    /** SortConfig */
-    SortConfig: {
-      /**
-       * Keys
-       * @default []
-       */
-      keys: components["schemas"]["SortKey"][];
-    };
-    /** SampleConfig */
-    SampleConfig: {
-      /**
-       * Mode
-       * @default first
-       * @enum {string}
-       */
-      mode: "first" | "random";
-      /**
-       * Rows
-       * @default 10000
-       */
-      rows: number;
-      /**
-       * Seed
-       * @default 42
-       */
-      seed: number;
-    };
-    /** SourceConfig */
-    SourceConfig: {
-      /**
-       * Source Id
-       * @default
-       */
-      source_id: string;
-      /** @default null */
-      sample: components["schemas"]["SampleConfig"] | null;
-    };
-  };
-  responses: never;
-  parameters: never;
-  requestBodies: never;
-  headers: never;
-  pathItems: never;
+    schemas: {
+        /** ApiError */
+        ApiError: {
+            /** Code */
+            code: string;
+            /** Message */
+            message: string;
+            /** Hint */
+            hint?: string | null;
+            /** Detail */
+            detail?: string | null;
+            /**
+             * Issues
+             * @default []
+             */
+            issues: components["schemas"]["Issue"][];
+        };
+        /** Body_replace_file_sources__source_id__replace_post */
+        Body_replace_file_sources__source_id__replace_post: {
+            /** File */
+            file: string;
+        };
+        /** Body_upload_sources_post */
+        Body_upload_sources_post: {
+            /** File */
+            file: string;
+            /** Project Id */
+            project_id?: string | null;
+        };
+        /** Column */
+        Column: {
+            /** Name */
+            name: string;
+            type: components["schemas"]["LogicalType"];
+        };
+        /** ColumnGuess */
+        ColumnGuess: {
+            /** Name */
+            name: string;
+            original_type: components["schemas"]["LogicalType"];
+            suggested_type: components["schemas"]["LogicalType"];
+            /** Format */
+            format?: string | null;
+            /** Decimal Separator */
+            decimal_separator?: ("," | ".") | null;
+            /**
+             * Examples
+             * @default []
+             */
+            examples: (string | null)[];
+        };
+        /** ColumnPlan */
+        ColumnPlan: {
+            /** Source */
+            source: string;
+            /** Name */
+            name: string;
+            /** @default text */
+            type: components["schemas"]["LogicalType"];
+            /** Format */
+            format?: string | null;
+            /** Decimal Separator */
+            decimal_separator?: ("," | ".") | null;
+            /**
+             * Include
+             * @default true
+             */
+            include: boolean;
+        };
+        /** ConfirmOut */
+        ConfirmOut: {
+            source: components["schemas"]["SourceOut"];
+            report: components["schemas"]["ImportReport"];
+        };
+        /** CsvImportOptions */
+        CsvImportOptions: {
+            /**
+             * Encoding
+             * @default utf-8
+             */
+            encoding: string;
+            /**
+             * Delimiter
+             * @default ,
+             */
+            delimiter: string;
+            /**
+             * Quote
+             * @default "
+             */
+            quote: string;
+            /**
+             * Header
+             * @default true
+             */
+            header: boolean;
+            /**
+             * Skip Rows
+             * @default 0
+             */
+            skip_rows: number;
+            /**
+             * Decimal Separator
+             * @default .
+             * @enum {string}
+             */
+            decimal_separator: "," | ".";
+            /** Date Format */
+            date_format?: string | null;
+        };
+        /** DetectRequest */
+        DetectRequest: {
+            options: components["schemas"]["ImportOptions"];
+        };
+        /** Detection */
+        Detection: {
+            options: components["schemas"]["ImportOptions"];
+            /** Columns */
+            columns: components["schemas"]["ColumnGuess"][];
+            /** Sample Rows */
+            sample_rows: (string | null)[][];
+            /**
+             * Sheets
+             * @default []
+             */
+            sheets: string[];
+            /** Encoding Confidence */
+            encoding_confidence?: number | null;
+            /**
+             * Notes
+             * @default []
+             */
+            notes: string[];
+        };
+        /** DistinctOut */
+        DistinctOut: {
+            /** Values */
+            values: unknown[];
+            /** Truncated */
+            truncated: boolean;
+        };
+        /** DistinctRequest */
+        DistinctRequest: {
+            pipeline: components["schemas"]["Pipeline"];
+            /** Node Id */
+            node_id: string;
+            /** Column */
+            column: string;
+            /**
+             * Limit
+             * @default 200
+             */
+            limit: number;
+            /**
+             * Of Input
+             * @default true
+             */
+            of_input: boolean;
+            /**
+             * Date Group
+             * @default none
+             * @enum {string}
+             */
+            date_group: "none" | "year" | "quarter" | "month" | "day";
+            /**
+             * As Text
+             * @default false
+             */
+            as_text: boolean;
+        };
+        /** Edge */
+        Edge: {
+            /** Id */
+            id: string;
+            /** Source */
+            source: string;
+            /** Target */
+            target: string;
+            /**
+             * Source Handle
+             * @default out
+             */
+            source_handle: string;
+            /**
+             * Target Handle
+             * @default in
+             */
+            target_handle: string;
+        };
+        /** ExportJobOut */
+        ExportJobOut: {
+            /** Id */
+            id: string;
+            /** Node Id */
+            node_id: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "pending" | "running" | "done" | "error";
+            /** Progress */
+            progress: number;
+            /** Format */
+            format: string;
+            /** Filename */
+            filename: string;
+            /** Rows */
+            rows: number | null;
+            /** Size Bytes */
+            size_bytes: number | null;
+            error: components["schemas"]["Issue"] | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Finished At */
+            finished_at: string | null;
+        };
+        /** ExportRequest */
+        ExportRequest: {
+            pipeline: components["schemas"]["Pipeline"];
+            /** Node Id */
+            node_id: string;
+            /** Project Id */
+            project_id?: string | null;
+        };
+        /** FormulaCheckOut */
+        FormulaCheckOut: {
+            /** Ok */
+            ok: boolean;
+            type?: components["schemas"]["LogicalType"] | null;
+            /** Type Label */
+            type_label?: string | null;
+            /**
+             * Issues
+             * @default []
+             */
+            issues: components["schemas"]["Issue"][];
+            /**
+             * Examples
+             * @default []
+             */
+            examples: (string | null)[];
+            /**
+             * Columns
+             * @default []
+             */
+            columns: string[];
+        };
+        /** FormulaCheckRequest */
+        FormulaCheckRequest: {
+            /** Formula */
+            formula: string;
+            /**
+             * Locale
+             * @default pt-BR
+             * @enum {string}
+             */
+            locale: "pt-BR" | "en-US";
+            /**
+             * Context
+             * @default row
+             * @enum {string}
+             */
+            context: "row" | "aggregate";
+            /**
+             * Group Keys
+             * @default []
+             */
+            group_keys: string[];
+            pipeline?: components["schemas"]["Pipeline"] | null;
+            /** Node Id */
+            node_id?: string | null;
+            /** Columns */
+            columns?: components["schemas"]["Column"][] | null;
+        };
+        /** FormulaRenderRequest */
+        FormulaRenderRequest: {
+            /** Formula */
+            formula: string;
+            /**
+             * From Locale
+             * @enum {string}
+             */
+            from_locale: "pt-BR" | "en-US";
+            /**
+             * To Locale
+             * @enum {string}
+             */
+            to_locale: "pt-BR" | "en-US";
+        };
+        /** FunctionOut */
+        FunctionOut: {
+            /** Name */
+            name: string;
+            /** Aliases */
+            aliases: string[];
+            /** Category */
+            category: string;
+            /**
+             * Context
+             * @enum {string}
+             */
+            context: "row" | "aggregate";
+            /** Signature */
+            signature: string;
+            /** Signature En */
+            signature_en: string;
+            /** Params */
+            params: components["schemas"]["FunctionParamOut"][];
+            /** Returns */
+            returns: string | null;
+            /** Description */
+            description: string;
+            /** Example */
+            example: string;
+            /** Excel */
+            excel: boolean;
+        };
+        /** FunctionParamOut */
+        FunctionParamOut: {
+            /** Name */
+            name: string;
+            /** Type */
+            type: string;
+            /** Optional */
+            optional: boolean;
+            /** Variadic */
+            variadic: boolean;
+        };
+        /** HTTPValidationError */
+        HTTPValidationError: {
+            /** Detail */
+            detail?: components["schemas"]["ValidationError"][];
+        };
+        /** ImportOptions */
+        ImportOptions: {
+            /**
+             * Format
+             * @enum {string}
+             */
+            format: "csv" | "parquet" | "xlsx" | "json" | "ndjson";
+            csv?: components["schemas"]["CsvImportOptions"] | null;
+            xlsx?: components["schemas"]["XlsxOptions"] | null;
+            /**
+             * Columns
+             * @default []
+             */
+            columns: components["schemas"]["ColumnPlan"][];
+        };
+        /** ImportReport */
+        ImportReport: {
+            /** Row Count */
+            row_count: number;
+            /**
+             * Failures
+             * @default {}
+             */
+            failures: {
+                [key: string]: number;
+            };
+        };
+        /** Issue */
+        Issue: {
+            /** Node Id */
+            node_id?: string | null;
+            /**
+             * Severity
+             * @default error
+             * @enum {string}
+             */
+            severity: "error" | "warning" | "info";
+            code: components["schemas"]["IssueCode"];
+            /** Column */
+            column?: string | null;
+            /** Message */
+            message: string;
+            /** Hint */
+            hint?: string | null;
+            /** Detail */
+            detail?: string | null;
+            position?: components["schemas"]["Position"] | null;
+            /** Count */
+            count?: number | null;
+            /** Examples */
+            examples?: string[] | null;
+        };
+        /**
+         * IssueCode
+         * @enum {string}
+         */
+        IssueCode: "CYCLE" | "MISSING_INPUT" | "UNKNOWN_NODE_TYPE" | "INVALID_CONFIG" | "UPSTREAM_ERROR" | "NODE_NOT_FOUND" | "COLUMN_NOT_FOUND" | "DUPLICATE_COLUMN" | "EMPTY_NAME" | "TYPE_MISMATCH" | "NO_COLUMNS" | "SOURCE_NOT_FOUND" | "SOURCE_NOT_READY" | "FORMULA_SYNTAX" | "FORMULA_TYPE" | "FORMULA_UNKNOWN_FUNCTION" | "FORMULA_ARGUMENTS" | "FORMULA_CONTEXT" | "CAST_FAILURES" | "DIVISION_BY_ZERO" | "JOIN_ROW_MULTIPLICATION" | "PIVOT_NEW_VALUES" | "PIVOT_TOO_MANY_VALUES" | "XLSX_LIMIT" | "LOOKUP_MULTIPLE_MATCHES" | "TIMEOUT" | "ENGINE_ERROR" | "SQL_NOT_ALLOWED";
+        /**
+         * LogicalType
+         * @enum {string}
+         */
+        LogicalType: "text" | "integer" | "decimal" | "boolean" | "date" | "datetime" | "time" | "other";
+        /** Node */
+        Node: {
+            /** Id */
+            id: string;
+            /** Type */
+            type: string;
+            /**
+             * Config
+             * @default {}
+             */
+            config: {
+                [key: string]: unknown;
+            };
+            /**
+             * @default {
+             *       "x": 0,
+             *       "y": 0
+             *     }
+             */
+            ui: components["schemas"]["NodeUI"];
+        };
+        /** NodeAnalysisOut */
+        NodeAnalysisOut: {
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "ok" | "warning" | "error" | "blocked";
+            /** Columns */
+            columns: components["schemas"]["Column"][] | null;
+            /** Issues */
+            issues: components["schemas"]["Issue"][];
+            /**
+             * Changed Columns
+             * @default []
+             */
+            changed_columns: string[];
+            /**
+             * Input Columns
+             * @default {}
+             */
+            input_columns: {
+                [key: string]: components["schemas"]["Column"][];
+            };
+            /** Hash */
+            hash?: string | null;
+        };
+        /** NodeRequest */
+        NodeRequest: {
+            pipeline: components["schemas"]["Pipeline"];
+            /** Node Id */
+            node_id: string;
+        };
+        /** NodeTypeOut */
+        NodeTypeOut: {
+            /** Type */
+            type: string;
+            /** Label */
+            label: string;
+            /** Category */
+            category: string;
+            /** Description */
+            description: string;
+            /** Inputs */
+            inputs: string[];
+            /** Variadic Inputs */
+            variadic_inputs: boolean;
+            /** Has Output */
+            has_output: boolean;
+            /** Annotation */
+            annotation: boolean;
+            /** Config Schema */
+            config_schema: {
+                [key: string]: unknown;
+            };
+        };
+        /** NodeUI */
+        NodeUI: {
+            /**
+             * X
+             * @default 0
+             */
+            x: number;
+            /**
+             * Y
+             * @default 0
+             */
+            y: number;
+            /** Label */
+            label?: string | null;
+            /** Color */
+            color?: string | null;
+            /** Width */
+            width?: number | null;
+            /** Height */
+            height?: number | null;
+        } & {
+            [key: string]: unknown;
+        };
+        /** Pipeline */
+        Pipeline: {
+            /**
+             * Schema Version
+             * @default 1
+             */
+            schema_version: number;
+            /**
+             * @default {
+             *       "locale": "pt-BR"
+             *     }
+             */
+            settings: components["schemas"]["PipelineSettings"];
+            /**
+             * Nodes
+             * @default []
+             */
+            nodes: components["schemas"]["Node"][];
+            /**
+             * Edges
+             * @default []
+             */
+            edges: components["schemas"]["Edge"][];
+        };
+        /** PipelineRequest */
+        PipelineRequest: {
+            pipeline: components["schemas"]["Pipeline"];
+        };
+        /** PipelineSettings */
+        PipelineSettings: {
+            /**
+             * Locale
+             * @default pt-BR
+             * @enum {string}
+             */
+            locale: "pt-BR" | "en-US";
+        };
+        /** Position */
+        Position: {
+            /** Start */
+            start: number;
+            /** End */
+            end: number;
+        };
+        /** PreviewRequest */
+        PreviewRequest: {
+            pipeline: components["schemas"]["Pipeline"];
+            /** Node Id */
+            node_id: string;
+            /**
+             * Limit
+             * @default 500
+             */
+            limit: number;
+            /**
+             * Offset
+             * @default 0
+             */
+            offset: number;
+        };
+        /** ProfileBucket */
+        ProfileBucket: {
+            /** From */
+            from: number | string;
+            /** To */
+            to: number | string;
+            /** Count */
+            count: number;
+        };
+        /** ProfileOut */
+        ProfileOut: {
+            /** Column */
+            column: string;
+            type: components["schemas"]["LogicalType"];
+            /** Rows */
+            rows: number;
+            /** Total Rows */
+            total_rows: number;
+            /** Sampled */
+            sampled: boolean;
+            /** Nulls */
+            nulls: number;
+            /** Null Pct */
+            null_pct: number;
+            /** Distinct */
+            distinct: number;
+            /** Min */
+            min: string | null;
+            /** Max */
+            max: string | null;
+            /** Mean */
+            mean: number | null;
+            /** Top */
+            top: components["schemas"]["ProfileTop"][];
+            /** Histogram */
+            histogram: components["schemas"]["ProfileBucket"][];
+        };
+        /** ProfileRequest */
+        ProfileRequest: {
+            pipeline: components["schemas"]["Pipeline"];
+            /** Node Id */
+            node_id: string;
+            /** Column */
+            column: string;
+        };
+        /** ProfileTop */
+        ProfileTop: {
+            /** Value */
+            value: string | null;
+            /** Count */
+            count: number;
+        };
+        /** ProjectCreate */
+        ProjectCreate: {
+            /** Name */
+            name: string;
+            pipeline?: components["schemas"]["Pipeline"] | null;
+        };
+        /** ProjectOut */
+        ProjectOut: {
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
+            /** Version */
+            version: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /**
+             * Node Count
+             * @default 0
+             */
+            node_count: number;
+        };
+        /** ProjectUpdate */
+        ProjectUpdate: {
+            /** Name */
+            name: string;
+        };
+        /** SavedPipeline */
+        SavedPipeline: {
+            pipeline: components["schemas"]["Pipeline"];
+            /** Version */
+            version: number;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /** SchemaResponse */
+        SchemaResponse: {
+            /** Nodes */
+            nodes: {
+                [key: string]: components["schemas"]["NodeAnalysisOut"];
+            };
+        };
+        /** SourceOut */
+        SourceOut: {
+            /** Id */
+            id: string;
+            /** Project Id */
+            project_id: string | null;
+            /** Name */
+            name: string;
+            /** Filename */
+            filename: string;
+            /** Format */
+            format: string;
+            /** Size Bytes */
+            size_bytes: number;
+            /** Status */
+            status: string;
+            /** Row Count */
+            row_count: number | null;
+            /** Columns */
+            columns: components["schemas"]["Column"][] | null;
+            options: components["schemas"]["ImportOptions"] | null;
+            /** Error */
+            error: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
+        /** SourceRename */
+        SourceRename: {
+            /** Name */
+            name: string;
+        };
+        /** SqlOut */
+        SqlOut: {
+            /** Sql */
+            sql: string;
+        };
+        /** StatsOut */
+        StatsOut: {
+            /** Row Count */
+            row_count: number | null;
+            /** Input Row Counts */
+            input_row_counts: {
+                [key: string]: number;
+            };
+            /** Issues */
+            issues: components["schemas"]["Issue"][];
+        };
+        /** UploadOut */
+        UploadOut: {
+            source: components["schemas"]["SourceOut"];
+            detection: components["schemas"]["Detection"] | null;
+            error?: components["schemas"]["ApiError"] | null;
+        };
+        /** ValidationError */
+        ValidationError: {
+            /** Location */
+            loc: (string | number)[];
+            /** Message */
+            msg: string;
+            /** Error Type */
+            type: string;
+            /** Input */
+            input?: unknown;
+            /** Context */
+            ctx?: Record<string, never>;
+        };
+        /** XlsxOptions */
+        XlsxOptions: {
+            /** Sheet */
+            sheet?: string | null;
+            /**
+             * Header
+             * @default true
+             */
+            header: boolean;
+            /**
+             * Skip Rows
+             * @default 0
+             */
+            skip_rows: number;
+        };
+        /** CsvExportOptions */
+        CsvExportOptions: {
+            /**
+             * Delimiter
+             * @default ,
+             */
+            delimiter: string;
+            /**
+             * Encoding
+             * @default utf-8
+             * @enum {string}
+             */
+            encoding: "utf-8" | "utf-8-sig" | "latin-1";
+            /**
+             * Decimal Separator
+             * @default .
+             * @enum {string}
+             */
+            decimal_separator: "." | ",";
+            /**
+             * Date Format
+             * @default %Y-%m-%d
+             */
+            date_format: string;
+            /**
+             * Datetime Format
+             * @default %Y-%m-%d %H:%M:%S
+             */
+            datetime_format: string;
+            /**
+             * Header
+             * @default true
+             */
+            header: boolean;
+            /**
+             * Quote
+             * @default "
+             */
+            quote: string;
+        };
+        /** ParquetOptions */
+        ParquetOptions: {
+            /**
+             * Compression
+             * @default zstd
+             * @enum {string}
+             */
+            compression: "zstd" | "snappy" | "none";
+            /**
+             * Row Group Size
+             * @default null
+             */
+            row_group_size: number | null;
+        };
+        /** OutputConfig */
+        OutputConfig: {
+            /**
+             * Format
+             * @default csv
+             * @enum {string}
+             */
+            format: "csv" | "parquet" | "xlsx" | "json" | "ndjson";
+            /**
+             * Filename
+             * @default dataset
+             */
+            filename: string;
+            /**
+             * Preset
+             * @default null
+             */
+            preset: ("excel_br" | "custom") | null;
+            /**
+             * @default {
+             *       "delimiter": ",",
+             *       "encoding": "utf-8",
+             *       "decimal_separator": ".",
+             *       "date_format": "%Y-%m-%d",
+             *       "datetime_format": "%Y-%m-%d %H:%M:%S",
+             *       "header": true,
+             *       "quote": "\""
+             *     }
+             */
+            csv: components["schemas"]["CsvExportOptions"];
+            /**
+             * @default {
+             *       "compression": "zstd",
+             *       "row_group_size": null
+             *     }
+             */
+            parquet: components["schemas"]["ParquetOptions"];
+        };
+        /** BinConfig */
+        BinConfig: {
+            /**
+             * Column
+             * @default
+             */
+            column: string;
+            /**
+             * Name
+             * @default
+             */
+            name: string;
+            /**
+             * Mode
+             * @default manual
+             * @enum {string}
+             */
+            mode: "manual" | "equal";
+            /**
+             * Boundaries
+             * @default []
+             */
+            boundaries: number[];
+            /**
+             * Labels
+             * @default []
+             */
+            labels: string[];
+            /**
+             * Count
+             * @default 5
+             */
+            count: number;
+        };
+        /** CalculatedConfig */
+        CalculatedConfig: {
+            /**
+             * Name
+             * @default
+             */
+            name: string;
+            /**
+             * Mode
+             * @default new
+             * @enum {string}
+             */
+            mode: "new" | "replace";
+            /**
+             * Formula
+             * @default
+             */
+            formula: string;
+        };
+        /** CastRule */
+        CastRule: {
+            /** Column */
+            column: string;
+            to: components["schemas"]["LogicalType"];
+            /**
+             * Format
+             * @default null
+             */
+            format: string | null;
+            /**
+             * Decimal Separator
+             * @default null
+             */
+            decimal_separator: ("," | ".") | null;
+            /**
+             * Precision
+             * @default null
+             */
+            precision: number | null;
+            /**
+             * Scale
+             * @default null
+             */
+            scale: number | null;
+            /**
+             * On Error
+             * @default null
+             * @enum {string}
+             */
+            on_error: "null" | "error";
+        };
+        /** CastConfig */
+        CastConfig: {
+            /**
+             * Casts
+             * @default []
+             */
+            casts: components["schemas"]["CastRule"][];
+        };
+        /** Condition */
+        Condition: {
+            /**
+             * Kind
+             * @default condition
+             * @constant
+             */
+            kind: "condition";
+            /** Column */
+            column: string;
+            /**
+             * Operator
+             * @default eq
+             * @enum {string}
+             */
+            operator: "eq" | "neq" | "gt" | "gte" | "lt" | "lte" | "between" | "contains" | "not_contains" | "starts_with" | "ends_with" | "in" | "not_in" | "is_null" | "is_not_null" | "is_true" | "is_false";
+            /**
+             * Value
+             * @default null
+             */
+            value: string | number | boolean | null;
+            /**
+             * Value2
+             * @default null
+             */
+            value2: string | number | boolean | null;
+            /**
+             * Values
+             * @default []
+             */
+            values: (string | number | boolean | null)[];
+            /**
+             * Case Sensitive
+             * @default false
+             */
+            case_sensitive: boolean;
+        };
+        /** ConditionGroup */
+        ConditionGroup: {
+            /**
+             * Kind
+             * @default group
+             * @constant
+             */
+            kind: "group";
+            /**
+             * Op
+             * @default and
+             * @enum {string}
+             */
+            op: "and" | "or";
+            /**
+             * Conditions
+             * @default []
+             */
+            conditions: (components["schemas"]["Condition"] | components["schemas"]["ConditionGroup"])[];
+        };
+        /** ConditionalRule */
+        ConditionalRule: {
+            /**
+             * @default {
+             *       "kind": "group",
+             *       "op": "and",
+             *       "conditions": []
+             *     }
+             */
+            when: components["schemas"]["ConditionGroup"];
+            /**
+             * @default {
+             *       "kind": "value",
+             *       "value": null,
+             *       "column": null
+             *     }
+             */
+            then: components["schemas"]["Outcome"];
+        };
+        /**
+         * Outcome
+         * @description What a rule produces: a fixed value or another column.
+         */
+        Outcome: {
+            /**
+             * Kind
+             * @default value
+             * @enum {string}
+             */
+            kind: "value" | "column";
+            /**
+             * Value
+             * @default null
+             */
+            value: string | number | boolean | null;
+            /**
+             * Column
+             * @default null
+             */
+            column: string | null;
+        };
+        /** ConditionalConfig */
+        ConditionalConfig: {
+            /**
+             * Name
+             * @default
+             */
+            name: string;
+            /**
+             * Mode
+             * @default new
+             * @enum {string}
+             */
+            mode: "new" | "replace";
+            /**
+             * Rules
+             * @default []
+             */
+            rules: components["schemas"]["ConditionalRule"][];
+            /**
+             * @default {
+             *       "kind": "value",
+             *       "value": null,
+             *       "column": null
+             *     }
+             */
+            otherwise: components["schemas"]["Outcome"];
+            /** @default null */
+            value_type: components["schemas"]["LogicalType"] | null;
+        };
+        /** DatePartsConfig */
+        DatePartsConfig: {
+            /**
+             * Column
+             * @default
+             */
+            column: string;
+            /**
+             * Parts
+             * @default [
+             *       "year",
+             *       "month"
+             *     ]
+             */
+            parts: ("year" | "quarter" | "month" | "month_name" | "year_month" | "week" | "weekday" | "weekday_name" | "day" | "hour" | "date")[];
+            /**
+             * Prefix
+             * @default null
+             */
+            prefix: string | null;
+        };
+        /** SortKey */
+        SortKey: {
+            /** Column */
+            column: string;
+            /**
+             * Direction
+             * @default asc
+             * @enum {string}
+             */
+            direction: "asc" | "desc";
+            /**
+             * Nulls
+             * @default last
+             * @enum {string}
+             */
+            nulls: "first" | "last";
+            /**
+             * Case Sensitive
+             * @default false
+             */
+            case_sensitive: boolean;
+        };
+        /** SortConfig */
+        SortConfig: {
+            /**
+             * Keys
+             * @default []
+             */
+            keys: components["schemas"]["SortKey"][];
+        };
+        /** DistinctConfig */
+        DistinctConfig: {
+            /**
+             * Keys
+             * @default []
+             */
+            keys: string[];
+            /**
+             * Keep
+             * @default first
+             * @enum {string}
+             */
+            keep: "first" | "last";
+            /**
+             * Order By
+             * @default []
+             */
+            order_by: components["schemas"]["SortKey"][];
+        };
+        /** FillRule */
+        FillRule: {
+            /** Column */
+            column: string;
+            /**
+             * Method
+             * @default value
+             * @enum {string}
+             */
+            method: "value" | "previous" | "next" | "mean" | "median";
+            /**
+             * Value
+             * @default null
+             */
+            value: string | number | boolean | null;
+        };
+        /** FillNullConfig */
+        FillNullConfig: {
+            /**
+             * Rules
+             * @default []
+             */
+            rules: components["schemas"]["FillRule"][];
+            /**
+             * Order By
+             * @default []
+             */
+            order_by: components["schemas"]["SortKey"][];
+        };
+        /** FilterConfig */
+        FilterConfig: {
+            /**
+             * Mode
+             * @default rules
+             * @enum {string}
+             */
+            mode: "rules" | "formula";
+            /**
+             * @default {
+             *       "kind": "group",
+             *       "op": "and",
+             *       "conditions": []
+             *     }
+             */
+            rules: components["schemas"]["ConditionGroup"];
+            /**
+             * Formula
+             * @default
+             */
+            formula: string;
+        };
+        /** Aggregation */
+        Aggregation: {
+            /**
+             * Column
+             * @default null
+             */
+            column: string | null;
+            /**
+             * Fn
+             * @default sum
+             * @enum {string}
+             */
+            fn: "count" | "count_non_null" | "count_distinct" | "sum" | "avg" | "median" | "min" | "max" | "stddev" | "variance" | "percentile" | "mode" | "first" | "last" | "concat";
+            /**
+             * As
+             * @default
+             */
+            as: string;
+            /**
+             * Percentile
+             * @default 0.5
+             */
+            percentile: number;
+            /**
+             * Separator
+             * @default ,
+             */
+            separator: string;
+            /**
+             * Order By
+             * @default null
+             */
+            order_by: string | null;
+        };
+        /**
+         * Measure
+         * @description Calculated measure: a formula in aggregate context, e.g. SOMA([receita]) / SOMA([qtd]).
+         */
+        Measure: {
+            /** Name */
+            name: string;
+            /** Formula */
+            formula: string;
+        };
+        /** GroupByConfig */
+        GroupByConfig: {
+            /**
+             * Keys
+             * @default []
+             */
+            keys: string[];
+            /**
+             * Aggs
+             * @default []
+             */
+            aggs: components["schemas"]["Aggregation"][];
+            /**
+             * Measures
+             * @default []
+             */
+            measures: components["schemas"]["Measure"][];
+        };
+        /** JoinKey */
+        JoinKey: {
+            /** Left */
+            left: string;
+            /** Right */
+            right: string;
+        };
+        /** JoinConfig */
+        JoinConfig: {
+            /**
+             * How
+             * @default left
+             * @enum {string}
+             */
+            how: "inner" | "left" | "right" | "full" | "anti" | "semi";
+            /**
+             * Keys
+             * @default []
+             */
+            keys: components["schemas"]["JoinKey"][];
+            /**
+             * Suffix
+             * @default _2
+             */
+            suffix: string;
+        };
+        /** LookupKey */
+        LookupKey: {
+            /** Main */
+            main: string;
+            /** Lookup */
+            lookup: string;
+        };
+        /** LookupConfig */
+        LookupConfig: {
+            /**
+             * Keys
+             * @default []
+             */
+            keys: components["schemas"]["LookupKey"][];
+            /**
+             * Columns
+             * @default []
+             */
+            columns: string[];
+            /**
+             * Prefix
+             * @default
+             */
+            prefix: string;
+            /**
+             * On Multiple
+             * @default first
+             * @enum {string}
+             */
+            on_multiple: "first" | "error";
+        };
+        /** NoteConfig */
+        NoteConfig: {
+            /**
+             * Text
+             * @default
+             */
+            text: string;
+        };
+        /** FrameConfig */
+        FrameConfig: {
+            /**
+             * Title
+             * @default
+             */
+            title: string;
+            /**
+             * Color
+             * @default slate
+             */
+            color: string;
+        };
+        /** PivotField */
+        PivotField: {
+            /** Column */
+            column: string;
+            /**
+             * Date Group
+             * @default none
+             * @enum {string}
+             */
+            date_group: "none" | "year" | "quarter" | "month" | "day";
+        };
+        /** PivotValue */
+        PivotValue: {
+            /**
+             * Column
+             * @default null
+             */
+            column: string | null;
+            /**
+             * Fn
+             * @default sum
+             * @enum {string}
+             */
+            fn: "count" | "count_non_null" | "count_distinct" | "sum" | "avg" | "median" | "min" | "max" | "stddev" | "variance" | "percentile" | "mode" | "first" | "last" | "concat";
+            /**
+             * Show As
+             * @default normal
+             * @enum {string}
+             */
+            show_as: "normal" | "pct_total" | "pct_row" | "pct_column";
+            /**
+             * Label
+             * @default null
+             */
+            label: string | null;
+        };
+        /** PivotConfig */
+        PivotConfig: {
+            /**
+             * Rows
+             * @default []
+             */
+            rows: components["schemas"]["PivotField"][];
+            /** @default null */
+            columns: components["schemas"]["PivotField"] | null;
+            /**
+             * Values
+             * @default []
+             */
+            values: components["schemas"]["PivotValue"][];
+            /**
+             * Filters
+             * @default []
+             */
+            filters: components["schemas"]["Condition"][];
+            /**
+             * Column Values
+             * @default []
+             */
+            column_values: (string | null)[];
+            /**
+             * Name Template
+             * @default {valor} · {medida}
+             */
+            name_template: string;
+            /**
+             * Totals
+             * @default false
+             */
+            totals: boolean;
+        };
+        /** ReplaceRule */
+        ReplaceRule: {
+            /**
+             * Find
+             * @default null
+             */
+            find: string | number | boolean | null;
+            /**
+             * Replace
+             * @default null
+             */
+            replace: string | number | boolean | null;
+        };
+        /** ReplaceConfig */
+        ReplaceConfig: {
+            /**
+             * Column
+             * @default
+             */
+            column: string;
+            /**
+             * Mode
+             * @default exact
+             * @enum {string}
+             */
+            mode: "exact" | "contains" | "regex";
+            /**
+             * Rules
+             * @default []
+             */
+            rules: components["schemas"]["ReplaceRule"][];
+            /**
+             * Case Sensitive
+             * @default true
+             */
+            case_sensitive: boolean;
+        };
+        /** SampleNodeConfig */
+        SampleNodeConfig: {
+            /**
+             * Mode
+             * @default first
+             * @enum {string}
+             */
+            mode: "first" | "random" | "percent";
+            /**
+             * Rows
+             * @default 1000
+             */
+            rows: number;
+            /**
+             * Percent
+             * @default 10
+             */
+            percent: number;
+            /**
+             * Seed
+             * @default 42
+             */
+            seed: number;
+        };
+        /** SelectConfig */
+        SelectConfig: {
+            /**
+             * Mode
+             * @default keep
+             * @enum {string}
+             */
+            mode: "keep" | "drop";
+            /**
+             * Columns
+             * @default []
+             */
+            columns: string[];
+            /**
+             * Renames
+             * @default {}
+             */
+            renames: {
+                [key: string]: string;
+            };
+        };
+        /** SampleConfig */
+        SampleConfig: {
+            /**
+             * Mode
+             * @default first
+             * @enum {string}
+             */
+            mode: "first" | "random";
+            /**
+             * Rows
+             * @default 10000
+             */
+            rows: number;
+            /**
+             * Seed
+             * @default 42
+             */
+            seed: number;
+        };
+        /** SourceConfig */
+        SourceConfig: {
+            /**
+             * Source Id
+             * @default
+             */
+            source_id: string;
+            /** @default null */
+            sample: components["schemas"]["SampleConfig"] | null;
+        };
+        /** SplitConfig */
+        SplitConfig: {
+            /**
+             * Column
+             * @default
+             */
+            column: string;
+            /**
+             * Mode
+             * @default delimiter
+             * @enum {string}
+             */
+            mode: "delimiter" | "position" | "regex";
+            /**
+             * Delimiter
+             * @default ;
+             */
+            delimiter: string;
+            /**
+             * Positions
+             * @default []
+             */
+            positions: number[];
+            /**
+             * Pattern
+             * @default
+             */
+            pattern: string;
+            /**
+             * Parts
+             * @default 2
+             */
+            parts: number;
+            /**
+             * Names
+             * @default []
+             */
+            names: string[];
+            /**
+             * Keep Original
+             * @default true
+             */
+            keep_original: boolean;
+            /**
+             * Trim
+             * @default true
+             */
+            trim: boolean;
+        };
+        /** TextCleanConfig */
+        TextCleanConfig: {
+            /**
+             * Columns
+             * @default []
+             */
+            columns: string[];
+            /**
+             * Trim
+             * @default true
+             */
+            trim: boolean;
+            /**
+             * Collapse Spaces
+             * @default true
+             */
+            collapse_spaces: boolean;
+            /**
+             * Case
+             * @default none
+             * @enum {string}
+             */
+            case: "none" | "upper" | "lower" | "title";
+            /**
+             * Remove Accents
+             * @default false
+             */
+            remove_accents: boolean;
+            /**
+             * Empty As Null
+             * @default false
+             */
+            empty_as_null: boolean;
+        };
+        /** UnionConfig */
+        UnionConfig: {
+            /**
+             * Mode
+             * @default by_name
+             * @enum {string}
+             */
+            mode: "by_name" | "by_position";
+            /**
+             * Source Column
+             * @default null
+             */
+            source_column: string | null;
+        };
+        /** UnpivotConfig */
+        UnpivotConfig: {
+            /**
+             * Columns
+             * @default []
+             */
+            columns: string[];
+            /**
+             * Name Column
+             * @default atributo
+             */
+            name_column: string;
+            /**
+             * Value Column
+             * @default valor
+             */
+            value_column: string;
+            /**
+             * Drop Nulls
+             * @default false
+             */
+            drop_nulls: boolean;
+        };
+        /** WindowItem */
+        WindowItem: {
+            /**
+             * Fn
+             * @default cumulative_sum
+             * @enum {string}
+             */
+            fn: "row_number" | "rank" | "dense_rank" | "cumulative_sum" | "cumulative_count" | "previous" | "next" | "pct_of_total" | "moving_avg" | "partition_agg";
+            /**
+             * Column
+             * @default null
+             */
+            column: string | null;
+            /**
+             * As
+             * @default
+             */
+            as: string;
+            /**
+             * Offset
+             * @default 1
+             */
+            offset: number;
+            /**
+             * Size
+             * @default 3
+             */
+            size: number;
+            /**
+             * Agg
+             * @default sum
+             * @enum {string}
+             */
+            agg: "count" | "count_non_null" | "count_distinct" | "sum" | "avg" | "median" | "min" | "max" | "stddev" | "variance" | "percentile" | "mode" | "first" | "last" | "concat";
+        };
+        /** WindowConfig */
+        WindowConfig: {
+            /**
+             * Partition By
+             * @default []
+             */
+            partition_by: string[];
+            /**
+             * Order By
+             * @default []
+             */
+            order_by: components["schemas"]["SortKey"][];
+            /**
+             * Items
+             * @default []
+             */
+            items: components["schemas"]["WindowItem"][];
+        };
+    };
+    responses: never;
+    parameters: never;
+    requestBodies: never;
+    headers: never;
+    pathItems: never;
 }
 export type $defs = Record<string, never>;
 export interface operations {
-  health_health_get: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": {
-            [key: string]: string;
-          };
-        };
-      };
-    };
-  };
-  node_types_nodes_get: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["NodeTypeOut"][];
-        };
-      };
-    };
-  };
-  list_projects_projects_get: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["ProjectOut"][];
-        };
-      };
-    };
-  };
-  create_project_projects_post: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ProjectCreate"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["ProjectOut"];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  get_project_projects__project_id__get: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        project_id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["ProjectOut"];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  delete_project_projects__project_id__delete: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        project_id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      204: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  rename_project_projects__project_id__patch: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        project_id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ProjectUpdate"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["ProjectOut"];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  load_pipeline_projects__project_id__pipeline_get: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        project_id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["SavedPipeline"];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  save_pipeline_projects__project_id__pipeline_put: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        project_id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["Pipeline"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["SavedPipeline"];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  list_sources_sources_get: {
-    parameters: {
-      query?: {
-        project_id?: string | null;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["SourceOut"][];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  upload_sources_post: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "multipart/form-data": components["schemas"]["Body_upload_sources_post"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["UploadOut"];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  get_source_sources__source_id__get: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        source_id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["SourceOut"];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  delete_source_sources__source_id__delete: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        source_id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      204: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  rename_source_sources__source_id__patch: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        source_id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SourceRename"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["SourceOut"];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  get_detection_sources__source_id__detection_get: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        source_id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["Detection"];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  redetect_sources__source_id__detect_post: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        source_id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["DetectRequest"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["Detection"];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  confirm_import_sources__source_id__confirm_post: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        source_id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ImportOptions"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["ConfirmOut"];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  replace_file_sources__source_id__replace_post: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        source_id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "multipart/form-data": components["schemas"]["Body_replace_file_sources__source_id__replace_post"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["UploadOut"];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  pipeline_schema_pipeline_schema_post: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["PipelineRequest"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["SchemaResponse"];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  pipeline_preview_pipeline_preview_post: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["PreviewRequest"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/vnd.apache.arrow.stream": unknown;
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  pipeline_stats_pipeline_stats_post: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["NodeRequest"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["StatsOut"];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  pipeline_profile_pipeline_profile_post: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ProfileRequest"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["ProfileOut"];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  pipeline_sql_pipeline_sql_post: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["NodeRequest"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["SqlOut"];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  distinct_values_pipeline_distinct_values_post: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["DistinctRequest"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["DistinctOut"];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  distinct_values_pivot_distinct_values_post: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["DistinctRequest"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["DistinctOut"];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  functions_formula_functions_get: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["FunctionOut"][];
-        };
-      };
-    };
-  };
-  check_formula_check_post: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["FormulaCheckRequest"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["FormulaCheckOut"];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  render_formula_formula_render_post: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["FormulaRenderRequest"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": string;
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  start_export_exports_post: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ExportRequest"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      202: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["ExportJobOut"];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  get_export_exports__job_id__get: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        job_id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["ExportJobOut"];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  download_exports__job_id__download_get: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        job_id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
+    health_health_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: string;
+                    };
+                };
+            };
+        };
+    };
+    node_types_nodes_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NodeTypeOut"][];
+                };
+            };
+        };
+    };
+    list_projects_projects_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectOut"][];
+                };
+            };
+        };
+    };
+    create_project_projects_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProjectCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_project_projects__project_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_project_projects__project_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    rename_project_projects__project_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProjectUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    load_pipeline_projects__project_id__pipeline_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SavedPipeline"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    save_pipeline_projects__project_id__pipeline_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Pipeline"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SavedPipeline"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_sources_sources_get: {
+        parameters: {
+            query?: {
+                project_id?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SourceOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    upload_sources_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_upload_sources_post"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UploadOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_source_sources__source_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                source_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SourceOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_source_sources__source_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                source_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    rename_source_sources__source_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                source_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SourceRename"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SourceOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_detection_sources__source_id__detection_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                source_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Detection"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    redetect_sources__source_id__detect_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                source_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DetectRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Detection"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    confirm_import_sources__source_id__confirm_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                source_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ImportOptions"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConfirmOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    replace_file_sources__source_id__replace_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                source_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_replace_file_sources__source_id__replace_post"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UploadOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    pipeline_schema_pipeline_schema_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PipelineRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SchemaResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    pipeline_preview_pipeline_preview_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PreviewRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.apache.arrow.stream": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    pipeline_stats_pipeline_stats_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NodeRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StatsOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    pipeline_profile_pipeline_profile_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProfileRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    pipeline_sql_pipeline_sql_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NodeRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SqlOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    distinct_values_pipeline_distinct_values_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DistinctRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DistinctOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    distinct_values_pivot_distinct_values_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DistinctRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DistinctOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    functions_formula_functions_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FunctionOut"][];
+                };
+            };
+        };
+    };
+    check_formula_check_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FormulaCheckRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FormulaCheckOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    render_formula_formula_render_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FormulaRenderRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    start_export_exports_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExportRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExportJobOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_export_exports__job_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExportJobOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    download_exports__job_id__download_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
     };
-  };
 }

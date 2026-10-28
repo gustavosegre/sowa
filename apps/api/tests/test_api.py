@@ -257,3 +257,24 @@ def test_formula_check_endpoint(client: TestClient) -> None:
     assert "IF" in se["aliases"]
     en = client.post("/formula/render", json={"formula": "ARRED([a]; 2)", "from_locale": "pt-BR", "to_locale": "en-US"})
     assert en.json() == "ROUND([a], 2)"
+
+
+def test_pivot_distinct_values_as_text(client: TestClient) -> None:
+    up = upload(client, "vendas_latin1.csv")
+    opts = up["detection"]["options"]
+    for c in opts["columns"]:
+        if c["source"] == "data_venda":
+            c["type"], c["format"] = "date", "%d/%m/%Y"
+    client.post(f"/sources/{up['source']['id']}/confirm", json=opts)
+    pipeline = {
+        "nodes": [
+            {"id": "s", "type": "source", "config": {"source_id": up["source"]["id"]}},
+            {"id": "p", "type": "pivot", "config": {}},
+        ],
+        "edges": [{"id": "e", "source": "s", "target": "p"}],
+    }
+    body = {"pipeline": pipeline, "node_id": "p", "column": "data_venda", "date_group": "month", "as_text": True}
+    r = client.post("/pivot/distinct-values", json=body).json()
+    assert r == {"values": ["2025-02", "2025-03", "2025-12"], "truncated": False}
+    r = client.post("/pivot/distinct-values", json={**body, "column": "ativo", "date_group": "none"}).json()
+    assert r["values"] == ["false", "true"]

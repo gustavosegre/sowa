@@ -125,6 +125,9 @@ class DistinctRequest(NodeRequest):
     column: str
     limit: int = Field(default=200, ge=1, le=10_000)
     of_input: bool = True  # values from the node's input (pivot config) rather than its output
+    date_group: Literal["none", "year", "quarter", "month", "day"] = "none"
+    # Values as the text the pivot compiler compares against (CAST AS VARCHAR).
+    as_text: bool = False
 
 
 class DistinctOut(BaseModel):

@@ -1,0 +1,108 @@
+{
+  "description": "Janela: acumulado e ranking por UF, anterior e % do total.",
+  "target": "o",
+  "pipeline": {
+    "schema_version": 1,
+    "settings": {
+      "locale": "pt-BR"
+    },
+    "nodes": [
+      {
+        "id": "v",
+        "type": "source",
+        "config": {
+          "source_id": "vendas"
+        },
+        "ui": {
+          "label": "Vendas"
+        }
+      },
+      {
+        "id": "w",
+        "type": "window",
+        "config": {
+          "partition_by": [
+            "uf"
+          ],
+          "order_by": [
+            {
+              "column": "data_venda"
+            }
+          ],
+          "items": [
+            {
+              "fn": "cumulative_sum",
+              "column": "quantidade",
+              "as": "acum"
+            },
+            {
+              "fn": "row_number",
+              "as": "n"
+            },
+            {
+              "fn": "previous",
+              "column": "cidade",
+              "as": "anterior"
+            },
+            {
+              "fn": "pct_of_total",
+              "column": "quantidade",
+              "as": "pct"
+            }
+          ]
+        }
+      },
+      {
+        "id": "s",
+        "type": "select",
+        "config": {
+          "mode": "keep",
+          "columns": [
+            "uf",
+            "cidade",
+            "acum",
+            "n",
+            "anterior",
+            "pct"
+          ]
+        }
+      },
+      {
+        "id": "o",
+        "type": "sort",
+        "config": {
+          "keys": [
+            {
+              "column": "uf"
+            },
+            {
+              "column": "n"
+            }
+          ]
+        }
+      }
+    ],
+    "edges": [
+      {
+        "id": "e0",
+        "source": "v",
+        "target": "w",
+        "target_handle": "in"
+      },
+      {
+        "id": "e1",
+        "source": "w",
+        "target": "s",
+        "target_handle": "in"
+      },
+      {
+        "id": "e2",
+        "source": "s",
+        "target": "o",
+        "target_handle": "in"
+      }
+    ]
+  },
+  "sql": "WITH \"v\" AS (\n  SELECT\n    *\n  FROM READ_PARQUET('Vendas.parquet')\n), \"w\" AS (\n  SELECT\n    \"uf\",\n    \"cidade\",\n    \"data_txt\",\n    \"preço_txt\",\n    \"quantidade\",\n    \"data_venda\",\n    \"valor\",\n    \"ativo\",\n    CAST(SUM(\"quantidade\") OVER (\n      PARTITION BY \"uf\"\n      ORDER BY \"data_venda\" ASC\n      ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW\n    ) AS BIGINT) AS \"acum\",\n    CAST(ROW_NUMBER() OVER (PARTITION BY \"uf\" ORDER BY \"data_venda\" ASC) AS BIGINT) AS \"n\",\n    LAG(\"cidade\", 1) OVER (PARTITION BY \"uf\" ORDER BY \"data_venda\" ASC) AS \"anterior\",\n    CAST(CAST(\"quantidade\" AS DOUBLE) / NULLIF(SUM(\"quantidade\") OVER (PARTITION BY \"uf\"), 0) AS DOUBLE) AS \"pct\"\n  FROM \"v\"\n), \"s\" AS (\n  SELECT\n    \"uf\",\n    \"cidade\",\n    \"acum\",\n    \"n\",\n    \"anterior\",\n    \"pct\"\n  FROM \"w\"\n), \"o\" AS (\n  SELECT\n    *\n  FROM \"s\"\n  ORDER BY\n    \"uf\" COLLATE NOCASE ASC,\n    \"n\" ASC\n)\nSELECT\n  *\nFROM \"o\"",
+  "result": "uf,cidade,acum,n,anterior,pct\nPR,Londrina,2,1,,0.4\nPR,Curitiba,5,2,Londrina,0.6\nSC,Florianópolis,0,1,,\nSP,São Paulo,1,1,,1.0\n"
+}

@@ -137,6 +137,13 @@ def distinct_values(body: DistinctRequest, db: Db) -> DistinctOut:
     if schema is None or not schema.has(body.column):
         raise HttpError(404, "COLUMN_NOT_FOUND", f'A coluna "{body.column}" não existe.')
     values, truncated = service.distinct_values(
-        get_engine(), a, target, body.column, body.limit, get_settings().preview_timeout_s * 2
+        get_engine(),
+        a,
+        target,
+        body.column,
+        body.limit,
+        get_settings().preview_timeout_s * 2,
+        date_group=body.date_group,
+        as_text=body.as_text,
     )
     return DistinctOut(values=values, truncated=truncated)

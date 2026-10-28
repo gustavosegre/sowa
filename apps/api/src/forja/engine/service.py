@@ -238,16 +238,29 @@ def profile(engine: Engine, analysis: Analysis, node_id: str, column: str, timeo
 
 
 def distinct_values(
-    engine: Engine, analysis: Analysis, node_id: str, column: str, limit: int, timeout: float | None
+    engine: Engine,
+    analysis: Analysis,
+    node_id: str,
+    column: str,
+    limit: int,
+    timeout: float | None,
+    *,
+    date_group: str = "none",
+    as_text: bool = False,
 ) -> tuple[list[Any], bool]:
+    from forja.nodes.pivot import PivotField, field_expr
+
     chain = compile_chain(analysis, node_id)
-    v = col(column)
+    schema = analysis.results[node_id].schema or Schema()
+    v: exp.Expr = field_expr(PivotField(column=column, date_group=date_group), schema)
+    if as_text:
+        v = exp.Cast(this=v, to=exp.DataType.build("VARCHAR"))
     q = (
-        exp.select(v)
+        exp.select(alias(v, "v"))
         .from_(_target(node_id))
         .where(exp.Not(this=exp.Is(this=v.copy(), expression=exp.Null())))
-        .group_by(v.copy())
-        .order_by(exp.Ordered(this=v.copy()))
+        .group_by(col("v"))
+        .order_by(exp.Ordered(this=col("v")))
         .limit(limit + 1)
     )
     rows = engine.rows(chain.wrap(q), timeout)

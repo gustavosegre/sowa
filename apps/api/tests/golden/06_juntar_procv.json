@@ -1,0 +1,99 @@
+{
+  "description": "Juntar (left) e Procurar trazem o nome do estado; RS não tem vendas.",
+  "target": "o",
+  "pipeline": {
+    "schema_version": 1,
+    "settings": {
+      "locale": "pt-BR"
+    },
+    "nodes": [
+      {
+        "id": "v",
+        "type": "source",
+        "config": {
+          "source_id": "vendas"
+        },
+        "ui": {
+          "label": "Vendas"
+        }
+      },
+      {
+        "id": "c",
+        "type": "source",
+        "config": {
+          "source_id": "clientes"
+        },
+        "ui": {
+          "label": "Clientes"
+        }
+      },
+      {
+        "id": "j",
+        "type": "join",
+        "config": {
+          "how": "full",
+          "keys": [
+            {
+              "left": "uf",
+              "right": "uf"
+            }
+          ]
+        }
+      },
+      {
+        "id": "s",
+        "type": "select",
+        "config": {
+          "mode": "keep",
+          "columns": [
+            "uf",
+            "cidade",
+            "estado"
+          ]
+        }
+      },
+      {
+        "id": "o",
+        "type": "sort",
+        "config": {
+          "keys": [
+            {
+              "column": "uf"
+            },
+            {
+              "column": "cidade"
+            }
+          ]
+        }
+      }
+    ],
+    "edges": [
+      {
+        "id": "e0",
+        "source": "v",
+        "target": "j",
+        "target_handle": "left"
+      },
+      {
+        "id": "e1",
+        "source": "c",
+        "target": "j",
+        "target_handle": "right"
+      },
+      {
+        "id": "e2",
+        "source": "j",
+        "target": "s",
+        "target_handle": "in"
+      },
+      {
+        "id": "e3",
+        "source": "s",
+        "target": "o",
+        "target_handle": "in"
+      }
+    ]
+  },
+  "sql": "WITH \"v\" AS (\n  SELECT\n    *\n  FROM READ_PARQUET('Vendas.parquet')\n), \"c\" AS (\n  SELECT\n    *\n  FROM READ_PARQUET('Clientes.parquet')\n), \"j\" AS (\n  SELECT\n    COALESCE(\"__l\".\"uf\", \"__r\".\"uf\") AS \"uf\",\n    \"__l\".\"cidade\" AS \"cidade\",\n    \"__l\".\"data_txt\" AS \"data_txt\",\n    \"__l\".\"preço_txt\" AS \"preço_txt\",\n    \"__l\".\"quantidade\" AS \"quantidade\",\n    \"__l\".\"data_venda\" AS \"data_venda\",\n    \"__l\".\"valor\" AS \"valor\",\n    \"__l\".\"ativo\" AS \"ativo\",\n    \"__r\".\"estado\" AS \"estado\"\n  FROM \"v\" AS \"__l\"\n  FULL JOIN \"c\" AS \"__r\"\n    ON \"__l\".\"uf\" = \"__r\".\"uf\"\n), \"s\" AS (\n  SELECT\n    \"uf\",\n    \"cidade\",\n    \"estado\"\n  FROM \"j\"\n), \"o\" AS (\n  SELECT\n    *\n  FROM \"s\"\n  ORDER BY\n    \"uf\" COLLATE NOCASE ASC,\n    \"cidade\" COLLATE NOCASE ASC\n)\nSELECT\n  *\nFROM \"o\"",
+  "result": "uf,cidade,estado\nPR,Curitiba,Paraná\nPR,Londrina,Paraná\nRS,,Rio Grande do Sul\nSC,Florianópolis,Santa Catarina\nSP,São Paulo,\n"
+}

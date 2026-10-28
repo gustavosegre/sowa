@@ -1,0 +1,175 @@
+{
+  "description": "Condicional, faixas, preencher para baixo, remover duplicatas e extrair mês.",
+  "target": "o",
+  "pipeline": {
+    "schema_version": 1,
+    "settings": {
+      "locale": "pt-BR"
+    },
+    "nodes": [
+      {
+        "id": "v",
+        "type": "source",
+        "config": {
+          "source_id": "vendas"
+        },
+        "ui": {
+          "label": "Vendas"
+        }
+      },
+      {
+        "id": "f",
+        "type": "fill_null",
+        "config": {
+          "rules": [
+            {
+              "column": "valor",
+              "method": "previous"
+            }
+          ],
+          "order_by": [
+            {
+              "column": "data_venda"
+            }
+          ]
+        }
+      },
+      {
+        "id": "k",
+        "type": "conditional",
+        "config": {
+          "name": "porte",
+          "rules": [
+            {
+              "when": {
+                "conditions": [
+                  {
+                    "column": "valor",
+                    "operator": "gte",
+                    "value": "10"
+                  }
+                ]
+              },
+              "then": {
+                "kind": "value",
+                "value": "grande"
+              }
+            }
+          ],
+          "otherwise": {
+            "kind": "value",
+            "value": "pequeno"
+          }
+        }
+      },
+      {
+        "id": "b",
+        "type": "bin",
+        "config": {
+          "column": "quantidade",
+          "boundaries": [
+            1,
+            3
+          ]
+        }
+      },
+      {
+        "id": "m",
+        "type": "date_parts",
+        "config": {
+          "column": "data_venda",
+          "parts": [
+            "month_name"
+          ],
+          "prefix": ""
+        }
+      },
+      {
+        "id": "x",
+        "type": "distinct",
+        "config": {
+          "keys": [
+            "uf"
+          ],
+          "keep": "last",
+          "order_by": [
+            {
+              "column": "data_venda"
+            }
+          ]
+        }
+      },
+      {
+        "id": "s",
+        "type": "select",
+        "config": {
+          "mode": "keep",
+          "columns": [
+            "uf",
+            "valor",
+            "porte",
+            "quantidade_faixa",
+            "nome_mes"
+          ]
+        }
+      },
+      {
+        "id": "o",
+        "type": "sort",
+        "config": {
+          "keys": [
+            {
+              "column": "uf"
+            }
+          ]
+        }
+      }
+    ],
+    "edges": [
+      {
+        "id": "e0",
+        "source": "v",
+        "target": "f",
+        "target_handle": "in"
+      },
+      {
+        "id": "e1",
+        "source": "f",
+        "target": "k",
+        "target_handle": "in"
+      },
+      {
+        "id": "e2",
+        "source": "k",
+        "target": "b",
+        "target_handle": "in"
+      },
+      {
+        "id": "e3",
+        "source": "b",
+        "target": "m",
+        "target_handle": "in"
+      },
+      {
+        "id": "e4",
+        "source": "m",
+        "target": "x",
+        "target_handle": "in"
+      },
+      {
+        "id": "e5",
+        "source": "x",
+        "target": "s",
+        "target_handle": "in"
+      },
+      {
+        "id": "e6",
+        "source": "s",
+        "target": "o",
+        "target_handle": "in"
+      }
+    ]
+  },
+  "sql": "WITH \"v\" AS (\n  SELECT\n    *\n  FROM READ_PARQUET('Vendas.parquet')\n), \"f\" AS (\n  SELECT\n    \"uf\",\n    \"cidade\",\n    \"data_txt\",\n    \"preço_txt\",\n    \"quantidade\",\n    \"data_venda\",\n    COALESCE(\n      \"valor\",\n      LAST_VALUE(\"valor\" IGNORE NULLS) OVER (ORDER BY \"data_venda\" ASC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)\n    ) AS \"valor\",\n    \"ativo\"\n  FROM \"v\"\n), \"k\" AS (\n  SELECT\n    \"uf\",\n    \"cidade\",\n    \"data_txt\",\n    \"preço_txt\",\n    \"quantidade\",\n    \"data_venda\",\n    \"valor\",\n    \"ativo\",\n    CASE WHEN \"valor\" >= 10 THEN 'grande' ELSE 'pequeno' END AS \"porte\"\n  FROM \"f\"\n), \"b\" AS (\n  SELECT\n    \"uf\",\n    \"cidade\",\n    \"data_txt\",\n    \"preço_txt\",\n    \"quantidade\",\n    \"data_venda\",\n    \"valor\",\n    \"ativo\",\n    \"porte\",\n    CASE\n      WHEN \"quantidade\" IS NULL\n      THEN NULL\n      ELSE CASE\n        WHEN \"quantidade\" < 1.0\n        THEN '< 1'\n        WHEN \"quantidade\" < 3.0\n        THEN '1 a 3'\n        ELSE '≥ 3'\n      END\n    END AS \"quantidade_faixa\"\n  FROM \"k\"\n), \"m\" AS (\n  SELECT\n    \"uf\",\n    \"cidade\",\n    \"data_txt\",\n    \"preço_txt\",\n    \"quantidade\",\n    \"data_venda\",\n    \"valor\",\n    \"ativo\",\n    \"porte\",\n    \"quantidade_faixa\",\n    LIST_EXTRACT(\n      [\n        'janeiro',\n        'fevereiro',\n        'março',\n        'abril',\n        'maio',\n        'junho',\n        'julho',\n        'agosto',\n        'setembro',\n        'outubro',\n        'novembro',\n        'dezembro'\n      ],\n      MONTH(\"data_venda\")\n    ) AS \"nome_mes\"\n  FROM \"b\"\n), \"x\" AS (\n  SELECT\n    *\n  FROM \"m\"\n  QUALIFY\n    ROW_NUMBER() OVER (PARTITION BY \"uf\" ORDER BY \"data_venda\" DESC NULLS FIRST) = 1\n), \"s\" AS (\n  SELECT\n    \"uf\",\n    \"valor\",\n    \"porte\",\n    \"quantidade_faixa\",\n    \"nome_mes\"\n  FROM \"x\"\n), \"o\" AS (\n  SELECT\n    *\n  FROM \"s\"\n  ORDER BY\n    \"uf\" COLLATE NOCASE ASC\n)\nSELECT\n  *\nFROM \"o\"",
+  "result": "uf,valor,porte,quantidade_faixa,nome_mes\nPR,10.5,grande,≥ 3,dezembro\nSC,2.0,pequeno,< 1,fevereiro\nSP,7.25,pequeno,1 a 3,março\n"
+}

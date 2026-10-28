@@ -1688,6 +1688,23 @@
       "type": "boolean",
       "title": "Of Input",
       "default": true
+     },
+     "date_group": {
+      "type": "string",
+      "enum": [
+       "none",
+       "year",
+       "quarter",
+       "month",
+       "day"
+      ],
+      "title": "Date Group",
+      "default": "none"
+     },
+     "as_text": {
+      "type": "boolean",
+      "title": "As Text",
+      "default": false
      }
     },
     "type": "object",
@@ -3433,6 +3450,55 @@
     "title": "OutputConfig",
     "type": "object"
    },
+   "BinConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "column": {
+      "default": "",
+      "title": "Column",
+      "type": "string"
+     },
+     "name": {
+      "default": "",
+      "title": "Name",
+      "type": "string"
+     },
+     "mode": {
+      "default": "manual",
+      "enum": [
+       "manual",
+       "equal"
+      ],
+      "title": "Mode",
+      "type": "string"
+     },
+     "boundaries": {
+      "default": [],
+      "items": {
+       "type": "number"
+      },
+      "title": "Boundaries",
+      "type": "array"
+     },
+     "labels": {
+      "default": [],
+      "items": {
+       "type": "string"
+      },
+      "title": "Labels",
+      "type": "array"
+     },
+     "count": {
+      "default": 5,
+      "maximum": 100,
+      "minimum": 2,
+      "title": "Count",
+      "type": "integer"
+     }
+    },
+    "title": "BinConfig",
+    "type": "object"
+   },
    "CalculatedConfig": {
     "additionalProperties": false,
     "properties": {
@@ -3706,6 +3772,325 @@
     "title": "ConditionGroup",
     "type": "object"
    },
+   "ConditionalRule": {
+    "properties": {
+     "when": {
+      "$ref": "#/components/schemas/ConditionGroup",
+      "default": {
+       "kind": "group",
+       "op": "and",
+       "conditions": []
+      }
+     },
+     "then": {
+      "$ref": "#/components/schemas/Outcome",
+      "default": {
+       "kind": "value",
+       "value": null,
+       "column": null
+      }
+     }
+    },
+    "title": "ConditionalRule",
+    "type": "object"
+   },
+   "Outcome": {
+    "description": "What a rule produces: a fixed value or another column.",
+    "properties": {
+     "kind": {
+      "default": "value",
+      "enum": [
+       "value",
+       "column"
+      ],
+      "title": "Kind",
+      "type": "string"
+     },
+     "value": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "integer"
+       },
+       {
+        "type": "number"
+       },
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Value"
+     },
+     "column": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Column"
+     }
+    },
+    "title": "Outcome",
+    "type": "object"
+   },
+   "ConditionalConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "default": "",
+      "title": "Name",
+      "type": "string"
+     },
+     "mode": {
+      "default": "new",
+      "enum": [
+       "new",
+       "replace"
+      ],
+      "title": "Mode",
+      "type": "string"
+     },
+     "rules": {
+      "default": [],
+      "items": {
+       "$ref": "#/components/schemas/ConditionalRule"
+      },
+      "title": "Rules",
+      "type": "array"
+     },
+     "otherwise": {
+      "$ref": "#/components/schemas/Outcome",
+      "default": {
+       "kind": "value",
+       "value": null,
+       "column": null
+      }
+     },
+     "value_type": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/LogicalType"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     }
+    },
+    "title": "ConditionalConfig",
+    "type": "object"
+   },
+   "DatePartsConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "column": {
+      "default": "",
+      "title": "Column",
+      "type": "string"
+     },
+     "parts": {
+      "default": [
+       "year",
+       "month"
+      ],
+      "items": {
+       "enum": [
+        "year",
+        "quarter",
+        "month",
+        "month_name",
+        "year_month",
+        "week",
+        "weekday",
+        "weekday_name",
+        "day",
+        "hour",
+        "date"
+       ],
+       "type": "string"
+      },
+      "title": "Parts",
+      "type": "array"
+     },
+     "prefix": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Prefix"
+     }
+    },
+    "title": "DatePartsConfig",
+    "type": "object"
+   },
+   "SortKey": {
+    "properties": {
+     "column": {
+      "title": "Column",
+      "type": "string"
+     },
+     "direction": {
+      "default": "asc",
+      "enum": [
+       "asc",
+       "desc"
+      ],
+      "title": "Direction",
+      "type": "string"
+     },
+     "nulls": {
+      "default": "last",
+      "enum": [
+       "first",
+       "last"
+      ],
+      "title": "Nulls",
+      "type": "string"
+     },
+     "case_sensitive": {
+      "default": false,
+      "title": "Case Sensitive",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "column"
+    ],
+    "title": "SortKey",
+    "type": "object"
+   },
+   "SortConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "keys": {
+      "default": [],
+      "items": {
+       "$ref": "#/components/schemas/SortKey"
+      },
+      "title": "Keys",
+      "type": "array"
+     }
+    },
+    "title": "SortConfig",
+    "type": "object"
+   },
+   "DistinctConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "keys": {
+      "default": [],
+      "items": {
+       "type": "string"
+      },
+      "title": "Keys",
+      "type": "array"
+     },
+     "keep": {
+      "default": "first",
+      "enum": [
+       "first",
+       "last"
+      ],
+      "title": "Keep",
+      "type": "string"
+     },
+     "order_by": {
+      "default": [],
+      "items": {
+       "$ref": "#/components/schemas/SortKey"
+      },
+      "title": "Order By",
+      "type": "array"
+     }
+    },
+    "title": "DistinctConfig",
+    "type": "object"
+   },
+   "FillRule": {
+    "properties": {
+     "column": {
+      "title": "Column",
+      "type": "string"
+     },
+     "method": {
+      "default": "value",
+      "enum": [
+       "value",
+       "previous",
+       "next",
+       "mean",
+       "median"
+      ],
+      "title": "Method",
+      "type": "string"
+     },
+     "value": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "integer"
+       },
+       {
+        "type": "number"
+       },
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Value"
+     }
+    },
+    "required": [
+     "column"
+    ],
+    "title": "FillRule",
+    "type": "object"
+   },
+   "FillNullConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "rules": {
+      "default": [],
+      "items": {
+       "$ref": "#/components/schemas/FillRule"
+      },
+      "title": "Rules",
+      "type": "array"
+     },
+     "order_by": {
+      "default": [],
+      "items": {
+       "$ref": "#/components/schemas/SortKey"
+      },
+      "title": "Order By",
+      "type": "array"
+     }
+    },
+    "title": "FillNullConfig",
+    "type": "object"
+   },
    "FilterConfig": {
     "additionalProperties": false,
     "properties": {
@@ -3854,6 +4239,112 @@
     "title": "GroupByConfig",
     "type": "object"
    },
+   "JoinKey": {
+    "properties": {
+     "left": {
+      "title": "Left",
+      "type": "string"
+     },
+     "right": {
+      "title": "Right",
+      "type": "string"
+     }
+    },
+    "required": [
+     "left",
+     "right"
+    ],
+    "title": "JoinKey",
+    "type": "object"
+   },
+   "JoinConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "how": {
+      "default": "left",
+      "enum": [
+       "inner",
+       "left",
+       "right",
+       "full",
+       "anti",
+       "semi"
+      ],
+      "title": "How",
+      "type": "string"
+     },
+     "keys": {
+      "default": [],
+      "items": {
+       "$ref": "#/components/schemas/JoinKey"
+      },
+      "title": "Keys",
+      "type": "array"
+     },
+     "suffix": {
+      "default": "_2",
+      "title": "Suffix",
+      "type": "string"
+     }
+    },
+    "title": "JoinConfig",
+    "type": "object"
+   },
+   "LookupKey": {
+    "properties": {
+     "main": {
+      "title": "Main",
+      "type": "string"
+     },
+     "lookup": {
+      "title": "Lookup",
+      "type": "string"
+     }
+    },
+    "required": [
+     "main",
+     "lookup"
+    ],
+    "title": "LookupKey",
+    "type": "object"
+   },
+   "LookupConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "keys": {
+      "default": [],
+      "items": {
+       "$ref": "#/components/schemas/LookupKey"
+      },
+      "title": "Keys",
+      "type": "array"
+     },
+     "columns": {
+      "default": [],
+      "items": {
+       "type": "string"
+      },
+      "title": "Columns",
+      "type": "array"
+     },
+     "prefix": {
+      "default": "",
+      "title": "Prefix",
+      "type": "string"
+     },
+     "on_multiple": {
+      "default": "first",
+      "enum": [
+       "first",
+       "error"
+      ],
+      "title": "On Multiple",
+      "type": "string"
+     }
+    },
+    "title": "LookupConfig",
+    "type": "object"
+   },
    "NoteConfig": {
     "additionalProperties": false,
     "properties": {
@@ -3881,6 +4372,279 @@
      }
     },
     "title": "FrameConfig",
+    "type": "object"
+   },
+   "PivotField": {
+    "properties": {
+     "column": {
+      "title": "Column",
+      "type": "string"
+     },
+     "date_group": {
+      "default": "none",
+      "enum": [
+       "none",
+       "year",
+       "quarter",
+       "month",
+       "day"
+      ],
+      "title": "Date Group",
+      "type": "string"
+     }
+    },
+    "required": [
+     "column"
+    ],
+    "title": "PivotField",
+    "type": "object"
+   },
+   "PivotValue": {
+    "properties": {
+     "column": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Column"
+     },
+     "fn": {
+      "default": "sum",
+      "enum": [
+       "count",
+       "count_non_null",
+       "count_distinct",
+       "sum",
+       "avg",
+       "median",
+       "min",
+       "max",
+       "stddev",
+       "variance",
+       "percentile",
+       "mode",
+       "first",
+       "last",
+       "concat"
+      ],
+      "title": "Fn",
+      "type": "string"
+     },
+     "show_as": {
+      "default": "normal",
+      "enum": [
+       "normal",
+       "pct_total",
+       "pct_row",
+       "pct_column"
+      ],
+      "title": "Show As",
+      "type": "string"
+     },
+     "label": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Label"
+     }
+    },
+    "title": "PivotValue",
+    "type": "object"
+   },
+   "PivotConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "rows": {
+      "default": [],
+      "items": {
+       "$ref": "#/components/schemas/PivotField"
+      },
+      "title": "Rows",
+      "type": "array"
+     },
+     "columns": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/PivotField"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "values": {
+      "default": [],
+      "items": {
+       "$ref": "#/components/schemas/PivotValue"
+      },
+      "title": "Values",
+      "type": "array"
+     },
+     "filters": {
+      "default": [],
+      "items": {
+       "$ref": "#/components/schemas/Condition"
+      },
+      "title": "Filters",
+      "type": "array"
+     },
+     "column_values": {
+      "default": [],
+      "items": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "title": "Column Values",
+      "type": "array"
+     },
+     "name_template": {
+      "default": "{valor} · {medida}",
+      "title": "Name Template",
+      "type": "string"
+     },
+     "totals": {
+      "default": false,
+      "title": "Totals",
+      "type": "boolean"
+     }
+    },
+    "title": "PivotConfig",
+    "type": "object"
+   },
+   "ReplaceRule": {
+    "properties": {
+     "find": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "integer"
+       },
+       {
+        "type": "number"
+       },
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Find"
+     },
+     "replace": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "integer"
+       },
+       {
+        "type": "number"
+       },
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Replace"
+     }
+    },
+    "title": "ReplaceRule",
+    "type": "object"
+   },
+   "ReplaceConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "column": {
+      "default": "",
+      "title": "Column",
+      "type": "string"
+     },
+     "mode": {
+      "default": "exact",
+      "enum": [
+       "exact",
+       "contains",
+       "regex"
+      ],
+      "title": "Mode",
+      "type": "string"
+     },
+     "rules": {
+      "default": [],
+      "items": {
+       "$ref": "#/components/schemas/ReplaceRule"
+      },
+      "title": "Rules",
+      "type": "array"
+     },
+     "case_sensitive": {
+      "default": true,
+      "title": "Case Sensitive",
+      "type": "boolean"
+     }
+    },
+    "title": "ReplaceConfig",
+    "type": "object"
+   },
+   "SampleNodeConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "mode": {
+      "default": "first",
+      "enum": [
+       "first",
+       "random",
+       "percent"
+      ],
+      "title": "Mode",
+      "type": "string"
+     },
+     "rows": {
+      "default": 1000,
+      "minimum": 1,
+      "title": "Rows",
+      "type": "integer"
+     },
+     "percent": {
+      "default": 10.0,
+      "exclusiveMinimum": 0,
+      "maximum": 100,
+      "title": "Percent",
+      "type": "number"
+     },
+     "seed": {
+      "default": 42,
+      "title": "Seed",
+      "type": "integer"
+     }
+    },
+    "title": "SampleNodeConfig",
     "type": "object"
    },
    "SelectConfig": {
@@ -3913,57 +4677,6 @@
      }
     },
     "title": "SelectConfig",
-    "type": "object"
-   },
-   "SortKey": {
-    "properties": {
-     "column": {
-      "title": "Column",
-      "type": "string"
-     },
-     "direction": {
-      "default": "asc",
-      "enum": [
-       "asc",
-       "desc"
-      ],
-      "title": "Direction",
-      "type": "string"
-     },
-     "nulls": {
-      "default": "last",
-      "enum": [
-       "first",
-       "last"
-      ],
-      "title": "Nulls",
-      "type": "string"
-     },
-     "case_sensitive": {
-      "default": false,
-      "title": "Case Sensitive",
-      "type": "boolean"
-     }
-    },
-    "required": [
-     "column"
-    ],
-    "title": "SortKey",
-    "type": "object"
-   },
-   "SortConfig": {
-    "additionalProperties": false,
-    "properties": {
-     "keys": {
-      "default": [],
-      "items": {
-       "$ref": "#/components/schemas/SortKey"
-      },
-      "title": "Keys",
-      "type": "array"
-     }
-    },
-    "title": "SortConfig",
     "type": "object"
    },
    "SampleConfig": {
@@ -4014,6 +4727,280 @@
      }
     },
     "title": "SourceConfig",
+    "type": "object"
+   },
+   "SplitConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "column": {
+      "default": "",
+      "title": "Column",
+      "type": "string"
+     },
+     "mode": {
+      "default": "delimiter",
+      "enum": [
+       "delimiter",
+       "position",
+       "regex"
+      ],
+      "title": "Mode",
+      "type": "string"
+     },
+     "delimiter": {
+      "default": ";",
+      "title": "Delimiter",
+      "type": "string"
+     },
+     "positions": {
+      "default": [],
+      "items": {
+       "type": "integer"
+      },
+      "title": "Positions",
+      "type": "array"
+     },
+     "pattern": {
+      "default": "",
+      "title": "Pattern",
+      "type": "string"
+     },
+     "parts": {
+      "default": 2,
+      "maximum": 50,
+      "minimum": 1,
+      "title": "Parts",
+      "type": "integer"
+     },
+     "names": {
+      "default": [],
+      "items": {
+       "type": "string"
+      },
+      "title": "Names",
+      "type": "array"
+     },
+     "keep_original": {
+      "default": true,
+      "title": "Keep Original",
+      "type": "boolean"
+     },
+     "trim": {
+      "default": true,
+      "title": "Trim",
+      "type": "boolean"
+     }
+    },
+    "title": "SplitConfig",
+    "type": "object"
+   },
+   "TextCleanConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "columns": {
+      "default": [],
+      "items": {
+       "type": "string"
+      },
+      "title": "Columns",
+      "type": "array"
+     },
+     "trim": {
+      "default": true,
+      "title": "Trim",
+      "type": "boolean"
+     },
+     "collapse_spaces": {
+      "default": true,
+      "title": "Collapse Spaces",
+      "type": "boolean"
+     },
+     "case": {
+      "default": "none",
+      "enum": [
+       "none",
+       "upper",
+       "lower",
+       "title"
+      ],
+      "title": "Case",
+      "type": "string"
+     },
+     "remove_accents": {
+      "default": false,
+      "title": "Remove Accents",
+      "type": "boolean"
+     },
+     "empty_as_null": {
+      "default": false,
+      "title": "Empty As Null",
+      "type": "boolean"
+     }
+    },
+    "title": "TextCleanConfig",
+    "type": "object"
+   },
+   "UnionConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "mode": {
+      "default": "by_name",
+      "enum": [
+       "by_name",
+       "by_position"
+      ],
+      "title": "Mode",
+      "type": "string"
+     },
+     "source_column": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Source Column"
+     }
+    },
+    "title": "UnionConfig",
+    "type": "object"
+   },
+   "UnpivotConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "columns": {
+      "default": [],
+      "items": {
+       "type": "string"
+      },
+      "title": "Columns",
+      "type": "array"
+     },
+     "name_column": {
+      "default": "atributo",
+      "title": "Name Column",
+      "type": "string"
+     },
+     "value_column": {
+      "default": "valor",
+      "title": "Value Column",
+      "type": "string"
+     },
+     "drop_nulls": {
+      "default": false,
+      "title": "Drop Nulls",
+      "type": "boolean"
+     }
+    },
+    "title": "UnpivotConfig",
+    "type": "object"
+   },
+   "WindowItem": {
+    "properties": {
+     "fn": {
+      "default": "cumulative_sum",
+      "enum": [
+       "row_number",
+       "rank",
+       "dense_rank",
+       "cumulative_sum",
+       "cumulative_count",
+       "previous",
+       "next",
+       "pct_of_total",
+       "moving_avg",
+       "partition_agg"
+      ],
+      "title": "Fn",
+      "type": "string"
+     },
+     "column": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Column"
+     },
+     "as": {
+      "default": "",
+      "title": "As",
+      "type": "string"
+     },
+     "offset": {
+      "default": 1,
+      "minimum": 1,
+      "title": "Offset",
+      "type": "integer"
+     },
+     "size": {
+      "default": 3,
+      "minimum": 1,
+      "title": "Size",
+      "type": "integer"
+     },
+     "agg": {
+      "default": "sum",
+      "enum": [
+       "count",
+       "count_non_null",
+       "count_distinct",
+       "sum",
+       "avg",
+       "median",
+       "min",
+       "max",
+       "stddev",
+       "variance",
+       "percentile",
+       "mode",
+       "first",
+       "last",
+       "concat"
+      ],
+      "title": "Agg",
+      "type": "string"
+     }
+    },
+    "title": "WindowItem",
+    "type": "object"
+   },
+   "WindowConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "partition_by": {
+      "default": [],
+      "items": {
+       "type": "string"
+      },
+      "title": "Partition By",
+      "type": "array"
+     },
+     "order_by": {
+      "default": [],
+      "items": {
+       "$ref": "#/components/schemas/SortKey"
+      },
+      "title": "Order By",
+      "type": "array"
+     },
+     "items": {
+      "default": [],
+      "items": {
+       "$ref": "#/components/schemas/WindowItem"
+      },
+      "title": "Items",
+      "type": "array"
+     }
+    },
+    "title": "WindowConfig",
     "type": "object"
    }
   }

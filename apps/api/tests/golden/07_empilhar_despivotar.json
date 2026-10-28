@@ -1,0 +1,118 @@
+{
+  "description": "Empilhar por nome com coluna de origem, depois despivotar.",
+  "target": "o",
+  "pipeline": {
+    "schema_version": 1,
+    "settings": {
+      "locale": "pt-BR"
+    },
+    "nodes": [
+      {
+        "id": "v",
+        "type": "source",
+        "config": {
+          "source_id": "vendas"
+        },
+        "ui": {
+          "label": "Vendas"
+        }
+      },
+      {
+        "id": "c",
+        "type": "source",
+        "config": {
+          "source_id": "clientes"
+        },
+        "ui": {
+          "label": "Clientes"
+        }
+      },
+      {
+        "id": "u",
+        "type": "union",
+        "config": {
+          "mode": "by_name",
+          "source_column": "origem"
+        }
+      },
+      {
+        "id": "s",
+        "type": "select",
+        "config": {
+          "mode": "keep",
+          "columns": [
+            "origem",
+            "uf",
+            "estado",
+            "quantidade"
+          ]
+        }
+      },
+      {
+        "id": "d",
+        "type": "unpivot",
+        "config": {
+          "columns": [
+            "estado",
+            "quantidade"
+          ],
+          "drop_nulls": true
+        }
+      },
+      {
+        "id": "o",
+        "type": "sort",
+        "config": {
+          "keys": [
+            {
+              "column": "origem"
+            },
+            {
+              "column": "uf"
+            },
+            {
+              "column": "atributo"
+            },
+            {
+              "column": "valor"
+            }
+          ]
+        }
+      }
+    ],
+    "edges": [
+      {
+        "id": "e0",
+        "source": "v",
+        "target": "u",
+        "target_handle": "in_0"
+      },
+      {
+        "id": "e1",
+        "source": "c",
+        "target": "u",
+        "target_handle": "in_1"
+      },
+      {
+        "id": "e2",
+        "source": "u",
+        "target": "s",
+        "target_handle": "in"
+      },
+      {
+        "id": "e3",
+        "source": "s",
+        "target": "d",
+        "target_handle": "in"
+      },
+      {
+        "id": "e4",
+        "source": "d",
+        "target": "o",
+        "target_handle": "in"
+      }
+    ]
+  },
+  "sql": "WITH \"v\" AS (\n  SELECT\n    *\n  FROM READ_PARQUET('Vendas.parquet')\n), \"c\" AS (\n  SELECT\n    *\n  FROM READ_PARQUET('Clientes.parquet')\n), \"u\" AS (\n  SELECT\n    *\n  FROM (\n    SELECT\n      \"uf\" AS \"uf\",\n      \"cidade\" AS \"cidade\",\n      \"data_txt\" AS \"data_txt\",\n      \"preço_txt\" AS \"preço_txt\",\n      \"quantidade\" AS \"quantidade\",\n      \"data_venda\" AS \"data_venda\",\n      \"valor\" AS \"valor\",\n      \"ativo\" AS \"ativo\",\n      CAST(NULL AS TEXT) AS \"estado\",\n      'Vendas' AS \"origem\"\n    FROM \"v\"\n    UNION ALL\n    SELECT\n      \"uf\" AS \"uf\",\n      CAST(NULL AS TEXT) AS \"cidade\",\n      CAST(NULL AS TEXT) AS \"data_txt\",\n      CAST(NULL AS TEXT) AS \"preço_txt\",\n      CAST(NULL AS BIGINT) AS \"quantidade\",\n      CAST(NULL AS DATE) AS \"data_venda\",\n      CAST(NULL AS DOUBLE) AS \"valor\",\n      CAST(NULL AS BOOLEAN) AS \"ativo\",\n      \"estado\" AS \"estado\",\n      'Clientes' AS \"origem\"\n    FROM \"c\"\n  ) AS \"__u\"\n), \"s\" AS (\n  SELECT\n    \"origem\",\n    \"uf\",\n    \"estado\",\n    \"quantidade\"\n  FROM \"u\"\n), \"d\" AS (\n  SELECT\n    *\n  FROM (\n    SELECT\n      \"origem\",\n      \"uf\",\n      'estado' AS \"atributo\",\n      \"estado\" AS \"valor\"\n    FROM \"s\"\n    WHERE\n      NOT \"estado\" IS NULL\n    UNION ALL\n    SELECT\n      \"origem\",\n      \"uf\",\n      'quantidade' AS \"atributo\",\n      CAST(\"quantidade\" AS TEXT) AS \"valor\"\n    FROM \"s\"\n    WHERE\n      NOT \"quantidade\" IS NULL\n  ) AS \"__unpivot\"\n), \"o\" AS (\n  SELECT\n    *\n  FROM \"d\"\n  ORDER BY\n    \"origem\" COLLATE NOCASE ASC,\n    \"uf\" COLLATE NOCASE ASC,\n    \"atributo\" COLLATE NOCASE ASC,\n    \"valor\" COLLATE NOCASE ASC\n)\nSELECT\n  *\nFROM \"o\"",
+  "result": "origem,uf,atributo,valor\nClientes,PR,estado,Paraná\nClientes,RS,estado,Rio Grande do Sul\nClientes,SC,estado,Santa Catarina\nVendas,PR,quantidade,2\nVendas,PR,quantidade,3\nVendas,SC,quantidade,0\nVendas,SP,quantidade,1\n"
+}

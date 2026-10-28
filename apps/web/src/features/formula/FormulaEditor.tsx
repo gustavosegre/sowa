@@ -30,13 +30,13 @@ import { cn } from "@/lib/utils";
 import { usePipelineStore } from "@/stores/pipelineStore";
 
 const TOKEN =
-  /(\[(?:[^\]]|\]\])*\])|("(?:[^"]|"")*")|([A-Za-z_À-ɏ][A-Za-z0-9_.À-ɏ]*)(?=\s*\()|(\d+(?:[.,]\d+)?)/g;
-const CLASSES = ["tok-column", "tok-string", "tok-function", "tok-number"];
+  /(\{[^{}]*\})|(\[(?:[^\]]|\]\])*\])|("(?:[^"]|"")*")|([A-Za-z_À-ɏ][A-Za-z0-9_.À-ɏ]*)(?=\s*\()|(\d+(?:[.,]\d+)?)/g;
+const CLASSES = ["tok-param", "tok-column", "tok-string", "tok-function", "tok-number"];
 
 const highlighter = new MatchDecorator({
   regexp: TOKEN,
   decoration: (m) => {
-    const idx = [1, 2, 3, 4].findIndex((g) => m[g] !== undefined);
+    const idx = [1, 2, 3, 4, 5].findIndex((g) => m[g] !== undefined);
     return Decoration.mark({ class: CLASSES[idx] ?? "" });
   },
 });
@@ -84,6 +84,19 @@ export function FormulaEditor(props: FormulaEditorProps) {
     if (!host.current) return;
     const complete = (ctx: CompletionContext): CompletionResult | null => {
       const { columns, context = "row", locale } = live.current;
+      const brace = ctx.matchBefore(/\{[^{}]*$/);
+      if (brace) {
+        const params = usePipelineStore.getState().pipeline.settings.params;
+        return {
+          from: brace.from,
+          options: params.map((p) => ({
+            label: `{${p.name}}`,
+            type: "constant",
+            detail: `${t.types[p.type] ?? p.type} = ${String(p.value ?? "")}`,
+          })),
+          validFor: /^\{[^{}]*$/,
+        };
+      }
       const bracket = ctx.matchBefore(/\[[^\]]*$/);
       if (bracket) {
         const after = ctx.state.sliceDoc(ctx.pos, ctx.pos + 1);

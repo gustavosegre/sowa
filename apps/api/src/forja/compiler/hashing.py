@@ -18,6 +18,7 @@ def node_hashes(analysis: Analysis, node_id: str) -> dict[str, str]:
         cfg = r.config.model_dump(mode="json") if r.config is not None else r.node.config
         h.update(json.dumps(cfg, sort_keys=True, ensure_ascii=False).encode())
         h.update(analysis.pipeline.settings.locale.encode())
+        h.update(json.dumps([p.model_dump(mode="json") for p in analysis.pipeline.settings.params]).encode())
         for handle, up in sorted(r.inputs.items()):
             h.update(f"{handle}={out[up]}".encode())
         source_id = cfg.get("source_id") if isinstance(cfg, dict) else None

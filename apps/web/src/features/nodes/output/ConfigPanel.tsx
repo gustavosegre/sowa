@@ -11,6 +11,7 @@ import { t } from "@/i18n/pt-BR";
 import { fmtBytes, fmtInt } from "@/lib/utils";
 import { usePipelineStore } from "@/stores/pipelineStore";
 
+import { ColumnMultiSelect } from "../shared/ColumnSelect";
 import type { ConfigPanelProps } from "../shared/panel";
 
 function ExportButton({ nodeId }: { nodeId: string }) {
@@ -70,7 +71,7 @@ function ExportButton({ nodeId }: { nodeId: string }) {
   );
 }
 
-export function ConfigPanel({ node, config, update }: ConfigPanelProps<OutputConfig>) {
+export function ConfigPanel({ node, config, update, columns }: ConfigPanelProps<OutputConfig>) {
   const tt = t.nodes.output;
   const csv = config.csv;
   const custom = config.format === "csv" && config.preset !== "excel_br";
@@ -183,6 +184,15 @@ export function ConfigPanel({ node, config, update }: ConfigPanelProps<OutputCon
             />
           </Field>
         </div>
+      )}
+      {config.format === "parquet" && (
+        <Field label={t.partition}>
+          <ColumnMultiSelect
+            columns={columns}
+            value={config.parquet.partition_by}
+            onChange={(partition_by) => update({ ...config, parquet: { ...config.parquet, partition_by } })}
+          />
+        </Field>
       )}
       <ExportButton nodeId={node.id} />
     </div>

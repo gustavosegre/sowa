@@ -17,6 +17,7 @@ from forja.domain.schema import Schema
 from forja.domain.types import NUMERIC_TYPES, TEMPORAL_TYPES, LogicalType
 from forja.engine.cache import count_cache, preview_cache
 from forja.engine.duck import Engine, EngineError
+from forja.engine.matcache import get_cache
 from forja.nodes.base import alias, col, count_star, lit
 
 L = LogicalType
@@ -56,7 +57,7 @@ def preview(
     engine: Engine, analysis: Analysis, node_id: str, *, limit: int, offset: int, timeout: float | None
 ) -> Preview:
     r = analysis.results[node_id]
-    chain = compile_chain(analysis, node_id)
+    chain = compile_chain(analysis, node_id, cache=get_cache())
     schema = r.schema or Schema()
     key = f"{node_hashes(analysis, node_id)[node_id]}:{limit}:{offset}"
     cached = preview_cache.get(key)
@@ -89,12 +90,16 @@ def count_rows(
     cached = count_cache.get(key)
     if cached is not None:
         return cached
-    chain = compile_chain(analysis, node_id)
-    n = int(
-        engine.rows(
-            chain.wrap(exp.select(count_star()).from_(exp.Table(this=exp.to_identifier(node_id, quoted=True)))), timeout
-        )[0][0]
-    )
+    chain = compile_chain(analysis, node_id, cache=get_cache())
+    spec = analysis.results[node_id].spec
+    if spec is not None and spec.cacheable and node_id not in chain.cached:
+        # Counting runs the whole node anyway: keep the result for everything downstream.
+        path = get_cache().materialize(engine, chain.query(), key)
+        table: exp.Expr = exp.Table(this=exp.Anonymous(this="read_parquet", expressions=[lit(path)]))
+        n = int(engine.rows(exp.select(count_star()).from_(table), timeout)[0][0])
+    else:
+        target = exp.Table(this=exp.to_identifier(node_id, quoted=True))
+        n = int(engine.rows(chain.wrap(exp.select(count_star()).from_(target)), timeout)[0][0])
     count_cache.put(key, n)
     return n
 
@@ -109,7 +114,7 @@ def stats(engine: Engine, analysis: Analysis, node_id: str, timeout: float | Non
         for handle, up in r.inputs.items():
             out.input_row_counts[handle] = count_rows(engine, analysis, up, timeout, hashes)
         if r.spec is not None and r.config is not None:
-            chain = compile_chain(analysis, node_id)
+            chain = compile_chain(analysis, node_id, cache=get_cache())
             schemas = {h: s for h, u in r.inputs.items() if (s := analysis.results[u].schema) is not None}
             found = r.spec.runtime_issues(
                 r.config,
@@ -139,7 +144,7 @@ def profile(engine: Engine, analysis: Analysis, node_id: str, column: str, timeo
     r = analysis.results[node_id]
     assert r.schema is not None
     t = r.schema.type_of(column)
-    chain: Chain = compile_chain(analysis, node_id)
+    chain: Chain = compile_chain(analysis, node_id, cache=get_cache())
     total = count_rows(engine, analysis, node_id, timeout)
     sampled = total > PROFILE_SAMPLE_ROWS
     base: exp.Select = exp.select(alias(col(column), "v")).from_(_target(node_id))
@@ -250,7 +255,7 @@ def distinct_values(
 ) -> tuple[list[Any], bool]:
     from forja.nodes.pivot import PivotField, field_expr
 
-    chain = compile_chain(analysis, node_id)
+    chain = compile_chain(analysis, node_id, cache=get_cache())
     schema = analysis.results[node_id].schema or Schema()
     v: exp.Expr = field_expr(PivotField(column=column, date_group=date_group), schema)
     if as_text:

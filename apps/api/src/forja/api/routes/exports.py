@@ -9,9 +9,9 @@ from sqlalchemy.orm import Session
 
 from forja.api.errors import HttpError, not_found
 from forja.api.schemas import ExportJobOut, ExportRequest
-from forja.compiler.analyze import analyze
 from forja.compiler.build import CompileError
 from forja.domain.issues import Issue
+from forja.engine.describe import analyze_live
 from forja.jobs import exports as jobs
 from forja.nodes.output import OutputConfig
 from forja.storage.db import ExportJobRow, get_session
@@ -26,6 +26,7 @@ MEDIA = {
     ".json": "application/json",
     ".ndjson": "application/x-ndjson",
     ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    ".zip": "application/zip",
 }
 
 
@@ -48,7 +49,7 @@ def _out(row: ExportJobRow) -> ExportJobOut:
 @router.post("", response_model=ExportJobOut, status_code=202)
 def start_export(body: ExportRequest, db: Db) -> ExportJobOut:
     """Start an export job for an `output` node."""
-    a = analyze(body.pipeline, DbSourceResolver(db))
+    a = analyze_live(body.pipeline, DbSourceResolver(db))
     r = a.results.get(body.node_id)
     if r is None or r.node.type != "output" or not isinstance(r.config, OutputConfig):
         raise HttpError(422, "NOT_AN_OUTPUT", 'Escolha um nó "Exportar" para gerar o arquivo.')

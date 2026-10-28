@@ -96,6 +96,67 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/projects/{project_id}/versions": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List Versions
+     * @description History: automatic snapshots while editing and named versions.
+     */
+    get: operations["list_versions_projects__project_id__versions_get"];
+    put?: never;
+    /**
+     * Create Version
+     * @description Save the current pipeline as a named version.
+     */
+    post: operations["create_version_projects__project_id__versions_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/projects/{project_id}/versions/{version_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Version */
+    get: operations["get_version_projects__project_id__versions__version_id__get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/projects/{project_id}/versions/{version_id}/restore": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Restore Version
+     * @description Restore a version. The current state is saved first, so restoring can be undone.
+     */
+    post: operations["restore_version_projects__project_id__versions__version_id__restore_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/sources": {
     parameters: {
       query?: never;
@@ -875,6 +936,7 @@ export interface components {
       | "FORMULA_UNKNOWN_FUNCTION"
       | "FORMULA_ARGUMENTS"
       | "FORMULA_CONTEXT"
+      | "PARAM_NOT_FOUND"
       | "CAST_FAILURES"
       | "DIVISION_BY_ZERO"
       | "JOIN_ROW_MULTIPLICATION"
@@ -989,6 +1051,18 @@ export interface components {
     } & {
       [key: string]: unknown;
     };
+    /**
+     * Parameter
+     * @description Global parameter, referenced as {name} in formulas and filter values.
+     */
+    Parameter: {
+      /** Name */
+      name: string;
+      /** @default text */
+      type: components["schemas"]["LogicalType"];
+      /** Value */
+      value?: string | number | boolean | null;
+    };
     /** Pipeline */
     Pipeline: {
       /**
@@ -998,7 +1072,8 @@ export interface components {
       schema_version: number;
       /**
        * @default {
-       *       "locale": "pt-BR"
+       *       "locale": "pt-BR",
+       *       "params": []
        *     }
        */
       settings: components["schemas"]["PipelineSettings"];
@@ -1025,6 +1100,11 @@ export interface components {
        * @enum {string}
        */
       locale: "pt-BR" | "en-US";
+      /**
+       * Params
+       * @default []
+       */
+      params: components["schemas"]["Parameter"][];
     };
     /** Position */
     Position: {
@@ -1223,6 +1303,44 @@ export interface components {
       /** Context */
       ctx?: Record<string, never>;
     };
+    /** VersionCreate */
+    VersionCreate: {
+      /** Label */
+      label: string;
+    };
+    /** VersionDetail */
+    VersionDetail: {
+      /** Id */
+      id: number;
+      /** Version */
+      version: number;
+      /** Label */
+      label: string | null;
+      /** Node Count */
+      node_count: number;
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string;
+      pipeline: components["schemas"]["Pipeline"];
+    };
+    /** VersionOut */
+    VersionOut: {
+      /** Id */
+      id: number;
+      /** Version */
+      version: number;
+      /** Label */
+      label: string | null;
+      /** Node Count */
+      node_count: number;
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string;
+    };
     /** XlsxOptions */
     XlsxOptions: {
       /** Sheet */
@@ -1291,6 +1409,11 @@ export interface components {
        * @default null
        */
       row_group_size: number | null;
+      /**
+       * Partition By
+       * @default []
+       */
+      partition_by: string[];
     };
     /** OutputConfig */
     OutputConfig: {
@@ -1325,7 +1448,8 @@ export interface components {
       /**
        * @default {
        *       "compression": "zstd",
-       *       "row_group_size": null
+       *       "row_group_size": null,
+       *       "partition_by": []
        *     }
        */
       parquet: components["schemas"]["ParquetOptions"];
@@ -2101,6 +2225,14 @@ export interface components {
        */
       trim: boolean;
     };
+    /** SqlConfig */
+    SqlConfig: {
+      /**
+       * Query
+       * @default SELECT * FROM input
+       */
+      query: string;
+    };
     /** TextCleanConfig */
     TextCleanConfig: {
       /**
@@ -2494,6 +2626,136 @@ export interface operations {
         "application/json": components["schemas"]["Pipeline"];
       };
     };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SavedPipeline"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  list_versions_projects__project_id__versions_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        project_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["VersionOut"][];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  create_version_projects__project_id__versions_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        project_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["VersionCreate"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["VersionOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  get_version_projects__project_id__versions__version_id__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        project_id: string;
+        version_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["VersionDetail"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  restore_version_projects__project_id__versions__version_id__restore_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        project_id: string;
+        version_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
     responses: {
       /** @description Successful Response */
       200: {

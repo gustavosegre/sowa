@@ -356,3 +356,33 @@ export function useExportJob(jobId: string | null) {
 export function exportDownloadUrl(jobId: string): string {
   return `${import.meta.env.VITE_API_URL ?? "/api"}/exports/${jobId}/download`;
 }
+
+/* ---------------------------------------------------------------- versions */
+
+export function useVersions(projectId: string, enabled: boolean) {
+  return useQuery({
+    queryKey: ["versions", projectId],
+    enabled,
+    queryFn: async () =>
+      unwrap(
+        await api.GET("/projects/{project_id}/versions", { params: { path: { project_id: projectId } } }),
+      ),
+  });
+}
+
+export async function createVersion(projectId: string, label: string) {
+  return unwrap(
+    await api.POST("/projects/{project_id}/versions", {
+      params: { path: { project_id: projectId } },
+      body: { label },
+    }),
+  );
+}
+
+export async function restoreVersion(projectId: string, versionId: number) {
+  return unwrap(
+    await api.POST("/projects/{project_id}/versions/{version_id}/restore", {
+      params: { path: { project_id: projectId, version_id: versionId } },
+    }),
+  );
+}

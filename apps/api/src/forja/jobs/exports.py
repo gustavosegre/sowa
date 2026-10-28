@@ -9,12 +9,13 @@ from concurrent.futures import ThreadPoolExecutor
 from functools import cache
 from typing import Any
 
-from forja.compiler.analyze import analyze
 from forja.compiler.build import CompileError, compile_chain
 from forja.deps import get_storage
 from forja.domain.issues import Issue, IssueCode
 from forja.domain.pipeline import Pipeline
+from forja.engine.describe import analyze_live
 from forja.engine.duck import EngineError, get_engine
+from forja.engine.matcache import get_cache
 from forja.io.exporters.writer import ExportError, export
 from forja.nodes.output import OutputConfig
 from forja.settings import get_settings
@@ -56,11 +57,11 @@ def run(job_id: str, pipeline: Pipeline, node_id: str) -> None:
 
     try:
         with session_scope() as s:
-            analysis = analyze(pipeline, DbSourceResolver(s))
+            analysis = analyze_live(pipeline, DbSourceResolver(s))
             r = analysis.results.get(node_id)
             if r is None or r.node.type != "output" or not isinstance(r.config, OutputConfig):
                 raise CompileError([Issue(code=IssueCode.NODE_NOT_FOUND, message="Nó de exportação não encontrado.")])
-            chain = compile_chain(analysis, node_id)
+            chain = compile_chain(analysis, node_id, cache=get_cache())
             schema = r.schema
             cfg = r.config
         assert schema is not None

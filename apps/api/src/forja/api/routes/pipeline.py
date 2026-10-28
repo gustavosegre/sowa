@@ -20,11 +20,12 @@ from forja.api.schemas import (
     SqlOut,
     StatsOut,
 )
-from forja.compiler.analyze import Analysis, analyze
+from forja.compiler.analyze import Analysis
 from forja.compiler.build import CompileError, compile_chain, to_sql
 from forja.compiler.hashing import node_hashes
 from forja.domain.pipeline import Pipeline
 from forja.engine import service
+from forja.engine.describe import analyze_live
 from forja.engine.duck import get_engine
 from forja.settings import get_settings
 from forja.storage.db import get_session
@@ -35,7 +36,7 @@ Db = Annotated[Session, Depends(get_session)]
 
 
 def _analysis(p: Pipeline, db: Session) -> Analysis:
-    return analyze(p, DbSourceResolver(db))
+    return analyze_live(p, DbSourceResolver(db))
 
 
 def _node(a: Analysis, node_id: str) -> None:

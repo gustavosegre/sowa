@@ -142,6 +142,10 @@
   background: var(--accent) !important;
   color: var(--foreground) !important;
 }
+.tok-param {
+  color: var(--cat-output);
+  font-style: italic;
+}
 .tok-column {
   color: var(--cat-input);
 }

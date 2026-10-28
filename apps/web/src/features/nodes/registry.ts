@@ -8,6 +8,7 @@ import { meta as note } from "./note/meta";
 import { meta as output } from "./output/meta";
 import { meta as select } from "./select/meta";
 import { meta as sort } from "./sort/meta";
+import { meta as sql } from "./sql/meta";
 import { meta as source } from "./source/meta";
 import { meta as distinct } from "./distinct/meta";
 import { meta as sample } from "./sample/meta";
@@ -50,6 +51,7 @@ const ALL = [
   join,
   union,
   lookup,
+  sql,
   output,
   note,
   frame,

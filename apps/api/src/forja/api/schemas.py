@@ -43,6 +43,22 @@ class ProjectOut(BaseModel):
     node_count: int = 0
 
 
+class VersionOut(BaseModel):
+    id: int
+    version: int
+    label: str | None
+    node_count: int
+    created_at: datetime
+
+
+class VersionDetail(VersionOut):
+    pipeline: Pipeline
+
+
+class VersionCreate(BaseModel):
+    label: str = Field(min_length=1, max_length=200)
+
+
 class SavedPipeline(BaseModel):
     pipeline: Pipeline
     version: int

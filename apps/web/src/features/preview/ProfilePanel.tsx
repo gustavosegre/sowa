@@ -1,11 +1,15 @@
 import { X } from "lucide-react";
 
-import { useProfile } from "@/api/hooks";
+import { useProfile, useSources } from "@/api/hooks";
 import { Button, Spinner } from "@/components/ui";
 import { TypeIcon } from "@/components/TypeIcon";
-import { useServerPipeline } from "@/features/editor/analysis";
+import { useAnalysis, useServerPipeline } from "@/features/editor/analysis";
+import { useProjectId } from "@/features/editor/project";
 import { t } from "@/i18n/pt-BR";
 import { fmtInt } from "@/lib/utils";
+import { usePipelineStore } from "@/stores/pipelineStore";
+
+import { columnLineage } from "./lineage";
 
 export function ProfilePanel({
   nodeId,
@@ -20,6 +24,16 @@ export function ProfilePanel({
 }) {
   const pipeline = useServerPipeline((s) => s.pipeline);
   const { data, isLoading, error } = useProfile(pipeline, nodeId, hash, column);
+  const { data: analysis } = useAnalysis();
+  const { data: sources } = useSources(useProjectId());
+  const select = usePipelineStore((s) => s.select);
+  const lineage = columnLineage(
+    pipeline,
+    analysis,
+    nodeId,
+    column,
+    (id) => sources?.find((x) => x.id === id)?.name,
+  );
   const maxTop = Math.max(1, ...(data?.top.map((x) => x.count) ?? [1]));
   const maxHist = Math.max(1, ...(data?.histogram.map((x) => x.count) ?? [1]));
   const tt = t.profile;
@@ -34,6 +48,24 @@ export function ProfilePanel({
         </Button>
       </div>
       <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-auto p-3 text-[12px]">
+        {lineage.length > 0 && (
+          <div>
+            <p className="mb-1 font-medium">{t.lineage.title}</p>
+            <ol className="flex flex-col gap-0.5 border-l pl-2">
+              {lineage.map((step, i) => (
+                <li key={i}>
+                  <button
+                    type="button"
+                    className="cursor-pointer text-left text-muted-foreground hover:text-foreground hover:underline"
+                    onClick={() => select(step.nodeId)}
+                  >
+                    {step.text}
+                  </button>
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
         {isLoading && <Spinner />}
         {error && <p className="text-danger">{error.message}</p>}
         {data && (

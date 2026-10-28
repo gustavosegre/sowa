@@ -9,11 +9,11 @@ from sqlalchemy.orm import Session
 from sqlglot import exp
 
 from forja.api.schemas import FormulaCheckOut, FormulaCheckRequest, FormulaRenderRequest, FunctionOut, FunctionParamOut
-from forja.compiler.analyze import analyze
 from forja.compiler.build import CompileError, compile_chain
 from forja.domain.issues import Issue
 from forja.domain.schema import Schema
 from forja.domain.types import LogicalType, label
+from forja.engine.describe import analyze_live
 from forja.engine.duck import EngineError, get_engine
 from forja.formula.functions import FUNCTIONS
 from forja.formula.parser import FormulaSyntaxError, parse
@@ -77,14 +77,17 @@ def check(body: FormulaCheckRequest, db: Db) -> FormulaCheckOut:
     upstream: str | None = None
     analysis = None
     if body.pipeline is not None and body.node_id is not None:
-        analysis = analyze(body.pipeline, DbSourceResolver(db))
+        analysis = analyze_live(body.pipeline, DbSourceResolver(db))
         r = analysis.results.get(body.node_id)
         if r is not None:
             upstream = r.inputs.get("in")
             if upstream and (s := analysis.results[upstream].schema) is not None:
                 schema = s
     try:
-        f = compile_formula(body.formula, schema, locale=body.locale, context=body.context, group_keys=body.group_keys)
+        params = body.pipeline.settings.params if body.pipeline is not None else []
+        f = compile_formula(
+            body.formula, schema, locale=body.locale, context=body.context, group_keys=body.group_keys, params=params
+        )
     except FormulaError as e:
         return FormulaCheckOut(ok=False, issues=[formula_issue(e)])
     examples: list[str | None] = []

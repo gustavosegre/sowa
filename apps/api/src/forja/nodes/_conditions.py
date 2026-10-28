@@ -102,6 +102,15 @@ class ConditionBuilder:
         return self.condition(c)
 
     def _lit(self, c: Condition, raw: Scalar, t: LogicalType) -> exp.Expr | None:
+        # "{data_corte}" as a value refers to a global parameter.
+        if isinstance(raw, str) and raw.startswith("{") and raw.endswith("}"):
+            p = self.ctx.param(raw[1:-1].strip())
+            if p is None:
+                self.issues.append(
+                    error(IssueCode.PARAM_NOT_FOUND, f"O parâmetro {raw} não existe neste fluxo.", column=c.column)
+                )
+                return None
+            raw = p.value if not isinstance(p.value, bool) else ("sim" if p.value else "não")
         try:
             v = typed_literal(raw, t, self.ctx.locale)
         except ValueError_ as e:

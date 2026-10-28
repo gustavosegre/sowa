@@ -5,7 +5,7 @@ from typing import Literal
 from pydantic import BaseModel, Field
 from sqlglot import exp
 
-from forja.domain.issues import Issue, IssueCode, error, fmt_int, warning
+from forja.domain.issues import Issue, IssueCode, column_not_found, error, fmt_int, warning
 from forja.domain.schema import Schema
 from forja.nodes.base import NodeConfig, NodeContext, NodeSpec, QueryRunner, count_star, project
 from forja.nodes.registry import register_node
@@ -36,6 +36,8 @@ EXCEL_BR = CsvExportOptions(
 class ParquetOptions(BaseModel):
     compression: Literal["zstd", "snappy", "none"] = "zstd"
     row_group_size: int | None = Field(default=None, ge=1000)
+    # Hive-style partitions (coluna=valor/…); the download is a .zip of the folder.
+    partition_by: list[str] = []
 
 
 class OutputConfig(NodeConfig):
@@ -67,6 +69,13 @@ class OutputNode(NodeSpec[OutputConfig]):
                     "Nome de arquivo inválido.",
                     hint='Use letras, números, espaço, "-" e "_".',
                 )
+            )
+        for c in cfg.parquet.partition_by if cfg.format == "parquet" else []:
+            if not inputs["in"].has(c):
+                issues.append(column_not_found(c, where=ctx.input_labels.get("in")))
+        if cfg.format == "parquet" and cfg.parquet.partition_by and len(cfg.parquet.partition_by) >= len(inputs["in"]):
+            issues.append(
+                error(IssueCode.INVALID_CONFIG, "Particionar por todas as colunas deixaria os arquivos sem dados.")
             )
         if cfg.format == "xlsx" and len(inputs["in"]) > XLSX_MAX_COLS:
             issues.append(

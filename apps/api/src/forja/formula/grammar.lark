@@ -30,6 +30,7 @@
 ?atom: NUMBER                          -> number
     | STRING                           -> string
     | COLUMN                           -> column
+    | PARAM                            -> param
     | NAME LPAR [args] RPAR            -> call
     | NAME                             -> name
     | LPAR expr RPAR                   -> group
@@ -47,6 +48,7 @@ RPAR: ")"
 
 STRING: /"([^"]|"")*"/
 COLUMN: /\[([^\]]|\]\])*\]/
+PARAM: /\{[^{}]+\}/
 NAME: /[A-Za-z_À-ɏ][A-Za-z0-9_.À-ɏ]*/
 
 %import common.WS

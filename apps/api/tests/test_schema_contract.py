@@ -187,7 +187,7 @@ FIXTURES: dict[str, list[dict[str, Any]]] = {
 ANNOTATIONS = {"note", "frame"}
 
 
-MULTI_INPUT = {"join", "union", "lookup"}  # covered by test_contract_multi_input_nodes
+MULTI_INPUT = {"join", "union", "lookup", "sql"}  # covered by test_contract_multi_input_nodes / test_sql.py
 
 
 def test_every_node_type_has_contract_fixtures() -> None:

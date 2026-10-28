@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any, Literal
 
 from pydantic import ValidationError
+from sqlglot import exp
 
 from forja.compiler.graph import Graph, build_graph
 from forja.domain.issues import Issue, IssueCode
@@ -33,12 +35,17 @@ class NodeResult:
         return self.status in ("ok", "warning")
 
 
+# (analysis, upstream node ids, query over them) -> schema. Provided by the engine.
+Describer = Callable[["Analysis", list[str], exp.Select], Schema]
+
+
 @dataclass
 class Analysis:
     pipeline: Pipeline
     graph: Graph
     results: dict[str, NodeResult]
     sources: SourceResolver
+    describer: Describer | None = None
 
     def context(self, node_id: str, *, for_display: bool = False, result: NodeResult | None = None) -> NodeContext:
         r = result or self.results[node_id]
@@ -49,7 +56,16 @@ class Analysis:
             sources=self.sources,
             input_labels={h: self.results[u].node.display_name() for h, u in r.inputs.items()},
             for_display=for_display,
+            params=list(self.pipeline.settings.params),
+            input_ids=dict(r.inputs),
+            describe=self._describe(list(r.inputs.values())),
         )
+
+    def _describe(self, upstream: list[str]) -> Callable[[exp.Select], Schema] | None:
+        describer = self.describer
+        if describer is None:
+            return None
+        return lambda q: describer(self, upstream, q)
 
 
 _PYDANTIC_MESSAGES = {
@@ -75,11 +91,11 @@ def config_issues(err: ValidationError) -> list[Issue]:
     return out
 
 
-def analyze(p: Pipeline, sources: SourceResolver | None = None) -> Analysis:
+def analyze(p: Pipeline, sources: SourceResolver | None = None, describer: Describer | None = None) -> Analysis:
     graph = build_graph(p)
     nodes = {n.id: n for n in p.nodes}
     results: dict[str, NodeResult] = {}
-    analysis = Analysis(p, graph, results, sources or _NoSources())
+    analysis = Analysis(p, graph, results, sources or _NoSources(), describer)
 
     for nid in graph.in_cycle:
         results[nid] = NodeResult(

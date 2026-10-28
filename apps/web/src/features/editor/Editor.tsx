@@ -1,9 +1,11 @@
 import { ReactFlowProvider, useReactFlow } from "@xyflow/react";
 import {
   ArrowLeft,
+  Braces,
   Check,
   CircleAlert,
   Command,
+  History,
   LayoutGrid,
   Maximize,
   Moon,
@@ -29,6 +31,8 @@ import { useUiStore } from "@/stores/uiStore";
 
 import { useSyncServerPipeline } from "./analysis";
 import { ConfigSidebar } from "./ConfigSidebar";
+import { ParamsDialog } from "./ParamsDialog";
+import { VersionsDialog } from "./VersionsDialog";
 import { switchLocale } from "./locale";
 import { ProjectContext } from "./project";
 
@@ -120,6 +124,9 @@ function Toolbar({
   const ui = useUiStore();
   const locale = usePipelineStore((s) => s.pipeline.settings.locale);
   const temporal = useStore(usePipelineStore.temporal);
+  const params = usePipelineStore((s) => s.pipeline.settings.params.length);
+  const [paramsOpen, setParamsOpen] = useState(false);
+  const [versionsOpen, setVersionsOpen] = useState(false);
   return (
     <header className="flex h-11 shrink-0 items-center gap-2 border-b bg-background px-2">
       <Tooltip content={t.projects.title}>
@@ -171,6 +178,15 @@ function Toolbar({
           <Maximize />
         </Button>
       </Tooltip>
+      <Button variant="ghost" size="sm" onClick={() => setParamsOpen(true)} aria-label={t.params.button}>
+        <Braces /> {t.params.button}
+        {params > 0 && <span className="rounded bg-muted px-1 text-[10px]">{params}</span>}
+      </Button>
+      <Button variant="ghost" size="sm" onClick={() => setVersionsOpen(true)} aria-label={t.versions.button}>
+        <History /> {t.versions.button}
+      </Button>
+      <ParamsDialog open={paramsOpen} onClose={() => setParamsOpen(false)} />
+      <VersionsDialog projectId={projectId} open={versionsOpen} onClose={() => setVersionsOpen(false)} />
       <Tooltip content={t.editor.locale}>
         <Select
           className="w-36"

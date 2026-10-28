@@ -338,6 +338,207 @@
     }
    }
   },
+  "/projects/{project_id}/versions": {
+   "get": {
+    "tags": [
+     "projects"
+    ],
+    "summary": "List Versions",
+    "description": "History: automatic snapshots while editing and named versions.",
+    "operationId": "list_versions_projects__project_id__versions_get",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Project Id"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "array",
+         "items": {
+          "$ref": "#/components/schemas/VersionOut"
+         },
+         "title": "Response List Versions Projects  Project Id  Versions Get"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   },
+   "post": {
+    "tags": [
+     "projects"
+    ],
+    "summary": "Create Version",
+    "description": "Save the current pipeline as a named version.",
+    "operationId": "create_version_projects__project_id__versions_post",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Project Id"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/VersionCreate"
+       }
+      }
+     }
+    },
+    "responses": {
+     "201": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/VersionOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/projects/{project_id}/versions/{version_id}": {
+   "get": {
+    "tags": [
+     "projects"
+    ],
+    "summary": "Get Version",
+    "operationId": "get_version_projects__project_id__versions__version_id__get",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Project Id"
+      }
+     },
+     {
+      "name": "version_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "Version Id"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/VersionDetail"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/projects/{project_id}/versions/{version_id}/restore": {
+   "post": {
+    "tags": [
+     "projects"
+    ],
+    "summary": "Restore Version",
+    "description": "Restore a version. The current state is saved first, so restoring can be undone.",
+    "operationId": "restore_version_projects__project_id__versions__version_id__restore_post",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Project Id"
+      }
+     },
+     {
+      "name": "version_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "title": "Version Id"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SavedPipeline"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
   "/sources": {
    "post": {
     "tags": [
@@ -2361,6 +2562,7 @@
      "FORMULA_UNKNOWN_FUNCTION",
      "FORMULA_ARGUMENTS",
      "FORMULA_CONTEXT",
+     "PARAM_NOT_FOUND",
      "CAST_FAILURES",
      "DIVISION_BY_ZERO",
      "JOIN_ROW_MULTIPLICATION",
@@ -2628,6 +2830,47 @@
     "type": "object",
     "title": "NodeUI"
    },
+   "Parameter": {
+    "properties": {
+     "name": {
+      "type": "string",
+      "maxLength": 64,
+      "minLength": 1,
+      "pattern": "^[^{}\\[\\]]+$",
+      "title": "Name"
+     },
+     "type": {
+      "$ref": "#/components/schemas/LogicalType",
+      "default": "text"
+     },
+     "value": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "integer"
+       },
+       {
+        "type": "number"
+       },
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Value"
+     }
+    },
+    "type": "object",
+    "required": [
+     "name"
+    ],
+    "title": "Parameter",
+    "description": "Global parameter, referenced as {name} in formulas and filter values."
+   },
    "Pipeline": {
     "properties": {
      "schema_version": {
@@ -2638,7 +2881,8 @@
      "settings": {
       "$ref": "#/components/schemas/PipelineSettings",
       "default": {
-       "locale": "pt-BR"
+       "locale": "pt-BR",
+       "params": []
       }
      },
      "nodes": {
@@ -2683,6 +2927,14 @@
       ],
       "title": "Locale",
       "default": "pt-BR"
+     },
+     "params": {
+      "items": {
+       "$ref": "#/components/schemas/Parameter"
+      },
+      "type": "array",
+      "title": "Params",
+      "default": []
      }
     },
     "type": "object",
@@ -3281,6 +3533,107 @@
     ],
     "title": "ValidationError"
    },
+   "VersionCreate": {
+    "properties": {
+     "label": {
+      "type": "string",
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Label"
+     }
+    },
+    "type": "object",
+    "required": [
+     "label"
+    ],
+    "title": "VersionCreate"
+   },
+   "VersionDetail": {
+    "properties": {
+     "id": {
+      "type": "integer",
+      "title": "Id"
+     },
+     "version": {
+      "type": "integer",
+      "title": "Version"
+     },
+     "label": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Label"
+     },
+     "node_count": {
+      "type": "integer",
+      "title": "Node Count"
+     },
+     "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Created At"
+     },
+     "pipeline": {
+      "$ref": "#/components/schemas/Pipeline"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "version",
+     "label",
+     "node_count",
+     "created_at",
+     "pipeline"
+    ],
+    "title": "VersionDetail"
+   },
+   "VersionOut": {
+    "properties": {
+     "id": {
+      "type": "integer",
+      "title": "Id"
+     },
+     "version": {
+      "type": "integer",
+      "title": "Version"
+     },
+     "label": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Label"
+     },
+     "node_count": {
+      "type": "integer",
+      "title": "Node Count"
+     },
+     "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Created At"
+     }
+    },
+    "type": "object",
+    "required": [
+     "id",
+     "version",
+     "label",
+     "node_count",
+     "created_at"
+    ],
+    "title": "VersionOut"
+   },
    "XlsxOptions": {
     "properties": {
      "sheet": {
@@ -3386,6 +3739,14 @@
       ],
       "default": null,
       "title": "Row Group Size"
+     },
+     "partition_by": {
+      "default": [],
+      "items": {
+       "type": "string"
+      },
+      "title": "Partition By",
+      "type": "array"
      }
     },
     "title": "ParquetOptions",
@@ -3443,7 +3804,8 @@
       "$ref": "#/components/schemas/ParquetOptions",
       "default": {
        "compression": "zstd",
-       "row_group_size": null
+       "row_group_size": null,
+       "partition_by": []
       }
      }
     },
@@ -4792,6 +5154,18 @@
      }
     },
     "title": "SplitConfig",
+    "type": "object"
+   },
+   "SqlConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "query": {
+      "default": "SELECT * FROM input",
+      "title": "Query",
+      "type": "string"
+     }
+    },
+    "title": "SqlConfig",
     "type": "object"
    },
    "TextCleanConfig": {

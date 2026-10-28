@@ -28,7 +28,7 @@ class GroupByConfig(NodeConfig):
 
 def compile_measure(m: Measure, schema: Schema, keys: list[str], ctx: NodeContext) -> CompiledFormula:
     locale: Locale = "en-US" if ctx.locale == "en-US" else "pt-BR"
-    return compile_formula(m.formula, schema, locale=locale, context="aggregate", group_keys=keys)
+    return compile_formula(m.formula, schema, locale=locale, context="aggregate", group_keys=keys, params=ctx.params)
 
 
 def output_names(cfg: GroupByConfig) -> list[str]:

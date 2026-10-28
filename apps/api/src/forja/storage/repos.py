@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import secrets
 from collections.abc import Sequence
+from datetime import UTC, timedelta
 from typing import Any
 
 from sqlalchemy import select
@@ -12,7 +13,7 @@ from sqlalchemy.orm import Session
 from forja.domain.pipeline import Pipeline
 from forja.domain.schema import Schema
 from forja.nodes.base import SourceInfo
-from forja.storage.db import ExportJobRow, ProjectRow, SourceRow, utcnow
+from forja.storage.db import ExportJobRow, PipelineVersionRow, ProjectRow, SourceRow, utcnow
 
 
 def new_id(prefix: str) -> str:
@@ -44,6 +45,57 @@ class ProjectRepo:
 
     def delete(self, row: ProjectRow) -> None:
         self.s.delete(row)
+
+
+AUTO_SNAPSHOT_EVERY = timedelta(minutes=2)
+MAX_VERSIONS = 100
+
+
+class VersionRepo:
+    """Pipeline history: automatic snapshots while editing + named versions."""
+
+    def __init__(self, s: Session) -> None:
+        self.s = s
+
+    def list(self, project_id: str) -> Sequence[PipelineVersionRow]:
+        q = select(PipelineVersionRow).where(PipelineVersionRow.project_id == project_id)
+        return self.s.scalars(q.order_by(PipelineVersionRow.created_at.desc(), PipelineVersionRow.id.desc())).all()
+
+    def get(self, project_id: str, version_id: int) -> PipelineVersionRow | None:
+        row = self.s.get(PipelineVersionRow, version_id)
+        return row if row is not None and row.project_id == project_id else None
+
+    def snapshot(self, project: ProjectRow, label: str | None = None) -> PipelineVersionRow:
+        row = PipelineVersionRow(
+            project_id=project.id,
+            version=project.version,
+            label=label,
+            pipeline=project.pipeline,
+            node_count=len((project.pipeline or {}).get("nodes", [])),
+        )
+        self.s.add(row)
+        self.s.flush()
+        self._prune(project.id)
+        return row
+
+    def maybe_snapshot(self, project: ProjectRow) -> None:
+        """Called on every save; keeps at most one automatic snapshot per interval."""
+        last = self.s.scalars(
+            select(PipelineVersionRow)
+            .where(PipelineVersionRow.project_id == project.id)
+            .order_by(PipelineVersionRow.created_at.desc())
+            .limit(1)
+        ).first()
+        created = last.created_at if last else None
+        if created is not None and created.tzinfo is None:
+            created = created.replace(tzinfo=UTC)
+        if created is None or utcnow() - created >= AUTO_SNAPSHOT_EVERY:
+            self.snapshot(project)
+
+    def _prune(self, project_id: str) -> None:
+        auto = [v for v in self.list(project_id) if v.label is None]
+        for old in auto[MAX_VERSIONS:]:
+            self.s.delete(old)
 
 
 class SourceRepo:

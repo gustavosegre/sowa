@@ -21,6 +21,7 @@ import {
   TextCleanPanel,
   UnpivotPanel,
 } from "./simple/panels";
+import { ConfigPanel as SqlPanel } from "./sql/ConfigPanel";
 import { ConfigPanel as UnionPanel } from "./union/ConfigPanel";
 import { ConfigPanel as WindowPanel } from "./window/ConfigPanel";
 import { ConfigPanel as CastPanel } from "./cast/ConfigPanel";
@@ -91,6 +92,7 @@ const PANELS = {
   join: JoinPanel,
   union: UnionPanel,
   lookup: LookupPanel,
+  sql: SqlPanel,
 } as unknown as Record<string, ComponentType<AnyPanelProps> | undefined>;
 
 /** Renders the config panel of a node type. Components are static; only the lookup is dynamic. */

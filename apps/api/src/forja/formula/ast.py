@@ -33,6 +33,11 @@ class ColumnRef(_Node):
     name: str
 
 
+class ParamRef(_Node):
+    kind: Literal["param"] = "param"
+    name: str
+
+
 class Call(_Node):
     kind: Literal["call"] = "call"
     name: str  # as typed by the user
@@ -58,7 +63,7 @@ class Percent(_Node):
 
 
 Expr = Annotated[
-    NumberLit | StringLit | BoolLit | ColumnRef | Call | Unary | Binary | Percent,
+    NumberLit | StringLit | BoolLit | ColumnRef | ParamRef | Call | Unary | Binary | Percent,
     Field(discriminator="kind"),
 ]
 

@@ -132,6 +132,17 @@ def export(
             stmt = copy_to(q, tmp, format="CSV", delimiter=o.delimiter, header=o.header, quote=o.quote or '"')
             engine.execute(stmt, on_cursor=attach)
             _reencode(tmp, dest, o.encoding)
+        elif cfg.format == "parquet" and cfg.parquet.partition_by:
+            comp = "uncompressed" if cfg.parquet.compression == "none" else cfg.parquet.compression
+            folder = out_dir / f".{cfg.filename.strip()}_parts"
+            shutil.rmtree(folder, ignore_errors=True)
+            parts = exp.Tuple(expressions=[exp.column(c, quoted=True) for c in cfg.parquet.partition_by])
+            engine.execute(
+                copy_to(query, folder, format="PARQUET", compression=comp, partition_by=parts), on_cursor=attach
+            )
+            dest = out_dir / f"{cfg.filename.strip()}.zip"
+            _zip_folder(folder, dest)
+            shutil.rmtree(folder, ignore_errors=True)
         elif cfg.format == "parquet":
             comp = "uncompressed" if cfg.parquet.compression == "none" else cfg.parquet.compression
             engine.execute(
@@ -152,6 +163,16 @@ def export(
     if progress:
         progress(1.0)
     return ExportResult(dest, rows, dest.stat().st_size)
+
+
+def _zip_folder(folder: Path, dest: Path) -> None:
+    import zipfile
+
+    # Parquet is already compressed: store, don't deflate again.
+    with zipfile.ZipFile(dest, "w", compression=zipfile.ZIP_STORED) as z:
+        for f in sorted(folder.rglob("*")):
+            if f.is_file():
+                z.write(f, f.relative_to(folder).as_posix())
 
 
 def _count(engine: Engine, query: exp.Select) -> int:

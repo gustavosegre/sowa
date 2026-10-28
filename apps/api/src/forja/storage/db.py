@@ -34,6 +34,18 @@ class ProjectRow(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
 
+class PipelineVersionRow(Base):
+    __tablename__ = "pipeline_versions"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    project_id: Mapped[str] = mapped_column(ForeignKey("projects.id", ondelete="CASCADE"), index=True)
+    version: Mapped[int] = mapped_column(Integer)
+    label: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    pipeline: Mapped[dict[str, Any]] = mapped_column(JSON)
+    node_count: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
 class SourceRow(Base):
     __tablename__ = "sources"
 

@@ -11,6 +11,8 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from forja.domain.types import LogicalType
+
 CURRENT_SCHEMA_VERSION = 1
 
 
@@ -43,8 +45,20 @@ class Edge(BaseModel):
     target_handle: str = "in"
 
 
+ParamValue = str | int | float | bool | None
+
+
+class Parameter(BaseModel):
+    """Global parameter, referenced as {name} in formulas and filter values."""
+
+    name: str = Field(min_length=1, max_length=64, pattern=r"^[^{}\[\]]+$")
+    type: LogicalType = LogicalType.TEXT
+    value: ParamValue = None
+
+
 class PipelineSettings(BaseModel):
     locale: Literal["pt-BR", "en-US"] = "pt-BR"
+    params: list[Parameter] = []
 
 
 class Pipeline(BaseModel):

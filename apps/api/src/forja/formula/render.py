@@ -25,6 +25,8 @@ def render(node: ast.Expr, locale: Locale = "pt-BR") -> str:
                 return "TRUE" if n.value else "FALSE"
             case ast.ColumnRef():
                 return "[" + n.name.replace("]", "]]") + "]"
+            case ast.ParamRef():
+                return "{" + n.name + "}"
             case ast.Unary():
                 return n.op + r(n.operand, 7)
             case ast.Percent():

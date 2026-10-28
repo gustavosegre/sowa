@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
-from collections.abc import Collection
+from collections.abc import Collection, Sequence
 from dataclasses import dataclass, field
 
 from sqlglot import exp
 
 from forja.domain.issues import Issue, IssueCode, Position
+from forja.domain.pipeline import Parameter
 from forja.domain.schema import Schema
 from forja.domain.types import LogicalType
 from forja.formula import ast
@@ -33,14 +34,16 @@ def compile_formula(
     locale: Locale = "pt-BR",
     context: FormulaContext = "row",
     group_keys: Collection[str] = (),
+    params: Sequence[Parameter] = (),
 ) -> CompiledFormula:
     """Parse, type-check and generate SQL. Raises FormulaError on any problem."""
     try:
         tree = parse(text, locale)
     except FormulaSyntaxError as e:
         raise FormulaError(IssueCode.FORMULA_SYNTAX, e.message, e.start, e.end) from None
-    typed = Checker(schema, context, group_keys).check(tree)
-    ctx = GenCtx(locale=locale)
+    by_name = {p.name: p for p in params}
+    typed = Checker(schema, context, group_keys, by_name).check(tree)
+    ctx = GenCtx(locale=locale, params=by_name)
     sql = generate(typed, ctx)
     return CompiledFormula(tree, typed.type, sql, referenced_columns(tree), ctx.div_guards, typed.is_aggregate)
 

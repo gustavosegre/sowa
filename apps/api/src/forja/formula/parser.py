@@ -65,6 +65,11 @@ class _ToAst(Transformer[Token, Any]):
         s, e = _tok_pos(t)
         return ast.ColumnRef(name=str(t)[1:-1].replace("]]", "]"), start=s, end=e)
 
+    def param(self, items: list[Token]) -> ast.ParamRef:
+        (t,) = items
+        s, e = _tok_pos(t)
+        return ast.ParamRef(name=str(t)[1:-1].strip(), start=s, end=e)
+
     def name(self, items: list[Token]) -> ast.BoolLit:
         (t,) = items
         s, e = _tok_pos(t)

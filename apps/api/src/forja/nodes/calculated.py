@@ -21,7 +21,7 @@ class CalculatedConfig(NodeConfig):
 
 def _compile(cfg: CalculatedConfig, schema: Schema, ctx: NodeContext) -> CompiledFormula:
     locale: Locale = "en-US" if ctx.locale == "en-US" else "pt-BR"
-    return compile_formula(cfg.formula, schema, locale=locale)
+    return compile_formula(cfg.formula, schema, locale=locale, params=ctx.params)
 
 
 @register_node

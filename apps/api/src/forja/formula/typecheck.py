@@ -6,11 +6,12 @@ pt-BR message and the character range of the offending piece.
 
 from __future__ import annotations
 
-from collections.abc import Collection
+from collections.abc import Collection, Mapping
 from dataclasses import dataclass, field
 from typing import Literal
 
 from forja.domain.issues import IssueCode
+from forja.domain.pipeline import Parameter
 from forja.domain.schema import Schema
 from forja.domain.types import NUMERIC_TYPES, TEMPORAL_TYPES, LogicalType, label, unify
 from forja.formula import ast
@@ -46,8 +47,15 @@ class Typed:
 
 
 class Checker:
-    def __init__(self, schema: Schema, context: FormulaContext = "row", group_keys: Collection[str] = ()) -> None:
+    def __init__(
+        self,
+        schema: Schema,
+        context: FormulaContext = "row",
+        group_keys: Collection[str] = (),
+        params: Mapping[str, Parameter] | None = None,
+    ) -> None:
         self.schema = schema
+        self.params = dict(params or {})
         self.context = context
         self.group_keys = set(group_keys)
 
@@ -67,6 +75,16 @@ class Checker:
                 return Typed(node, L.BOOLEAN)
             case ast.ColumnRef():
                 return self._column(node, in_aggregate)
+            case ast.ParamRef():
+                p = self.params.get(node.name)
+                if p is None:
+                    known = ", ".join("{" + n + "}" for n in self.params) or "nenhum"
+                    raise self._err(
+                        IssueCode.PARAM_NOT_FOUND,
+                        f"O parâmetro {{{node.name}}} não existe. Parâmetros do fluxo: {known}.",
+                        node,
+                    )
+                return Typed(node, p.type)
             case ast.Unary():
                 inner = self._visit(node.operand, in_aggregate)
                 if inner.type not in NUMERIC_TYPES:

@@ -107,6 +107,7 @@ Ao criar o projeto, usar a versão estável mais recente de cada lib e fixar nos
 | POST | `/formula/render` | Re-renderiza uma fórmula em outro locale (troca de `;`/`,` e nomes de função) |
 | GET | `/nodes` | Catálogo de nós com o JSON Schema de cada config |
 | GET/POST/PATCH/DELETE | `/projects`, `/projects/{id}` | CRUD de projetos |
+| GET/POST | `/projects/{id}/versions` · GET `/projects/{id}/versions/{v}` · POST `.../{v}/restore` | Histórico de versões do fluxo |
 
 A prévia responde `application/vnd.apache.arrow.stream` com os cabeçalhos `X-Forja-Rows` e `X-Forja-Has-More`. Toda resposta de erro é um `ApiError` (`code`, `message` em pt-BR, `hint`, `detail`, `issues`).
 
@@ -418,6 +419,10 @@ Modelo único:
 **Fase 2 — Excel turbinado**: `pivot`, `unpivot`, `join`, `union`, `lookup`, `window`, `conditional` e os demais nós de colunas; XLSX e JSON na entrada e saída; preset Excel Brasil; profiling; menu de coluna gerando nós; undo/redo; modo comparação; molduras; paleta de comandos.
 
 **Fase 3 — Escala e colaboração**: cache materializado; jobs assíncronos; modo amostra; histórico de versões; templates e sub-fluxos reutilizáveis; parâmetros globais (`{data_corte}`); nó `sql`; linhagem de colunas (clicar numa coluna e ver de onde ela vem); "Substituir fonte"; autenticação e compartilhamento (seguir o padrão do Flowa); particionamento Parquet.
+
+**Estado atual** (out/2026): Fases 0, 1 e 2 completas. Da Fase 3 estão feitos: cache materializado (`engine/matcache.py`: nós `cacheable` viram Parquet pelo hash ao serem contados; `compile_chain(..., cache=)` lê do cache e poda o subgrafo; LRU por `FORJA_CACHE_MAX_GB`), jobs assíncronos, modo amostra, histórico de versões (snapshot automático a cada 2 min de edição, até 100 por projeto, versões nomeadas, restaurar guarda o estado atual antes), parâmetros globais (`settings.params`, `{nome}` em fórmulas e em valores de filtros visuais), nó `sql` (validação na AST, schema via `DESCRIBE` pelo `Describer` do engine), linhagem de colunas (no perfil da coluna, calculada da análise estática), "Substituir fonte" e particionamento Parquet (`.zip` com pastas `coluna=valor`). Pendentes: templates e sub-fluxos reutilizáveis; autenticação e compartilhamento (definir o "padrão do Flowa"); `FileStorage` S3/MinIO (hoje só disco local).
+
+Parâmetros: `{nome}` é resolvido como literal tipado (`typed_literal`) no codegen; parâmetro inexistente é erro `PARAM_NOT_FOUND` com posição. Mudar um parâmetro muda o hash de todos os nós (invalida o cache).
 
 ## 20. Fora de escopo (por enquanto)
 

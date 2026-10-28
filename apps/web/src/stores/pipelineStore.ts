@@ -5,7 +5,7 @@
 import { temporal } from "zundo";
 import { create } from "zustand";
 
-import type { Pipeline, PipelineEdge, PipelineNode } from "@/api/types";
+import type { Parameter, Pipeline, PipelineEdge, PipelineNode } from "@/api/types";
 import { getMeta } from "@/features/nodes/registry";
 import { uid } from "@/lib/utils";
 
@@ -18,7 +18,7 @@ interface XY {
 
 export const EMPTY_PIPELINE: Pipeline = {
   schema_version: 1,
-  settings: { locale: "pt-BR" },
+  settings: { locale: "pt-BR", params: [] },
   nodes: [],
   edges: [],
 };
@@ -51,6 +51,7 @@ interface State {
   paste: (payload: ClipboardPayload, offset?: XY) => string[];
   /** Switch the formula locale; `configs` carries the node configs with re-rendered formulas. */
   setLocale: (locale: Locale, configs?: Record<string, Config>) => void;
+  setParams: (params: Parameter[]) => void;
 }
 
 function nodeAt(p: Pipeline, id: string): PipelineNode | undefined {
@@ -296,6 +297,9 @@ export const usePipelineStore = create<State>()(
         }));
         return nodes.map((n) => n.id);
       },
+
+      setParams: (params) =>
+        set(({ pipeline }) => ({ pipeline: { ...pipeline, settings: { ...pipeline.settings, params } } })),
 
       setLocale: (locale, configs = {}) =>
         set(({ pipeline }) => ({

@@ -73,3 +73,9 @@ export type JoinKey = S["JoinKey"];
 export type UnionConfig = S["UnionConfig"];
 export type LookupConfig = S["LookupConfig"];
 export type LookupKey = S["LookupKey"];
+
+// Phase 3.
+export type SqlConfig = S["SqlConfig"];
+export type Parameter = S["Parameter"];
+export type VersionOut = S["VersionOut"];
+export type VersionDetail = S["VersionDetail"];

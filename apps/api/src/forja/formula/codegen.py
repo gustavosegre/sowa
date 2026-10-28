@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 
 from sqlglot import exp
 
+from forja.domain.pipeline import Parameter
 from forja.domain.types import NUMERIC_TYPES, TEMPORAL_TYPES, LogicalType
 from forja.formula import ast
 from forja.formula.functions import as_double, as_int, lit_str, tmpl, to_text
@@ -17,6 +18,7 @@ L = LogicalType
 @dataclass
 class GenCtx:
     locale: str = "pt-BR"
+    params: dict[str, Parameter] = field(default_factory=dict)
     # Divisor expressions, so the node can report how many rows divided by zero.
     div_guards: list[exp.Expr] = field(default_factory=list)
 
@@ -50,6 +52,11 @@ def generate(t: Typed, ctx: GenCtx) -> exp.Expr:
             return exp.Boolean(this=node.value)
         case ast.ColumnRef():
             return col(node.name)
+        case ast.ParamRef():
+            from forja.nodes._values import typed_literal
+
+            p = ctx.params[node.name]
+            return typed_literal(p.value, p.type, ctx.locale)
         case ast.Unary():
             inner = generate(t.children[0], ctx)
             return inner if node.op == "+" else exp.Neg(this=_p(inner))

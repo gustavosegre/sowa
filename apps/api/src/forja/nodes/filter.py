@@ -37,7 +37,7 @@ class FilterNode(NodeSpec[FilterConfig]):
             if not cfg.formula.strip():
                 return None, []
             try:
-                f = compile_formula(cfg.formula, schema, locale=locale_of(ctx))
+                f = compile_formula(cfg.formula, schema, locale=locale_of(ctx), params=ctx.params)
             except FormulaError as e:
                 return None, [formula_issue(e)]
             if f.type is not L.BOOLEAN:

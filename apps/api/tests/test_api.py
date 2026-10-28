@@ -278,3 +278,47 @@ def test_pivot_distinct_values_as_text(client: TestClient) -> None:
     assert r == {"values": ["2025-02", "2025-03", "2025-12"], "truncated": False}
     r = client.post("/pivot/distinct-values", json={**body, "column": "ativo", "date_group": "none"}).json()
     assert r["values"] == ["false", "true"]
+
+
+def test_version_history(client: TestClient) -> None:
+    pid = client.post("/projects", json={"name": "Histórico"}).json()["id"]
+    p1 = {"nodes": [{"id": "a", "type": "note", "config": {"text": "v1"}}], "edges": []}
+    p2 = {"nodes": [{"id": "a", "type": "note", "config": {"text": "v2"}}], "edges": []}
+    client.put(f"/projects/{pid}/pipeline", json=p1)  # first save -> automatic snapshot
+    client.put(f"/projects/{pid}/pipeline", json=p2)  # within 2 min -> no new snapshot
+    versions = client.get(f"/projects/{pid}/versions").json()
+    assert len(versions) == 1
+    named = client.post(f"/projects/{pid}/versions", json={"label": "Entrega"}).json()
+    assert named["label"] == "Entrega"
+    auto = next(v for v in client.get(f"/projects/{pid}/versions").json() if v["label"] is None)
+    detail = client.get(f"/projects/{pid}/versions/{auto['id']}").json()
+    assert detail["pipeline"]["nodes"][0]["config"]["text"] == "v1"
+    restored = client.post(f"/projects/{pid}/versions/{auto['id']}/restore").json()
+    assert restored["pipeline"]["nodes"][0]["config"]["text"] == "v1"
+    labels = [v["label"] for v in client.get(f"/projects/{pid}/versions").json()]
+    assert "Antes de restaurar" in labels
+    assert client.get(f"/projects/{pid}/versions/99999").status_code == 404
+
+
+def test_export_partitioned_parquet(client: TestClient) -> None:
+    import zipfile
+
+    up = upload(client, "vendas_latin1.csv")
+    confirm(client, up)
+    pipeline = {
+        "nodes": [
+            {"id": "s", "type": "source", "config": {"source_id": up["source"]["id"]}},
+            {
+                "id": "o",
+                "type": "output",
+                "config": {"format": "parquet", "filename": "por_uf", "parquet": {"partition_by": ["uf"]}},
+            },
+        ],
+        "edges": [{"id": "e", "source": "s", "target": "o"}],
+    }
+    job = wait_export(client, client.post("/exports", json={"pipeline": pipeline, "node_id": "o"}).json()["id"])
+    assert job["status"] == "done", job
+    content = client.get(f"/exports/{job['id']}/download").content
+    names = zipfile.ZipFile(io.BytesIO(content)).namelist()
+    assert sorted({n.split("/")[0] for n in names}) == ["uf=PR", "uf=SC", "uf=SP"]
+    assert all(n.endswith(".parquet") for n in names)

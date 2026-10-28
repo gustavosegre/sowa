@@ -14,6 +14,7 @@ from pydantic import BaseModel, ConfigDict
 from sqlglot import exp
 
 from forja.domain.issues import Issue
+from forja.domain.pipeline import Parameter
 from forja.domain.schema import Schema
 from forja.domain.types import LogicalType
 
@@ -57,6 +58,14 @@ class NodeContext:
     input_labels: dict[str, str] = field(default_factory=dict)
     # When true, compile for display ("Copiar como SQL"): no absolute server paths.
     for_display: bool = False
+    params: list[Parameter] = field(default_factory=list)
+    # Upstream node id per input handle.
+    input_ids: dict[str, str] = field(default_factory=dict)
+    # Schema of a query over the inputs, asked to the engine (bind only). Used by the SQL node.
+    describe: Callable[[exp.Select], Schema] | None = None
+
+    def param(self, name: str) -> Parameter | None:
+        return next((p for p in self.params if p.name == name), None)
 
 
 # A function that runs a SELECT and returns its rows (used for data-dependent warnings).

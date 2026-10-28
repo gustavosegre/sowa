@@ -27,7 +27,7 @@ export const meta: NodeMeta<OutputConfig> = {
       header: true,
       quote: '"',
     },
-    parquet: { compression: "zstd", row_group_size: null },
+    parquet: { compression: "zstd", row_group_size: null, partition_by: [] },
   }),
   summary,
 };

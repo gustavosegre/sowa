@@ -1,0 +1,6 @@
+* text=auto eol=lf
+*.png binary
+*.xlsx binary
+*.parquet binary
+# Import fixtures are "ugly" on purpose (Windows-1252, CRLF, BOM): keep their bytes.
+apps/api/tests/fixtures/files/** binary

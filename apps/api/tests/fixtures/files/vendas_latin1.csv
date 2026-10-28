@@ -1,0 +1,5 @@
+uf;cidade;data_venda;preço;quantidade;cep;ativo;valor
+PR;Curitiba;31/12/2025;1.234,56;3;80010-000;sim;10,5
+SC;Florianópolis;01/02/2025;10,00;0;88010-000;não;2
+PR;Londrina;15/03/2025;R$ 99,90;2;86010-000;sim;
+SP;São Paulo;xx/03/2025;5,5;1;01310-100;não;7,25

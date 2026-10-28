@@ -1,0 +1,108 @@
+{
+  "description": "Fluxo do exemplo do CLAUDE.md: tipo → calculada → agrupar por UF.",
+  "target": "n5",
+  "pipeline": {
+    "schema_version": 1,
+    "settings": {
+      "locale": "pt-BR"
+    },
+    "nodes": [
+      {
+        "id": "n1",
+        "type": "source",
+        "config": {
+          "source_id": "vendas"
+        },
+        "ui": {
+          "label": "Vendas"
+        }
+      },
+      {
+        "id": "n2",
+        "type": "cast",
+        "config": {
+          "casts": [
+            {
+              "column": "data_txt",
+              "to": "date",
+              "format": "%d/%m/%Y"
+            },
+            {
+              "column": "preço_txt",
+              "to": "decimal",
+              "decimal_separator": ","
+            }
+          ]
+        }
+      },
+      {
+        "id": "n3",
+        "type": "calculated",
+        "config": {
+          "name": "receita",
+          "mode": "new",
+          "formula": "[preço_txt] * [quantidade]"
+        }
+      },
+      {
+        "id": "n4",
+        "type": "group_by",
+        "config": {
+          "keys": [
+            "uf"
+          ],
+          "aggs": [
+            {
+              "column": "receita",
+              "fn": "sum",
+              "as": "receita_total"
+            },
+            {
+              "fn": "count",
+              "as": "pedidos"
+            }
+          ]
+        }
+      },
+      {
+        "id": "n5",
+        "type": "sort",
+        "config": {
+          "keys": [
+            {
+              "column": "uf"
+            }
+          ]
+        }
+      }
+    ],
+    "edges": [
+      {
+        "id": "e0",
+        "source": "n1",
+        "target": "n2",
+        "target_handle": "in"
+      },
+      {
+        "id": "e1",
+        "source": "n2",
+        "target": "n3",
+        "target_handle": "in"
+      },
+      {
+        "id": "e2",
+        "source": "n3",
+        "target": "n4",
+        "target_handle": "in"
+      },
+      {
+        "id": "e3",
+        "source": "n4",
+        "target": "n5",
+        "target_handle": "in"
+      }
+    ]
+  },
+  "sql": "WITH \"n1\" AS (\n  SELECT\n    *\n  FROM READ_PARQUET('Vendas.parquet')\n), \"n2\" AS (\n  SELECT\n    \"uf\",\n    \"cidade\",\n    CAST(TRY_STRPTIME(NULLIF(TRIM(\"data_txt\"), ''), '%d/%m/%Y') AS DATE) AS \"data_txt\",\n    TRY_CAST(REPLACE(\n      REPLACE(REGEXP_REPLACE(NULLIF(TRIM(\"preço_txt\"), ''), '^R\\$\\s*|\\s', '', 'g'), '.', ''),\n      ',',\n      '.'\n    ) AS DOUBLE) AS \"preço_txt\",\n    \"quantidade\",\n    \"data_venda\",\n    \"valor\",\n    \"ativo\"\n  FROM \"n1\"\n), \"n3\" AS (\n  SELECT\n    \"uf\",\n    \"cidade\",\n    \"data_txt\",\n    \"preço_txt\",\n    \"quantidade\",\n    \"data_venda\",\n    \"valor\",\n    \"ativo\",\n    \"preço_txt\" * \"quantidade\" AS \"receita\"\n  FROM \"n2\"\n), \"n4\" AS (\n  SELECT\n    \"uf\",\n    SUM(\"receita\") AS \"receita_total\",\n    CAST(COUNT(*) AS BIGINT) AS \"pedidos\"\n  FROM \"n3\"\n  GROUP BY\n    \"uf\"\n), \"n5\" AS (\n  SELECT\n    *\n  FROM \"n4\"\n  ORDER BY\n    \"uf\" COLLATE NOCASE ASC\n)\nSELECT\n  *\nFROM \"n5\"",
+  "result": "uf,receita_total,pedidos\nPR,3903.48,2\nSC,0.0,1\nSP,5.5,1\n"
+}

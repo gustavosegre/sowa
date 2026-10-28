@@ -1,0 +1,73 @@
+{
+  "description": "Divisão por zero vira nulo; & trata nulo como vazio; TEXTO com formato BR.",
+  "target": "n4",
+  "pipeline": {
+    "schema_version": 1,
+    "settings": {
+      "locale": "pt-BR"
+    },
+    "nodes": [
+      {
+        "id": "n1",
+        "type": "source",
+        "config": {
+          "source_id": "vendas"
+        },
+        "ui": {
+          "label": "Vendas"
+        }
+      },
+      {
+        "id": "n2",
+        "type": "calculated",
+        "config": {
+          "name": "unitario",
+          "formula": "[valor] / [quantidade]"
+        }
+      },
+      {
+        "id": "n3",
+        "type": "calculated",
+        "config": {
+          "name": "rotulo",
+          "formula": "[cidade] & \" - \" & TEXTO([valor]; \"#.##0,00\")"
+        }
+      },
+      {
+        "id": "n4",
+        "type": "sort",
+        "config": {
+          "keys": [
+            {
+              "column": "unitario",
+              "direction": "desc",
+              "nulls": "last"
+            }
+          ]
+        }
+      }
+    ],
+    "edges": [
+      {
+        "id": "e0",
+        "source": "n1",
+        "target": "n2",
+        "target_handle": "in"
+      },
+      {
+        "id": "e1",
+        "source": "n2",
+        "target": "n3",
+        "target_handle": "in"
+      },
+      {
+        "id": "e2",
+        "source": "n3",
+        "target": "n4",
+        "target_handle": "in"
+      }
+    ]
+  },
+  "sql": "WITH \"n1\" AS (\n  SELECT\n    *\n  FROM READ_PARQUET('Vendas.parquet')\n), \"n2\" AS (\n  SELECT\n    \"uf\",\n    \"cidade\",\n    \"data_txt\",\n    \"preço_txt\",\n    \"quantidade\",\n    \"data_venda\",\n    \"valor\",\n    \"ativo\",\n    CASE WHEN \"quantidade\" = 0 THEN NULL ELSE CAST(\"valor\" AS DOUBLE) / \"quantidade\" END AS \"unitario\"\n  FROM \"n1\"\n), \"n3\" AS (\n  SELECT\n    \"uf\",\n    \"cidade\",\n    \"data_txt\",\n    \"preço_txt\",\n    \"quantidade\",\n    \"data_venda\",\n    \"valor\",\n    \"ativo\",\n    \"unitario\",\n    COALESCE((\n      COALESCE(\"cidade\", '') || COALESCE(' - ', '')\n    ), '') || COALESCE(\n      REPLACE(\n        REPLACE(REPLACE(FORMAT('{:,.2f}', CAST(\"valor\" AS DOUBLE)), ',', '#'), '.', ','),\n        '#',\n        '.'\n      ),\n      ''\n    ) AS \"rotulo\"\n  FROM \"n2\"\n), \"n4\" AS (\n  SELECT\n    *\n  FROM \"n3\"\n  ORDER BY\n    \"unitario\" DESC\n)\nSELECT\n  *\nFROM \"n4\"",
+  "result": "uf,cidade,data_txt,preço_txt,quantidade,data_venda,valor,ativo,unitario,rotulo\nSP,São Paulo,xx,\"5,5\",1,2025-03-20,7.25,False,7.25,\"São Paulo - 7,25\"\nPR,Curitiba,31/12/2025,\"1.234,56\",3,2025-12-31,10.5,True,3.5,\"Curitiba - 10,50\"\nSC,Florianópolis,01/02/2025,\"10,00\",0,2025-02-01,2.0,False,,\"Florianópolis - 2,00\"\nPR,Londrina,15/03/2025,\"99,90\",2,2025-03-15,,True,,Londrina - \n"
+}

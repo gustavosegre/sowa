@@ -1,0 +1,72 @@
+{
+  "description": "Medida calculada (campo calculado da dinâmica) depois do agrupamento.",
+  "target": "n3",
+  "pipeline": {
+    "schema_version": 1,
+    "settings": {
+      "locale": "pt-BR"
+    },
+    "nodes": [
+      {
+        "id": "n1",
+        "type": "source",
+        "config": {
+          "source_id": "vendas"
+        },
+        "ui": {
+          "label": "Vendas"
+        }
+      },
+      {
+        "id": "n2",
+        "type": "group_by",
+        "config": {
+          "keys": [
+            "ativo"
+          ],
+          "aggs": [
+            {
+              "column": "quantidade",
+              "fn": "sum",
+              "as": "qtd"
+            }
+          ],
+          "measures": [
+            {
+              "name": "ticket",
+              "formula": "ARRED(SOMA([valor]) / SOMA([quantidade]); 2)"
+            }
+          ]
+        }
+      },
+      {
+        "id": "n3",
+        "type": "sort",
+        "config": {
+          "keys": [
+            {
+              "column": "ativo",
+              "direction": "desc"
+            }
+          ]
+        }
+      }
+    ],
+    "edges": [
+      {
+        "id": "e0",
+        "source": "n1",
+        "target": "n2",
+        "target_handle": "in"
+      },
+      {
+        "id": "e1",
+        "source": "n2",
+        "target": "n3",
+        "target_handle": "in"
+      }
+    ]
+  },
+  "sql": "WITH \"n1\" AS (\n  SELECT\n    *\n  FROM READ_PARQUET('Vendas.parquet')\n), \"n2\" AS (\n  SELECT\n    \"ativo\",\n    CAST(SUM(\"quantidade\") AS BIGINT) AS \"qtd\",\n    ROUND(\n      CAST(CASE\n        WHEN CAST(SUM(\"quantidade\") AS BIGINT) = 0\n        THEN NULL\n        ELSE CAST(CAST(SUM(\"valor\") AS DOUBLE) AS DOUBLE) / CAST(SUM(\"quantidade\") AS BIGINT)\n      END AS DOUBLE),\n      2\n    ) AS \"ticket\"\n  FROM \"n1\"\n  GROUP BY\n    \"ativo\"\n), \"n3\" AS (\n  SELECT\n    *\n  FROM \"n2\"\n  ORDER BY\n    \"ativo\" DESC\n)\nSELECT\n  *\nFROM \"n3\"",
+  "result": "ativo,qtd,ticket\nTrue,5,2.1\nFalse,1,9.25\n"
+}

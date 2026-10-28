@@ -1,0 +1,82 @@
+{
+  "description": "Filtro com grupos E/OU, nulos e texto sem diferenciar maiúsculas.",
+  "target": "n3",
+  "pipeline": {
+    "schema_version": 1,
+    "settings": {
+      "locale": "pt-BR"
+    },
+    "nodes": [
+      {
+        "id": "n1",
+        "type": "source",
+        "config": {
+          "source_id": "vendas"
+        },
+        "ui": {
+          "label": "Vendas"
+        }
+      },
+      {
+        "id": "n2",
+        "type": "filter",
+        "config": {
+          "rules": {
+            "op": "or",
+            "conditions": [
+              {
+                "kind": "group",
+                "op": "and",
+                "conditions": [
+                  {
+                    "column": "uf",
+                    "operator": "eq",
+                    "value": "pr"
+                  },
+                  {
+                    "column": "valor",
+                    "operator": "is_not_null"
+                  }
+                ]
+              },
+              {
+                "column": "cidade",
+                "operator": "contains",
+                "value": "PAULO"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "n3",
+        "type": "select",
+        "config": {
+          "columns": [
+            "cidade",
+            "valor"
+          ],
+          "renames": {
+            "valor": "Valor (R$)"
+          }
+        }
+      }
+    ],
+    "edges": [
+      {
+        "id": "e0",
+        "source": "n1",
+        "target": "n2",
+        "target_handle": "in"
+      },
+      {
+        "id": "e1",
+        "source": "n2",
+        "target": "n3",
+        "target_handle": "in"
+      }
+    ]
+  },
+  "sql": "WITH \"n1\" AS (\n  SELECT\n    *\n  FROM READ_PARQUET('Vendas.parquet')\n), \"n2\" AS (\n  SELECT\n    *\n  FROM \"n1\"\n  WHERE\n    (\n      LOWER(\"uf\") = 'pr' AND NOT \"valor\" IS NULL\n    )\n    OR CONTAINS(LOWER(\"cidade\"), 'paulo')\n), \"n3\" AS (\n  SELECT\n    \"cidade\",\n    \"valor\" AS \"Valor (R$)\"\n  FROM \"n2\"\n)\nSELECT\n  *\nFROM \"n3\"",
+  "result": "cidade,Valor (R$)\nCuritiba,10.5\nSão Paulo,7.25\n"
+}

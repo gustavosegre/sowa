@@ -1,0 +1,42 @@
+# Forja — ambiente completo: API + web + Postgres (metadados). Arquivos em volume local (FileStorage local).
+# `docker compose up --build` e abra http://localhost:5173
+services:
+  api:
+    build: ./apps/api
+    environment:
+      FORJA_DATA_DIR: /data
+      FORJA_DATABASE_URL: postgresql+psycopg://forja:forja@postgres:5432/forja
+      FORJA_CORS_ORIGINS: '["http://localhost:5173"]'
+    volumes:
+      - forja-data:/data
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  web:
+    build: ./apps/web
+    environment:
+      FORJA_API_URL: http://api:8000
+    ports:
+      - "5173:5173"
+    depends_on:
+      - api
+
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: forja
+      POSTGRES_PASSWORD: forja
+      POSTGRES_DB: forja
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U forja"]
+      interval: 5s
+      retries: 10
+
+volumes:
+  forja-data:
+  pg-data:

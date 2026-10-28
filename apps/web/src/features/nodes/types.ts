@@ -13,6 +13,12 @@ export interface NodeMeta<C = Record<string, unknown>> {
   inputs: string[];
   hasOutput: boolean;
   annotation?: boolean;
+  /** Not offered in the library/menus (created another way, e.g. sub-flows from templates). */
+  hidden?: boolean;
+  /** Input handles that depend on the config (sub-flows); defaults to `inputs`. */
+  inputsFor?: (config: C) => string[];
+  /** Name of an input handle for this config (e.g. the sub-flow input name). */
+  inputLabel?: (config: C, handle: string) => string | null;
   keywords?: string[];
   /** Most likely next steps, for the "+" menu on the node output. */
   next?: string[];

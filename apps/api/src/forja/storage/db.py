@@ -1,4 +1,4 @@
-"""Metadata database (projects, sources, export jobs). SQLite in dev, Postgres in prod."""
+"""Metadata database (projects, sources, templates, export jobs). SQLite in dev, Postgres in prod."""
 
 from __future__ import annotations
 
@@ -44,6 +44,20 @@ class PipelineVersionRow(Base):
     pipeline: Mapped[dict[str, Any]] = mapped_column(JSON)
     node_count: Mapped[int] = mapped_column(Integer, default=0)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class TemplateRow(Base):
+    """A reusable piece of a pipeline (`domain.pipeline.Flow`), shared by all projects."""
+
+    __tablename__ = "templates"
+
+    id: Mapped[str] = mapped_column(String(32), primary_key=True)
+    name: Mapped[str] = mapped_column(String(200))
+    description: Mapped[str] = mapped_column(Text, default="")
+    flow: Mapped[dict[str, Any]] = mapped_column(JSON)
+    version: Mapped[int] = mapped_column(Integer, default=1)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
 
 class SourceRow(Base):

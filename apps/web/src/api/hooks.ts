@@ -13,6 +13,7 @@ import type {
   ConfirmOut,
   Detection,
   ExportJob,
+  Flow,
   FormulaCheck,
   ImportOptions,
   Pipeline,
@@ -385,4 +386,34 @@ export async function restoreVersion(projectId: string, versionId: number) {
       params: { path: { project_id: projectId, version_id: versionId } },
     }),
   );
+}
+
+/* ---------------------------------------------------------------- templates */
+
+export function useTemplates() {
+  return useQuery({
+    queryKey: ["templates"],
+    queryFn: async () => unwrap(await api.GET("/templates")),
+  });
+}
+
+export async function fetchTemplate(id: string) {
+  return unwrap(await api.GET("/templates/{template_id}", { params: { path: { template_id: id } } }));
+}
+
+export async function createTemplate(body: { name: string; description: string; flow: Flow }) {
+  return unwrap(await api.POST("/templates", { body }));
+}
+
+export async function updateTemplate(id: string, body: { name?: string; description?: string; flow?: Flow }) {
+  return unwrap(await api.PUT("/templates/{template_id}", { params: { path: { template_id: id } }, body }));
+}
+
+export function useDeleteTemplate() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) =>
+      unwrap(await api.DELETE("/templates/{template_id}", { params: { path: { template_id: id } } })),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["templates"] }),
+  });
 }

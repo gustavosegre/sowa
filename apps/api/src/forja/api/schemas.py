@@ -8,7 +8,7 @@ from typing import Any, Literal
 from pydantic import BaseModel, Field
 
 from forja.domain.issues import Issue
-from forja.domain.pipeline import Pipeline
+from forja.domain.pipeline import Flow, Pipeline
 from forja.domain.schema import Column
 from forja.domain.types import LogicalType
 from forja.io.models import Detection, ImportOptions, ImportReport
@@ -63,6 +63,38 @@ class SavedPipeline(BaseModel):
     pipeline: Pipeline
     version: int
     updated_at: datetime
+
+
+# ---------------------------------------------------------------- templates
+
+
+class TemplateOut(BaseModel):
+    id: str
+    name: str
+    description: str
+    version: int
+    node_count: int
+    # Names of the flow inputs (handles in_0 … of a sub-flow).
+    inputs: list[str]
+    # A single output and no Fonte/Exportar nodes: can be inserted as a sub-flow node.
+    can_be_subflow: bool
+    updated_at: datetime
+
+
+class TemplateDetail(TemplateOut):
+    flow: Flow
+
+
+class TemplateCreate(BaseModel):
+    name: str = Field(min_length=1, max_length=200)
+    description: str = Field(default="", max_length=2000)
+    flow: Flow
+
+
+class TemplateUpdate(BaseModel):
+    name: str | None = Field(default=None, min_length=1, max_length=200)
+    description: str | None = Field(default=None, max_length=2000)
+    flow: Flow | None = None
 
 
 # ---------------------------------------------------------------- pipeline

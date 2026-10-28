@@ -29,4 +29,5 @@ def node_types() -> list[NodeTypeOut]:
             config_schema=s.config_model.model_json_schema(),
         )
         for s in all_specs()
+        if not s.internal
     ]

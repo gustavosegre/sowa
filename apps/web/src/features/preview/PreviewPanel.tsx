@@ -176,7 +176,14 @@ export function PreviewPanel() {
   let body: React.ReactNode;
   if (!node || !previewId) {
     body = <p className="p-4 text-muted-foreground">{t.preview.noNode}</p>;
-  } else if (!previewAnalysis || !(previewAnalysis.status === "ok" || previewAnalysis.status === "warning")) {
+  } else if (!previewAnalysis) {
+    // A node just added: its analysis is still on the way.
+    body = (
+      <p className="flex items-center gap-2 p-4 text-muted-foreground">
+        <Spinner /> {t.common.loading}
+      </p>
+    );
+  } else if (!(previewAnalysis.status === "ok" || previewAnalysis.status === "warning")) {
     body = (
       <div className="flex flex-col gap-2 p-3">
         <p className="text-muted-foreground">{t.preview.blocked}</p>

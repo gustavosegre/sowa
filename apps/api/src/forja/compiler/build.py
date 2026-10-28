@@ -41,12 +41,11 @@ class Chain:
         """
         q = query.copy()
         own = q.args.get("with_")
-        q.set("with_", None)
-        for name, sel in self.ctes:
-            q = q.with_(ident(name), as_=sel.copy(), append=True)
+        # Built as AST nodes: the `with_()` builder re-parses names (and "a/b" isn't parseable).
+        ctes = [exp.CTE(this=sel.copy(), alias=exp.TableAlias(this=ident(name))) for name, sel in self.ctes]
         if own is not None:
-            for cte in own.expressions:
-                q = q.with_(cte.args["alias"].this, as_=cte.this, append=True)
+            ctes += own.expressions
+        q.set("with_", exp.With(expressions=ctes) if ctes else None)
         return q
 
     def query(self) -> exp.Select:

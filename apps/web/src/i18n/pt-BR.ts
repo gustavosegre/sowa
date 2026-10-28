@@ -457,17 +457,52 @@ export const t = {
     hint: "Somente SELECT. Use aspas duplas para colunas com espaço ou acento.",
     notConnected: "Conecte uma tabela à entrada do nó.",
   },
+  templates: {
+    tab: "Templates",
+    untitled: "Sem nome",
+    nodeCount: (n: number) => (n === 1 ? "1 nó" : `${n} nós`),
+    summary: (nodes: number, inputs: number) =>
+      `Template com ${nodes === 1 ? "1 etapa" : `${nodes} etapas`}` +
+      (inputs > 1 ? ` e ${inputs} entradas` : ""),
+    version: (v: number) => `Versão ${v} do template`,
+    deleted: "O template original foi excluído; este sub-fluxo continua funcionando.",
+    update: (v: number) => `Atualizar para a versão ${v}`,
+    steps: "Etapas",
+    output: "saída",
+    outputIs: (name: string) => `Saída: ${name}`,
+    expand: "Expandir em nós editáveis",
+    expandHint: "Substitui este nó pelas etapas do template, já conectadas, para você editar.",
+    empty: 'Nenhum template ainda. Selecione nós no canvas e use "Salvar como template" no painel do nó.',
+    insertSubflow: "Inserir como sub-fluxo",
+    insertNodes: "Inserir como nós editáveis",
+    inputsOf: (names: string[]) => (names.length ? `Entradas: ${names.join(", ")}` : "Sem entradas"),
+    onlyNodes: "Só pode ser inserido como nós (tem Fonte/Exportar ou não tem saída única).",
+    confirmDelete: (name: string) =>
+      `Excluir o template "${name}"? Sub-fluxos já inseridos continuam funcionando.`,
+    save: "Salvar como template",
+    saveTitle: "Salvar como template",
+    name: "Nome do template",
+    description: "Descrição (opcional)",
+    replace: "Substituir um template existente",
+    replaceNone: "Não, criar um novo",
+    selection: (n: number) => (n === 1 ? "1 nó selecionado" : `${n} nós selecionados`),
+    selectionHint: "Para salvar várias etapas, selecione-as com Ctrl+clique ou Shift+arrastar antes.",
+    noOutput: "Sem saída única: o template só poderá ser inserido como nós editáveis.",
+    saved: (name: string) => `Template "${name}" salvo.`,
+  },
   inputs: {
     title: "Entradas",
     none: "(nenhuma)",
-    handle: (h: string) =>
-      ({
-        in: "Entrada",
-        left: "Entrada esquerda",
-        right: "Entrada direita",
-        main: "Tabela principal",
-        lookup: "Tabela de consulta",
-      })[h] ?? (h.startsWith("in_") ? `Entrada ${Number(h.slice(3)) + 1}` : h),
+    handle: (h: string, name?: string | null) =>
+      name
+        ? `Entrada: ${name}`
+        : ({
+            in: "Entrada",
+            left: "Entrada esquerda",
+            right: "Entrada direita",
+            main: "Tabela principal",
+            lookup: "Tabela de consulta",
+          }[h] ?? (h.startsWith("in_") ? `Entrada ${Number(h.slice(3)) + 1}` : h)),
   },
   lineage: {
     title: "Linhagem",

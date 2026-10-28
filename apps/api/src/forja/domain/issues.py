@@ -44,6 +44,7 @@ class IssueCode(StrEnum):
     TIMEOUT = "TIMEOUT"
     ENGINE_ERROR = "ENGINE_ERROR"
     SQL_NOT_ALLOWED = "SQL_NOT_ALLOWED"
+    SUBFLOW_INVALID = "SUBFLOW_INVALID"
 
 
 Severity = Literal["error", "warning", "info"]

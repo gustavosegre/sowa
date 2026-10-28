@@ -72,3 +72,30 @@ class Pipeline(BaseModel):
             if n.id == node_id:
                 return n
         return None
+
+
+class FlowTarget(BaseModel):
+    node: str
+    handle: str = "in"
+
+
+class FlowInput(BaseModel):
+    """An entry point of a reusable flow: the outside table feeds these node inputs."""
+
+    name: str = Field(min_length=1, max_length=200)
+    targets: list[FlowTarget] = Field(min_length=1)
+
+
+class Flow(BaseModel):
+    """A reusable piece of a pipeline (templates and sub-flows).
+
+    Edges that came from outside the piece become `inputs`; `output` is the node whose
+    result the piece returns (None when it has no single output, e.g. it ends in exports).
+    Formulas are text in `locale`.
+    """
+
+    locale: Literal["pt-BR", "en-US"] = "pt-BR"
+    nodes: list[Node] = []
+    edges: list[Edge] = []
+    inputs: list[FlowInput] = []
+    output: str | None = None

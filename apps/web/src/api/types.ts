@@ -76,6 +76,13 @@ export type LookupKey = S["LookupKey"];
 
 // Phase 3.
 export type SqlConfig = S["SqlConfig"];
+
+// Templates and sub-flows (Phase 3).
+export type Flow = S["Flow"];
+export type FlowInput = S["FlowInput"];
+export type SubflowConfig = S["SubflowConfig"];
+export type Template = S["TemplateOut"];
+export type TemplateDetail = S["TemplateDetail"];
 export type Parameter = S["Parameter"];
 export type VersionOut = S["VersionOut"];
 export type VersionDetail = S["VersionDetail"];

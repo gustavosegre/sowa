@@ -63,7 +63,7 @@ export function InputsEditor({ node }: { node: PipelineNode }) {
   }, [pipeline, node.id, sources]);
 
   if (!meta || meta.inputs.length === 0) return null;
-  const handles = inputHandles(meta, lastVariadicInput(pipeline.edges, node.id));
+  const handles = inputHandles(meta, lastVariadicInput(pipeline.edges, node.id), node.config);
   const store = usePipelineStore.getState();
 
   return (
@@ -72,7 +72,7 @@ export function InputsEditor({ node }: { node: PipelineNode }) {
       {handles.map((h) => {
         const current = pipeline.edges.find((e) => e.target === node.id && e.target_handle === h);
         return (
-          <Field key={h} label={t.inputs.handle(h)}>
+          <Field key={h} label={t.inputs.handle(h, meta.inputLabel?.(node.config, h))}>
             <Select
               value={current?.source ?? NONE}
               options={[{ value: NONE, label: t.inputs.none }, ...options]}

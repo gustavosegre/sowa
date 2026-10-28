@@ -108,6 +108,7 @@ Ao criar o projeto, usar a versão estável mais recente de cada lib e fixar nos
 | GET | `/nodes` | Catálogo de nós com o JSON Schema de cada config |
 | GET/POST/PATCH/DELETE | `/projects`, `/projects/{id}` | CRUD de projetos |
 | GET/POST | `/projects/{id}/versions` · GET `/projects/{id}/versions/{v}` · POST `.../{v}/restore` | Histórico de versões do fluxo |
+| GET/POST | `/templates` · GET/PUT/DELETE `/templates/{id}` | Templates (trechos reutilizáveis do fluxo, globais). `PUT` com `flow` incrementa `version` |
 
 A prévia responde `application/vnd.apache.arrow.stream` com os cabeçalhos `X-Forja-Rows` e `X-Forja-Has-More`. Toda resposta de erro é um `ApiError` (`code`, `message` em pt-BR, `hint`, `detail`, `issues`).
 
@@ -199,7 +200,8 @@ Regras:
 - `ui` (posição, rótulo, cor) é ignorado pelo compilador.
 - `config` é um modelo Pydantic discriminado por `type`. Mudança incompatível → incrementa `schema_version` + migração em `domain/migrations/`.
 - Colunas são referenciadas por nome. Renomear upstream quebra os nós seguintes de forma **visível** (erro no nó), nunca silenciosa.
-- Uma saída pode alimentar vários nós (ramificação). Nós com várias entradas usam handles nomeados: `join` (`left`, `right`), `lookup` (`main`, `lookup`), `union` (`in_0` … `in_n`).
+- Uma saída pode alimentar vários nós (ramificação). Nós com várias entradas usam handles nomeados: `join` (`left`, `right`), `lookup` (`main`, `lookup`), `union` e `sql` (`in_0` … `in_n`), `subflow` (`in_0` … um por entrada do template).
+- **Flow** (`domain.pipeline.Flow`): trecho reutilizável do grafo — `{locale, nodes, edges, inputs: [{name, targets: [{node, handle}]}], output}`. As arestas que entravam na seleção viram `inputs`; `output` é o único nó de dados sem saída para dentro do trecho (ou `null`). É o formato dos templates e da config do `subflow`.
 - Fórmulas são guardadas como texto. O backend sempre re-parseia; nunca confia em AST vindo do cliente.
 
 ### 8.2 Tipos lógicos
@@ -226,6 +228,7 @@ class CastNode(NodeSpec[CastConfig]):
     label = "Alterar tipo"          # pt-BR, aparece nas mensagens
     category = "columns"
     inputs = ("in",)                # join: ("left", "right"); lookup: ("main", "lookup"); union: variadic_inputs
+                                    # handles que dependem da config: sobrescrever input_handles(connected, cfg)
     cacheable = False               # True para nós caros (join, group_by, pivot, window, distinct, sql)
 
     def validate(self, cfg, inputs: dict[str, Schema], ctx: NodeContext) -> list[Issue]: ...
@@ -236,7 +239,7 @@ class CastNode(NodeSpec[CastConfig]):
     def runtime_issues(self, cfg, inputs, output, schemas, ctx, run: QueryRunner) -> list[Issue]: ...
 ```
 
-`compile` é função pura (grafo → AST), testável sem DuckDB. `NodeContext` traz locale, rótulos dos nós de entrada (para mensagens) e o resolvedor de fontes. Configs são validadas por nó: config inválida vira `INVALID_CONFIG` naquele nó, nunca um 422 do fluxo inteiro.
+`compile` é função pura (grafo → AST), testável sem DuckDB. `NodeContext` traz locale, rótulos dos nós de entrada (para mensagens), o resolvedor de fontes e, dentro de um sub-fluxo, os `slots` (tabelas externas). Nós `internal = True` (ex.: `subflow_input`) não aparecem em `GET /nodes`. Configs são validadas por nó: config inválida vira `INVALID_CONFIG` naquele nó, nunca um 422 do fluxo inteiro.
 
 **Armadilhas das versões instaladas** (conferidas na criação do projeto):
 - SQLGlot 30: a classe base é `exp.Expr`; `exp.Expression` é só uma subclasse — use `exp.Expr` em anotações e `isinstance`.
@@ -271,6 +274,7 @@ class CastNode(NodeSpec[CastConfig]):
 | Combinar | Procurar (PROCV) | `lookup` | 2 | Traz colunas de outra tabela pela chave; regra para múltiplas correspondências (primeira ou erro) | 2 |
 | Saída | Exportar | `output` | 1 | CSV, Parquet, XLSX, JSON/NDJSON (ver §12) | 1 |
 | Avançado | SQL | `sql` | N | SELECT livre sobre `input`, `input_1`…; validado via SQLGlot (só SELECT, sem funções de tabela/arquivo) | 3 |
+| Avançado | Sub-fluxo | `subflow` | N | Template usado como um nó: o `Flow` fica embutido na config (o hash cobre os nós internos); "Atualizar" traz a versão nova do template; "Expandir" troca o nó pelas etapas. Sem `source`/`output` dentro. Não aparece na biblioteca de nós (vem da aba Templates) | 3 |
 | Organização | Nota | `note` | 0 | Post-it no whiteboard, sem efeito nos dados | 1 |
 | Organização | Moldura | `frame` | 0 | Agrupa nós visualmente com título e cor | 2 |
 
@@ -406,7 +410,7 @@ Modelo único:
 1. `apps/api/src/forja/nodes/<type>.py`: config Pydantic (`NodeConfig`) + `validate`, `infer_schema`, `compile` (e `runtime_issues` se houver aviso que dependa de dados); registrar com `@register_node`. O módulo é importado automaticamente pelo registro.
 2. Fixtures + testes: entrada em `FIXTURES` (ou `MULTI_CASES`) de `tests/test_schema_contract.py` — o teste falha se um tipo de nó não tiver fixture —, golden test em `tests/golden/` (gerar com `UPDATE_GOLDEN=1` e conferir o resultado à mão), casos de erro.
 3. `make types` e o alias do config em `apps/web/src/api/types.ts`.
-4. `apps/web/src/features/nodes/<type>/`: `meta.ts` (ícone, categoria, handles, config padrão, próximos nós sugeridos), `summary.ts` e `ConfigPanel.tsx`; registrar em `registry.ts` (metadados, sem React) e em `panels.tsx` (painéis). O card do canvas é genérico (`features/canvas/NodeCard.tsx`, usa meta + summary); painéis pequenos podem ficar em `nodes/simple/panels.tsx`. Textos novos vão para `i18n/pt-BR.ts`.
+4. `apps/web/src/features/nodes/<type>/`: `meta.ts` (ícone, categoria, handles — `inputsFor`/`inputLabel` se dependerem da config —, config padrão, próximos nós sugeridos), `summary.ts` e `ConfigPanel.tsx`; registrar em `registry.ts` (metadados, sem React) e em `panels.tsx` (painéis). O card do canvas é genérico (`features/canvas/NodeCard.tsx`, usa meta + summary); painéis pequenos podem ficar em `nodes/simple/panels.tsx`. Textos novos vão para `i18n/pt-BR.ts`.
 5. Se fizer sentido, adicionar atalho no menu de coluna da prévia (`features/preview/columnActions.ts`).
 6. Atualizar a tabela da §9.
 
@@ -420,7 +424,11 @@ Modelo único:
 
 **Fase 3 — Escala e colaboração**: cache materializado; jobs assíncronos; modo amostra; histórico de versões; templates e sub-fluxos reutilizáveis; parâmetros globais (`{data_corte}`); nó `sql`; linhagem de colunas (clicar numa coluna e ver de onde ela vem); "Substituir fonte"; autenticação e compartilhamento (seguir o padrão do Flowa); particionamento Parquet.
 
-**Estado atual** (out/2026): Fases 0, 1 e 2 completas. Da Fase 3 estão feitos: cache materializado (`engine/matcache.py`: nós `cacheable` viram Parquet pelo hash ao serem contados; `compile_chain(..., cache=)` lê do cache e poda o subgrafo; LRU por `FORJA_CACHE_MAX_GB`), jobs assíncronos, modo amostra, histórico de versões (snapshot automático a cada 2 min de edição, até 100 por projeto, versões nomeadas, restaurar guarda o estado atual antes), parâmetros globais (`settings.params`, `{nome}` em fórmulas e em valores de filtros visuais), nó `sql` (validação na AST, schema via `DESCRIBE` pelo `Describer` do engine), linhagem de colunas (no perfil da coluna, calculada da análise estática), "Substituir fonte" e particionamento Parquet (`.zip` com pastas `coluna=valor`). Pendentes: templates e sub-fluxos reutilizáveis; autenticação e compartilhamento (definir o "padrão do Flowa"); `FileStorage` S3/MinIO (hoje só disco local).
+**Estado atual** (out/2026): Fases 0, 1 e 2 completas. Da Fase 3 estão feitos: cache materializado (`engine/matcache.py`: nós `cacheable` viram Parquet pelo hash ao serem contados; `compile_chain(..., cache=)` lê do cache e poda o subgrafo; LRU por `FORJA_CACHE_MAX_GB`), jobs assíncronos, modo amostra, histórico de versões (snapshot automático a cada 2 min de edição, até 100 por projeto, versões nomeadas, restaurar guarda o estado atual antes), parâmetros globais (`settings.params`, `{nome}` em fórmulas e em valores de filtros visuais), nó `sql` (validação na AST, schema via `DESCRIBE` pelo `Describer` do engine), linhagem de colunas (no perfil da coluna, calculada da análise estática), "Substituir fonte", particionamento Parquet (`.zip` com pastas `coluna=valor`) e templates/sub-fluxos (aba Templates da biblioteca; "Salvar como template" no painel do nó salva a seleção; inserir como sub-fluxo ou como nós editáveis). Pendentes: autenticação e compartilhamento (definir o "padrão do Flowa"); `FileStorage` S3/MinIO (hoje só disco local).
+
+Sub-fluxos por dentro (`nodes/subflow.py`): o `Flow` é analisado como um pipeline próprio (`analyze(..., slots=)`), com cada entrada virando um nó interno `subflow_input` que lê a CTE externa; ids internos ganham o prefixo `<id do nó>/` para as CTEs não sombrearem as de fora. Erros e avisos internos aparecem no nó como `Em "<etapa>": …`. O `Chain.wrap` monta o `WITH` direto na AST (o builder `with_()` do SQLGlot re-parseia nomes e falha com `/`).
+
+Todo o editor funciona pelo teclado: a seção **Entradas** do painel do nó liga cada entrada a um nó (alternativa a arrastar arestas; é o que o E2E usa).
 
 Parâmetros: `{nome}` é resolvido como literal tipado (`typed_literal`) no codegen; parâmetro inexistente é erro `PARAM_NOT_FOUND` com posição. Mudar um parâmetro muda o hash de todos os nós (invalida o cache).
 

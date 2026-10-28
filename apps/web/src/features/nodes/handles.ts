@@ -26,8 +26,16 @@ export function lastVariadicInput(edges: PipelineEdge[], nodeId: string): number
   return last;
 }
 
-/** Variadic inputs (union, sql): up to the last connected one plus one free handle. */
-export function inputHandles(meta: Pick<NodeMeta, "inputs">, lastConnected: number): string[] {
+/**
+ * Input handles of a node: config-defined (sub-flows), fixed, or variadic (union, sql: up to
+ * the last connected one plus one free handle).
+ */
+export function inputHandles(
+  meta: Pick<NodeMeta, "inputs" | "inputsFor">,
+  lastConnected: number,
+  config: Record<string, unknown> = {},
+): string[] {
+  if (meta.inputsFor) return meta.inputsFor(config);
   if (!meta.inputs[0]?.startsWith("in_")) return meta.inputs;
   const n = Math.max(meta.inputs.length, lastConnected + 2);
   return Array.from({ length: n }, (_, i) => `in_${i}`);

@@ -81,7 +81,7 @@ function NodeCardImpl({ data, selected }: NodeProps<CardNode>) {
   const firstError = analysis?.issues.find((i) => i.severity === "error");
   const warnings = analysis?.issues.filter((i) => i.severity === "warning").length ?? 0;
   const fallback = node.type === "source" && data.sourceName ? data.sourceName : meta.label;
-  const handles = inputHandles(meta, lastInput);
+  const handles = inputHandles(meta, lastInput, node.config);
 
   return (
     <div
@@ -105,7 +105,7 @@ function NodeCardImpl({ data, selected }: NodeProps<CardNode>) {
               type="target"
               position={Position.Left}
               style={{ top }}
-              title={name ? `Entrada ${name}` : "Entrada"}
+              title={meta.inputLabel?.(node.config, h) ?? (name ? `Entrada ${name}` : "Entrada")}
             />
             {handles.length > 1 && name && (
               <span

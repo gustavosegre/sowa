@@ -13,7 +13,7 @@ from forja.compiler.graph import Graph, build_graph
 from forja.domain.issues import Issue, IssueCode
 from forja.domain.pipeline import Node, Pipeline
 from forja.domain.schema import Schema
-from forja.nodes.base import NodeConfig, NodeContext, NodeSpec, SourceResolver, _NoSources
+from forja.nodes.base import NodeConfig, NodeContext, NodeSpec, Slot, SourceResolver, _NoSources
 from forja.nodes.registry import get_spec
 
 Status = Literal["ok", "warning", "error", "blocked"]
@@ -46,6 +46,8 @@ class Analysis:
     results: dict[str, NodeResult]
     sources: SourceResolver
     describer: Describer | None = None
+    # Set when analyzing the inside of a sub-flow.
+    slots: list[Slot] = field(default_factory=list)
 
     def context(self, node_id: str, *, for_display: bool = False, result: NodeResult | None = None) -> NodeContext:
         r = result or self.results[node_id]
@@ -59,6 +61,7 @@ class Analysis:
             params=list(self.pipeline.settings.params),
             input_ids=dict(r.inputs),
             describe=self._describe(list(r.inputs.values())),
+            slots=self.slots,
         )
 
     def _describe(self, upstream: list[str]) -> Callable[[exp.Select], Schema] | None:
@@ -91,11 +94,16 @@ def config_issues(err: ValidationError) -> list[Issue]:
     return out
 
 
-def analyze(p: Pipeline, sources: SourceResolver | None = None, describer: Describer | None = None) -> Analysis:
+def analyze(
+    p: Pipeline,
+    sources: SourceResolver | None = None,
+    describer: Describer | None = None,
+    slots: list[Slot] | None = None,
+) -> Analysis:
     graph = build_graph(p)
     nodes = {n.id: n for n in p.nodes}
     results: dict[str, NodeResult] = {}
-    analysis = Analysis(p, graph, results, sources or _NoSources(), describer)
+    analysis = Analysis(p, graph, results, sources or _NoSources(), describer, slots or [])
 
     for nid in graph.in_cycle:
         results[nid] = NodeResult(
@@ -141,7 +149,7 @@ def _analyze_node(node: Node, graph: Graph, analysis: Analysis) -> NodeResult:
     if spec.annotation:
         return r
 
-    handles = spec.input_handles(list(raw_inputs))
+    handles = spec.input_handles(list(raw_inputs), r.config)
     issues: list[Issue] = []
     for h in handles:
         ups = raw_inputs.get(h, [])
@@ -194,7 +202,7 @@ def _analyze_node(node: Node, graph: Graph, analysis: Analysis) -> NodeResult:
     r.schema = spec.infer_schema(r.config, in_schemas, ctx)
     if any(i.severity == "warning" for i in found):
         r.status = "warning"
-    main = in_schemas.get("in") or in_schemas.get("left") or in_schemas.get("main")
+    main = in_schemas.get("in") or in_schemas.get("left") or in_schemas.get("main") or in_schemas.get("in_0")
     if main is not None and spec.has_output:
         r.changed_columns = [c.name for c in r.schema if not main.has(c.name) or main.type_of(c.name) != c.type]
     return r
@@ -202,4 +210,5 @@ def _analyze_node(node: Node, graph: Graph, analysis: Analysis) -> NodeResult:
 
 def _missing_input_message(spec: NodeSpec[Any], handle: str) -> str:
     names = {"in": "", "left": " da esquerda", "right": " da direita", "main": " principal", "lookup": " de consulta"}
-    return f'O nó "{spec.label}" precisa de uma entrada{names.get(handle, f" {handle}")} conectada.'
+    name = names.get(handle, f" {int(handle[3:]) + 1}" if handle[3:].isdigit() else f" {handle}")
+    return f'O nó "{spec.label}" precisa de uma entrada{name} conectada.'

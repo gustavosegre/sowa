@@ -9,6 +9,7 @@ import { meta as output } from "./output/meta";
 import { meta as select } from "./select/meta";
 import { meta as sort } from "./sort/meta";
 import { meta as sql } from "./sql/meta";
+import { meta as subflow } from "./subflow/meta";
 import { meta as source } from "./source/meta";
 import { meta as distinct } from "./distinct/meta";
 import { meta as sample } from "./sample/meta";
@@ -52,19 +53,21 @@ const ALL = [
   union,
   lookup,
   sql,
+  subflow,
   output,
   note,
   frame,
 ] as unknown as NodeMeta[];
 
 const BY_TYPE = new Map(ALL.map((m) => [m.type, m]));
+const VISIBLE = ALL.filter((m) => !m.hidden);
 
 export function getMeta(type: string): NodeMeta | undefined {
   return BY_TYPE.get(type);
 }
 
 export function allMetas(): NodeMeta[] {
-  return ALL;
+  return VISIBLE;
 }
 
 export function nodeSummary(type: string, config: Record<string, unknown>): string {

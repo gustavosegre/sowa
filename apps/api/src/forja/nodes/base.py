@@ -43,6 +43,14 @@ class SourceResolver(Protocol):
     def get(self, source_id: str) -> SourceInfo | None: ...
 
 
+@dataclass(frozen=True)
+class Slot:
+    """An outside table visible inside a sub-flow: its schema and the outer CTE that holds it."""
+
+    schema: Schema
+    ref: str
+
+
 class _NoSources:
     def get(self, source_id: str) -> SourceInfo | None:
         return None
@@ -63,6 +71,8 @@ class NodeContext:
     input_ids: dict[str, str] = field(default_factory=dict)
     # Schema of a query over the inputs, asked to the engine (bind only). Used by the SQL node.
     describe: Callable[[exp.Select], Schema] | None = None
+    # Inside a sub-flow: the outer tables feeding it (read by `subflow_input`).
+    slots: list[Slot] = field(default_factory=list)
 
     def param(self, name: str) -> Parameter | None:
         return next((p for p in self.params if p.name == name), None)
@@ -85,6 +95,8 @@ class NodeSpec(Generic[C]):
     cacheable: ClassVar[bool] = False
     # Annotation nodes (note, frame) have no data semantics at all.
     annotation: ClassVar[bool] = False
+    # Internal nodes (sub-flow plumbing) aren't offered in the catalog.
+    internal: ClassVar[bool] = False
 
     def validate(self, cfg: C, inputs: dict[str, Schema], ctx: NodeContext) -> list[Issue]:
         return []
@@ -109,7 +121,7 @@ class NodeSpec(Generic[C]):
         """Warnings that need data (cast failures, division by zero…). Optional."""
         return []
 
-    def input_handles(self, connected: Sequence[str]) -> tuple[str, ...]:
+    def input_handles(self, connected: Sequence[str], cfg: C) -> tuple[str, ...]:
         if self.variadic_inputs:
             return tuple(sorted(connected, key=lambda h: int(h.split("_")[1]) if "_" in h else 0))
         return self.inputs

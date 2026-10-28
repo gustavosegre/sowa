@@ -10,10 +10,10 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from forja.domain.pipeline import Pipeline
+from forja.domain.pipeline import Flow, Pipeline
 from forja.domain.schema import Schema
 from forja.nodes.base import SourceInfo
-from forja.storage.db import ExportJobRow, PipelineVersionRow, ProjectRow, SourceRow, utcnow
+from forja.storage.db import ExportJobRow, PipelineVersionRow, ProjectRow, SourceRow, TemplateRow, utcnow
 
 
 def new_id(prefix: str) -> str:
@@ -96,6 +96,38 @@ class VersionRepo:
         auto = [v for v in self.list(project_id) if v.label is None]
         for old in auto[MAX_VERSIONS:]:
             self.s.delete(old)
+
+
+class TemplateRepo:
+    def __init__(self, s: Session) -> None:
+        self.s = s
+
+    def list(self) -> Sequence[TemplateRow]:
+        return self.s.scalars(select(TemplateRow).order_by(TemplateRow.name)).all()
+
+    def get(self, template_id: str) -> TemplateRow | None:
+        return self.s.get(TemplateRow, template_id)
+
+    def create(self, name: str, description: str, flow: Flow) -> TemplateRow:
+        row = TemplateRow(id=new_id("tpl"), name=name, description=description, flow=flow.model_dump(mode="json"))
+        self.s.add(row)
+        self.s.flush()
+        return row
+
+    def update(self, row: TemplateRow, name: str | None, description: str | None, flow: Flow | None) -> TemplateRow:
+        if name is not None:
+            row.name = name
+        if description is not None:
+            row.description = description
+        if flow is not None:
+            row.flow = flow.model_dump(mode="json")
+            row.version += 1  # sub-flows compare this to offer "Atualizar"
+        row.updated_at = utcnow()
+        self.s.flush()
+        return row
+
+    def delete(self, row: TemplateRow) -> None:
+        self.s.delete(row)
 
 
 class SourceRepo:

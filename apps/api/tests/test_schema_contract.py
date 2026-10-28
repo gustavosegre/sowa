@@ -187,11 +187,12 @@ FIXTURES: dict[str, list[dict[str, Any]]] = {
 ANNOTATIONS = {"note", "frame"}
 
 
-MULTI_INPUT = {"join", "union", "lookup", "sql"}  # covered by test_contract_multi_input_nodes / test_sql.py
+# Covered by test_contract_multi_input_nodes / test_sql.py / test_subflow.py.
+MULTI_INPUT = {"join", "union", "lookup", "sql", "subflow"}
 
 
 def test_every_node_type_has_contract_fixtures() -> None:
-    missing = {s.type for s in all_specs()} - set(FIXTURES) - ANNOTATIONS - MULTI_INPUT
+    missing = {s.type for s in all_specs() if not s.internal} - set(FIXTURES) - ANNOTATIONS - MULTI_INPUT
     assert not missing, f"node types without schema contract fixtures: {sorted(missing)}"
 
 

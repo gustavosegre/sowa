@@ -1,4 +1,5 @@
-import { Code2, Copy, Trash2 } from "lucide-react";
+import { useReactFlow } from "@xyflow/react";
+import { BookmarkPlus, Code2, Copy, Trash2 } from "lucide-react";
 import { useState } from "react";
 
 import { ApiError } from "@/api/client";
@@ -8,6 +9,7 @@ import { Badge, Button, Dialog, Tooltip } from "@/components/ui";
 import { NodePanel } from "@/features/nodes/panels";
 import { getMeta } from "@/features/nodes/registry";
 import { CATEGORY_COLOR } from "@/features/nodes/types";
+import { SaveTemplateDialog } from "@/features/templates/SaveTemplateDialog";
 import { t } from "@/i18n/pt-BR";
 import { usePipelineStore } from "@/stores/pipelineStore";
 
@@ -58,6 +60,8 @@ export function ConfigSidebar() {
   const node = usePipelineStore((s) => s.pipeline.nodes.find((n) => n.id === s.selectedId));
   const analysis = useNodeAnalysis(node?.id);
   const [sqlOpen, setSqlOpen] = useState(false);
+  const [templateIds, setTemplateIds] = useState<string[] | null>(null);
+  const rf = useReactFlow();
   if (!node) {
     return (
       <aside className="flex h-full w-80 shrink-0 items-center justify-center border-l bg-background p-6 text-center text-xs text-muted-foreground">
@@ -112,6 +116,24 @@ export function ConfigSidebar() {
             </Button>
           </Tooltip>
         )}
+        {!meta?.annotation && (
+          <Tooltip content={t.templates.save}>
+            <Button
+              variant="ghost"
+              size="iconSm"
+              onClick={() => {
+                const selected = rf
+                  .getNodes()
+                  .filter((n) => n.selected)
+                  .map((n) => n.id);
+                setTemplateIds(selected.includes(node.id) ? selected : [node.id]);
+              }}
+              aria-label={t.templates.save}
+            >
+              <BookmarkPlus />
+            </Button>
+          </Tooltip>
+        )}
         <Tooltip content={t.editor.duplicate}>
           <Button
             variant="ghost"
@@ -148,6 +170,7 @@ export function ConfigSidebar() {
         <InputsEditor node={node} />
       </div>
       <SqlDialog nodeId={node.id} open={sqlOpen} onClose={() => setSqlOpen(false)} />
+      {templateIds && <SaveTemplateDialog nodeIds={templateIds} open onClose={() => setTemplateIds(null)} />}
     </aside>
   );
 }

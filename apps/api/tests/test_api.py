@@ -322,3 +322,45 @@ def test_export_partitioned_parquet(client: TestClient) -> None:
     names = zipfile.ZipFile(io.BytesIO(content)).namelist()
     assert sorted({n.split("/")[0] for n in names}) == ["uf=PR", "uf=SC", "uf=SP"]
     assert all(n.endswith(".parquet") for n in names)
+
+
+def test_templates_crud_and_subflow_from_template(client: TestClient) -> None:
+    up = upload(client, "vendas_latin1.csv")
+    confirm(client, up)
+    flow = {
+        "nodes": [{"id": "c", "type": "calculated", "config": {"name": "dobro", "formula": "[quantidade] * 2"}}],
+        "edges": [],
+        "inputs": [{"name": "Vendas", "targets": [{"node": "c"}]}],
+        "output": "c",
+    }
+    r = client.post("/templates", json={"name": "Dobrar", "flow": flow})
+    assert r.status_code == 201, r.text
+    tpl = r.json()
+    assert tpl["inputs"] == ["Vendas"]
+    assert tpl["can_be_subflow"] is True
+    assert tpl["version"] == 1
+    assert [t["id"] for t in client.get("/templates").json()].count(tpl["id"]) == 1
+
+    bad = client.post("/templates", json={"name": "X", "flow": {**flow, "output": "zz"}})
+    assert bad.status_code == 422
+    assert bad.json()["message"].startswith("Template inválido")
+
+    pipeline = {
+        "nodes": [
+            {"id": "s", "type": "source", "config": {"source_id": up["source"]["id"]}},
+            {"id": "x", "type": "subflow", "config": {"template_id": tpl["id"], "flow": tpl["flow"]}},
+        ],
+        "edges": [{"id": "e", "source": "s", "target": "x", "target_handle": "in_0"}],
+    }
+    schema = client.post("/pipeline/schema", json={"pipeline": pipeline}).json()
+    assert schema["nodes"]["x"]["status"] == "ok"
+    assert "dobro" in [c["name"] for c in schema["nodes"]["x"]["columns"]]
+    prev = client.post("/pipeline/preview", json={"pipeline": pipeline, "node_id": "x", "limit": 10})
+    assert prev.headers["x-forja-rows"] == "4"
+
+    r = client.put(f"/templates/{tpl['id']}", json={"flow": {**flow, "nodes": [{**flow["nodes"][0], "ui": {"x": 5}}]}})
+    assert r.json()["version"] == 2
+    assert client.put(f"/templates/{tpl['id']}", json={"name": "Dobrar 2"}).json()["version"] == 2
+    assert client.delete(f"/templates/{tpl['id']}").status_code == 204
+    assert client.get(f"/templates/{tpl['id']}").status_code == 404
+    assert "subflow_input" not in [n["type"] for n in client.get("/nodes").json()]

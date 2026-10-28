@@ -5,8 +5,9 @@
 import { temporal } from "zundo";
 import { create } from "zustand";
 
-import type { Parameter, Pipeline, PipelineEdge, PipelineNode } from "@/api/types";
+import type { Flow, Parameter, Pipeline, PipelineEdge, PipelineNode } from "@/api/types";
 import { getMeta } from "@/features/nodes/registry";
+import { flowWidth, placeFlow } from "@/features/templates/flow";
 import { uid } from "@/lib/utils";
 
 export type Locale = "pt-BR" | "en-US";
@@ -52,6 +53,10 @@ interface State {
   /** Switch the formula locale; `configs` carries the node configs with re-rendered formulas. */
   setLocale: (locale: Locale, configs?: Record<string, Config>) => void;
   setParams: (params: Parameter[]) => void;
+  /** Insert a template's nodes at `at`; `sources[k]` feeds the flow's input k. */
+  insertFlow: (flow: Flow, opts?: { at?: XY; sources?: (string | null | undefined)[] }) => string[];
+  /** Replace a sub-flow node by its nodes (formulas already in the pipeline's locale). */
+  expandSubflow: (id: string, flow: Flow) => string[];
 }
 
 function nodeAt(p: Pipeline, id: string): PipelineNode | undefined {
@@ -296,6 +301,57 @@ export const usePipelineStore = create<State>()(
           selectedId: nodes[0]?.id ?? null,
         }));
         return nodes.map((n) => n.id);
+      },
+
+      insertFlow: (flow, opts = {}) => {
+        const { pipeline } = get();
+        const at = { ...(opts.at ?? { x: 80, y: 80 }) };
+        for (let i = 0; i < 30; i++) {
+          const hit = flow.nodes.some((n) => {
+            const p = { x: n.ui.x + at.x, y: n.ui.y + at.y };
+            return freeSpot(pipeline, p).y !== p.y;
+          });
+          if (!hit) break;
+          at.y += CARD_H + 20;
+        }
+        const placed = placeFlow(flow, at, opts.sources);
+        set({
+          pipeline: {
+            ...pipeline,
+            nodes: [...pipeline.nodes, ...placed.nodes],
+            edges: [...pipeline.edges, ...placed.edges],
+          },
+          selectedId: placed.map.get(flow.output ?? "") ?? placed.nodes[0]?.id ?? null,
+        });
+        return placed.nodes.map((n) => n.id);
+      },
+
+      expandSubflow: (id, flow) => {
+        const { pipeline } = get();
+        const node = nodeAt(pipeline, id);
+        if (!node) return [];
+        const sources = flow.inputs.map(
+          (_, k) => pipeline.edges.find((e) => e.target === id && e.target_handle === `in_${k}`)?.source,
+        );
+        const shifted = shiftDownstream(pipeline, id, flowWidth(flow) - 290);
+        const placed = placeFlow(flow, { x: node.ui.x, y: node.ui.y }, sources);
+        const out = flow.output ? placed.map.get(flow.output) : undefined;
+        const outgoing = out
+          ? shifted.edges.filter((e) => e.source === id).map((e) => ({ ...e, id: uid("e"), source: out }))
+          : [];
+        set({
+          pipeline: {
+            ...shifted,
+            nodes: [...shifted.nodes.filter((n) => n.id !== id), ...placed.nodes],
+            edges: [
+              ...shifted.edges.filter((e) => e.source !== id && e.target !== id),
+              ...placed.edges,
+              ...outgoing,
+            ],
+          },
+          selectedId: out ?? placed.nodes[0]?.id ?? null,
+        });
+        return placed.nodes.map((n) => n.id);
       },
 
       setParams: (params) =>

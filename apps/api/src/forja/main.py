@@ -11,7 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
 
 from forja.api import errors
-from forja.api.routes import exports, formula, meta, pipeline, projects, sources
+from forja.api.routes import exports, formula, meta, pipeline, projects, sources, templates
 from forja.nodes.registry import all_specs
 from forja.settings import get_settings
 
@@ -47,7 +47,15 @@ def create_app() -> FastAPI:
         expose_headers=["X-Forja-Rows", "X-Forja-Has-More", "X-Forja-Cached"],
     )
     errors.install(app)
-    for r in (meta.router, projects.router, sources.router, pipeline.router, formula.router, exports.router):
+    for r in (
+        meta.router,
+        projects.router,
+        sources.router,
+        pipeline.router,
+        formula.router,
+        exports.router,
+        templates.router,
+    ):
         app.include_router(r)
 
     def openapi() -> dict[str, Any]:

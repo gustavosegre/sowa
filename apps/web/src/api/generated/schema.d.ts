@@ -522,6 +522,43 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/templates": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List Templates */
+    get: operations["list_templates_templates_get"];
+    put?: never;
+    /** Create Template */
+    post: operations["create_template_templates_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/templates/{template_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Template */
+    get: operations["get_template_templates__template_id__get"];
+    /** Update Template */
+    put: operations["update_template_templates__template_id__put"];
+    post?: never;
+    /** Delete Template */
+    delete: operations["delete_template_templates__template_id__delete"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -752,6 +789,59 @@ export interface components {
       /** Project Id */
       project_id?: string | null;
     };
+    /**
+     * Flow
+     * @description A reusable piece of a pipeline (templates and sub-flows).
+     *
+     *     Edges that came from outside the piece become `inputs`; `output` is the node whose
+     *     result the piece returns (None when it has no single output, e.g. it ends in exports).
+     *     Formulas are text in `locale`.
+     */
+    Flow: {
+      /**
+       * Locale
+       * @default pt-BR
+       * @enum {string}
+       */
+      locale: "pt-BR" | "en-US";
+      /**
+       * Nodes
+       * @default []
+       */
+      nodes: components["schemas"]["Node"][];
+      /**
+       * Edges
+       * @default []
+       */
+      edges: components["schemas"]["Edge"][];
+      /**
+       * Inputs
+       * @default []
+       */
+      inputs: components["schemas"]["FlowInput"][];
+      /** Output */
+      output?: string | null;
+    };
+    /**
+     * FlowInput
+     * @description An entry point of a reusable flow: the outside table feeds these node inputs.
+     */
+    FlowInput: {
+      /** Name */
+      name: string;
+      /** Targets */
+      targets: components["schemas"]["FlowTarget"][];
+    };
+    /** FlowTarget */
+    FlowTarget: {
+      /** Node */
+      node: string;
+      /**
+       * Handle
+       * @default in
+       */
+      handle: string;
+    };
     /** FormulaCheckOut */
     FormulaCheckOut: {
       /** Ok */
@@ -946,7 +1036,8 @@ export interface components {
       | "LOOKUP_MULTIPLE_MATCHES"
       | "TIMEOUT"
       | "ENGINE_ERROR"
-      | "SQL_NOT_ALLOWED";
+      | "SQL_NOT_ALLOWED"
+      | "SUBFLOW_INVALID";
     /**
      * LogicalType
      * @enum {string}
@@ -1284,6 +1375,70 @@ export interface components {
       /** Issues */
       issues: components["schemas"]["Issue"][];
     };
+    /** TemplateCreate */
+    TemplateCreate: {
+      /** Name */
+      name: string;
+      /**
+       * Description
+       * @default
+       */
+      description: string;
+      flow: components["schemas"]["Flow"];
+    };
+    /** TemplateDetail */
+    TemplateDetail: {
+      /** Id */
+      id: string;
+      /** Name */
+      name: string;
+      /** Description */
+      description: string;
+      /** Version */
+      version: number;
+      /** Node Count */
+      node_count: number;
+      /** Inputs */
+      inputs: string[];
+      /** Can Be Subflow */
+      can_be_subflow: boolean;
+      /**
+       * Updated At
+       * Format: date-time
+       */
+      updated_at: string;
+      flow: components["schemas"]["Flow"];
+    };
+    /** TemplateOut */
+    TemplateOut: {
+      /** Id */
+      id: string;
+      /** Name */
+      name: string;
+      /** Description */
+      description: string;
+      /** Version */
+      version: number;
+      /** Node Count */
+      node_count: number;
+      /** Inputs */
+      inputs: string[];
+      /** Can Be Subflow */
+      can_be_subflow: boolean;
+      /**
+       * Updated At
+       * Format: date-time
+       */
+      updated_at: string;
+    };
+    /** TemplateUpdate */
+    TemplateUpdate: {
+      /** Name */
+      name?: string | null;
+      /** Description */
+      description?: string | null;
+      flow?: components["schemas"]["Flow"] | null;
+    };
     /** UploadOut */
     UploadOut: {
       source: components["schemas"]["SourceOut"];
@@ -1453,6 +1608,39 @@ export interface components {
        *     }
        */
       parquet: components["schemas"]["ParquetOptions"];
+    };
+    /** SubflowInputConfig */
+    SubflowInputConfig: {
+      /** Slot */
+      slot: number;
+    };
+    /** SubflowConfig */
+    SubflowConfig: {
+      /**
+       * Template Id
+       * @default null
+       */
+      template_id: string | null;
+      /**
+       * Template Name
+       * @default
+       */
+      template_name: string;
+      /**
+       * Template Version
+       * @default 0
+       */
+      template_version: number;
+      /**
+       * @default {
+       *       "locale": "pt-BR",
+       *       "nodes": [],
+       *       "edges": [],
+       *       "inputs": [],
+       *       "output": null
+       *     }
+       */
+      flow: components["schemas"]["Flow"];
     };
     /** BinConfig */
     BinConfig: {
@@ -3466,6 +3654,154 @@ export interface operations {
     responses: {
       /** @description Successful Response */
       200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  list_templates_templates_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TemplateOut"][];
+        };
+      };
+    };
+  };
+  create_template_templates_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TemplateCreate"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TemplateDetail"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  get_template_templates__template_id__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        template_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TemplateDetail"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  update_template_templates__template_id__put: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        template_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TemplateUpdate"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TemplateDetail"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  delete_template_templates__template_id__delete: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        template_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      204: {
         headers: {
           [name: string]: unknown;
         };

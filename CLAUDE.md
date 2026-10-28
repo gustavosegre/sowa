@@ -100,6 +100,15 @@ Ao criar o projeto, usar a versão estável mais recente de cada lib e fixar nos
 | GET | `/formula/functions` | Catálogo de funções (alimenta autocomplete e ajuda) |
 | POST | `/formula/check` | Valida fórmula: tipo resultante, erros com posição, 10 valores de exemplo |
 | POST | `/exports` · GET `/exports/{job}` · GET `/exports/{job}/download` | Exportação como job assíncrono |
+| POST | `/pipeline/stats` | Contagem de linhas do nó e das entradas + avisos que dependem de dados (falhas de conversão, divisão por zero, join multiplicando linhas, valores novos na dinâmica). A UI chama depois da prévia. |
+| POST | `/pipeline/distinct-values` (alias `/pivot/distinct-values`) | Valores distintos da entrada do nó; `date_group` e `as_text` reproduzem exatamente o texto que a dinâmica compara |
+| GET/POST | `/sources/{id}/detection` · `/sources/{id}/detect` | Detecção salva / reler a amostra com opções editadas (passo 2 do assistente) |
+| POST | `/sources/{id}/replace` | "Substituir fonte": troca o arquivo, mantém o id e as escolhas de coluna; exige confirmar de novo |
+| POST | `/formula/render` | Re-renderiza uma fórmula em outro locale (troca de `;`/`,` e nomes de função) |
+| GET | `/nodes` | Catálogo de nós com o JSON Schema de cada config |
+| GET/POST/PATCH/DELETE | `/projects`, `/projects/{id}` | CRUD de projetos |
+
+A prévia responde `application/vnd.apache.arrow.stream` com os cabeçalhos `X-Forja-Rows` e `X-Forja-Has-More`. Toda resposta de erro é um `ApiError` (`code`, `message` em pt-BR, `hint`, `detail`, `issues`).
 
 ## 6. Estrutura de pastas
 
@@ -144,14 +153,19 @@ forja/
 ## 7. Comandos
 
 ```bash
-make setup       # uv sync + pnpm install
-make dev         # api (:8000) + web (:5173) com reload
+make setup       # uv sync + pnpm install + chromium do Playwright
+make dev         # api (:8000) + web (:5173) com reload — portas: make dev API_PORT=8010
 make test        # pytest + vitest
-make e2e         # playwright
-make lint        # ruff + mypy + eslint + tsc --noEmit
+make e2e         # playwright (FORJA_API_PORT/FORJA_WEB_PORT para reaproveitar servidores já no ar)
+make lint        # ruff (check + format --check) + mypy + eslint + prettier --check + tsc --noEmit
+make format      # ruff format/--fix + prettier --write
 make types       # regenera tipos TS a partir do OpenAPI (rodar após mudar modelos Pydantic)
-make db-migrate  # alembic upgrade head
+make db-migrate  # alembic upgrade head (a API também migra ao subir, FORJA_AUTO_MIGRATE)
 ```
+
+As receitas do Makefile são `cd x && cmd` para rodarem tanto em sh quanto no cmd.exe; `make dev` usa `scripts/dev.py` (multiplataforma). Configuração por variáveis `FORJA_*` (ver `.env.example`); o Vite faz proxy de `/api` para `FORJA_API_URL`.
+
+Versões: TypeScript fixado em 6.0.x porque o typescript-eslint ainda não suporta o TS 7. Glide Data Grid declara peer React ≤ 18, mas funciona com React 19 (validado no E2E).
 
 ## 8. Modelo de domínio
 
@@ -207,15 +221,26 @@ Conversões sempre com `TRY_CAST` / `try_strptime`. O nó informa quantos valore
 @register_node
 class CastNode(NodeSpec[CastConfig]):
     type = "cast"
-    inputs = ("in",)
-    cacheable = False  # True para nós caros (join, group_by, pivot, window, distinct, sql)
+    config_model = CastConfig
+    label = "Alterar tipo"          # pt-BR, aparece nas mensagens
+    category = "columns"
+    inputs = ("in",)                # join: ("left", "right"); lookup: ("main", "lookup"); union: variadic_inputs
+    cacheable = False               # True para nós caros (join, group_by, pivot, window, distinct, sql)
 
-    def validate(self, cfg: CastConfig, inputs: dict[str, Schema]) -> list[Issue]: ...
-    def infer_schema(self, cfg: CastConfig, inputs: dict[str, Schema]) -> Schema: ...
-    def compile(self, cfg: CastConfig, inputs: dict[str, exp.Select]) -> exp.Select: ...
+    def validate(self, cfg, inputs: dict[str, Schema], ctx: NodeContext) -> list[Issue]: ...
+    def infer_schema(self, cfg, inputs: dict[str, Schema], ctx: NodeContext) -> Schema: ...
+    def compile(self, cfg, inputs: dict[str, exp.Select], schemas: dict[str, Schema],
+                ctx: NodeContext) -> exp.Select: ...
+    # Opcional: avisos que precisam de dados (rodam em /pipeline/stats).
+    def runtime_issues(self, cfg, inputs, output, schemas, ctx, run: QueryRunner) -> list[Issue]: ...
 ```
 
-`compile` é função pura (grafo → AST), testável sem DuckDB.
+`compile` é função pura (grafo → AST), testável sem DuckDB. `NodeContext` traz locale, rótulos dos nós de entrada (para mensagens) e o resolvedor de fontes. Configs são validadas por nó: config inválida vira `INVALID_CONFIG` naquele nó, nunca um 422 do fluxo inteiro.
+
+**Armadilhas das versões instaladas** (conferidas na criação do projeto):
+- SQLGlot 30: a classe base é `exp.Expr`; `exp.Expression` é só uma subclasse — use `exp.Expr` em anotações e `isinstance`.
+- DuckDB 2.0: relações não têm `fetchone()`; resultados de `execute()` precisam ser consumidos antes de outra consulta na mesma conexão; lambdas usam `LAMBDA x : …` (o SQLGlot já gera assim); `1/0` dá `inf` (por isso a divisão é protegida no codegen).
+- Templates SQL estáticos com marcadores `_0`, `_1` (`formula.functions.tmpl`) são substituídos como nós da AST — nunca interpolar dados do usuário em texto SQL.
 
 ## 9. Catálogo de nós
 
@@ -377,11 +402,11 @@ Modelo único:
 
 ## 18. Checklist: novo tipo de nó
 
-1. `apps/api/src/forja/nodes/<type>.py`: config Pydantic + `validate`, `infer_schema`, `compile`; registrar com `@register_node`.
-2. Fixtures + testes: contrato de schema, golden test, casos de erro.
-3. `make types`.
-4. `apps/web/src/features/nodes/<type>/`: `meta.ts` (ícone, categoria, cor, handles), `Card.tsx`, `ConfigPanel.tsx`, `summary.ts`; registrar no catálogo do front.
-5. Se fizer sentido, adicionar atalho no menu de coluna da prévia.
+1. `apps/api/src/forja/nodes/<type>.py`: config Pydantic (`NodeConfig`) + `validate`, `infer_schema`, `compile` (e `runtime_issues` se houver aviso que dependa de dados); registrar com `@register_node`. O módulo é importado automaticamente pelo registro.
+2. Fixtures + testes: entrada em `FIXTURES` (ou `MULTI_CASES`) de `tests/test_schema_contract.py` — o teste falha se um tipo de nó não tiver fixture —, golden test em `tests/golden/` (gerar com `UPDATE_GOLDEN=1` e conferir o resultado à mão), casos de erro.
+3. `make types` e o alias do config em `apps/web/src/api/types.ts`.
+4. `apps/web/src/features/nodes/<type>/`: `meta.ts` (ícone, categoria, handles, config padrão, próximos nós sugeridos), `summary.ts` e `ConfigPanel.tsx`; registrar em `registry.ts` (metadados, sem React) e em `panels.tsx` (painéis). O card do canvas é genérico (`features/canvas/NodeCard.tsx`, usa meta + summary); painéis pequenos podem ficar em `nodes/simple/panels.tsx`. Textos novos vão para `i18n/pt-BR.ts`.
+5. Se fizer sentido, adicionar atalho no menu de coluna da prévia (`features/preview/columnActions.ts`).
 6. Atualizar a tabela da §9.
 
 ## 19. Roadmap

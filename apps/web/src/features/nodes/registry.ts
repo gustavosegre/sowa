@@ -9,6 +9,21 @@ import { meta as output } from "./output/meta";
 import { meta as select } from "./select/meta";
 import { meta as sort } from "./sort/meta";
 import { meta as source } from "./source/meta";
+import { meta as distinct } from "./distinct/meta";
+import { meta as sample } from "./sample/meta";
+import { meta as textClean } from "./text_clean/meta";
+import { meta as replace } from "./replace/meta";
+import { meta as fillNull } from "./fill_null/meta";
+import { meta as dateParts } from "./date_parts/meta";
+import { meta as bin } from "./bin/meta";
+import { meta as split } from "./split/meta";
+import { meta as conditional } from "./conditional/meta";
+import { meta as unpivot } from "./unpivot/meta";
+import { meta as windowNode } from "./window/meta";
+import { meta as pivot } from "./pivot/meta";
+import { meta as join } from "./join/meta";
+import { meta as union } from "./union/meta";
+import { meta as lookup } from "./lookup/meta";
 import type { NodeMeta } from "./types";
 
 // Each meta is typed with its own config; the registry stores them type-erased.
@@ -17,9 +32,24 @@ const ALL = [
   select,
   cast,
   calculated,
+  conditional,
+  split,
+  textClean,
+  replace,
+  fillNull,
+  dateParts,
+  bin,
   filter,
   sort,
+  distinct,
+  sample,
   groupBy,
+  pivot,
+  unpivot,
+  windowNode,
+  join,
+  union,
+  lookup,
   output,
   note,
   frame,

@@ -195,13 +195,43 @@ export function useDistinctValues(pipeline: Pipeline, nodeId: string, column: st
     queryFn: async ({ signal }) =>
       unwrap(
         await api.POST("/pipeline/distinct-values", {
-          body: { pipeline, node_id: nodeId, column: column ?? "", limit: 200, of_input: ofInput },
+          body: {
+            pipeline,
+            node_id: nodeId,
+            column: column ?? "",
+            limit: 200,
+            of_input: ofInput,
+            date_group: "none",
+            as_text: false,
+          },
           signal,
         }),
       ),
     staleTime: Infinity,
     retry: false,
   });
+}
+
+/** Distinct values as the pivot compiles them (text, optional date grouping). */
+export async function fetchPivotValues(
+  pipeline: Pipeline,
+  nodeId: string,
+  column: string,
+  dateGroup: "none" | "year" | "quarter" | "month" | "day",
+) {
+  return unwrap(
+    await api.POST("/pivot/distinct-values", {
+      body: {
+        pipeline,
+        node_id: nodeId,
+        column,
+        limit: 201,
+        of_input: true,
+        date_group: dateGroup,
+        as_text: true,
+      },
+    }),
+  );
 }
 
 export async function fetchSql(pipeline: Pipeline, nodeId: string): Promise<string> {

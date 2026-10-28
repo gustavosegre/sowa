@@ -52,7 +52,7 @@ def test_golden(engine: Engine, sources: FakeSources, path: Path) -> None:
     result = to_csv(engine.rows(compile_chain(a, target).query()), schema.names)
     if os.environ.get("UPDATE_GOLDEN"):
         case["sql"], case["result"] = sql, result
-        path.write_text(json.dumps(case, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        path.write_text(json.dumps(case, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
         return
     assert sql == normalize(case["sql"])
     assert result == case["result"]

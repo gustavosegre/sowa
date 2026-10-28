@@ -47,3 +47,29 @@ export type NoteConfig = S["NoteConfig"];
 export type FrameConfig = S["FrameConfig"];
 
 export type NodeStatus = NodeAnalysis["status"];
+
+// Phase 2 nodes.
+export type DistinctConfig = S["DistinctConfig"];
+export type SampleNodeConfig = S["SampleNodeConfig"];
+export type TextCleanConfig = S["TextCleanConfig"];
+export type ReplaceConfig = S["ReplaceConfig"];
+export type ReplaceRule = S["ReplaceRule"];
+export type FillNullConfig = S["FillNullConfig"];
+export type FillRule = S["FillRule"];
+export type DatePartsConfig = S["DatePartsConfig"];
+export type BinConfig = S["BinConfig"];
+export type SplitConfig = S["SplitConfig"];
+export type ConditionalConfig = S["ConditionalConfig"];
+export type ConditionalRule = S["ConditionalRule"];
+export type Outcome = S["Outcome"];
+export type UnpivotConfig = S["UnpivotConfig"];
+export type WindowConfig = S["WindowConfig"];
+export type WindowItem = S["WindowItem"];
+export type PivotConfig = S["PivotConfig"];
+export type PivotField = S["PivotField"];
+export type PivotValue = S["PivotValue"];
+export type JoinConfig = S["JoinConfig"];
+export type JoinKey = S["JoinKey"];
+export type UnionConfig = S["UnionConfig"];
+export type LookupConfig = S["LookupConfig"];
+export type LookupKey = S["LookupKey"];

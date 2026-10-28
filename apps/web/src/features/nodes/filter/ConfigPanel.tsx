@@ -182,7 +182,7 @@ function ConditionRow({
   );
 }
 
-function GroupEditor({
+export function GroupEditor({
   group,
   columns,
   nodeId,

@@ -5,7 +5,7 @@ from typing import Literal
 from pydantic import BaseModel
 from sqlglot import exp
 
-from forja.domain.issues import Issue, IssueCode, column_not_found, error, fmt_dec, warning
+from forja.domain.issues import Issue, IssueCode, column_not_found, error, fmt_dec, fmt_int, warning
 from forja.domain.schema import Column, Schema
 from forja.domain.types import LogicalType, label, unify
 from forja.nodes.base import NodeConfig, NodeContext, NodeSpec, QueryRunner, alias, col, count_star, from_input, ident
@@ -140,7 +140,7 @@ class JoinNode(NodeSpec[JoinConfig]):
             return [
                 warning(
                     IssueCode.JOIN_ROW_MULTIPLICATION,
-                    f"A junção multiplicou as linhas por {fmt_dec(factor)} ({base:,} → {n_out:,}).".replace(",", "."),
+                    f"A junção multiplicou as linhas por {fmt_dec(factor)} ({fmt_int(base)} → {fmt_int(n_out)}).",
                     hint="A tabela da direita tem chaves repetidas. Remova duplicatas antes ou use Procurar (PROCV).",
                     count=n_out,
                 )

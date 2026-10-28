@@ -260,6 +260,18 @@ export const usePipelineStore = create<State>()(
       },
 
       paste: (payload, offset = { x: 40, y: 40 }) => {
+        // Move the whole group down until it doesn't cover existing nodes.
+        const existing = get().pipeline;
+        const off = { ...offset };
+        for (let i = 0; i < 30; i++) {
+          const hit = payload.nodes.some((n) => {
+            const p = { x: n.ui.x + off.x, y: n.ui.y + off.y };
+            return freeSpot(existing, p).y !== p.y;
+          });
+          if (!hit) break;
+          off.y += CARD_H + 20;
+        }
+        offset = off;
         const map = new Map<string, string>();
         const nodes = payload.nodes.map((n) => {
           const id = uid("n");

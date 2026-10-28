@@ -6,6 +6,23 @@ import { Field, Input, Select, Textarea } from "@/components/ui";
 import { t } from "@/i18n/pt-BR";
 
 import { ConfigPanel as CalculatedPanel } from "./calculated/ConfigPanel";
+import { ConfigPanel as ConditionalPanel } from "./conditional/ConfigPanel";
+import { ConfigPanel as JoinPanel } from "./join/ConfigPanel";
+import { ConfigPanel as LookupPanel } from "./lookup/ConfigPanel";
+import { ConfigPanel as PivotPanel } from "./pivot/ConfigPanel";
+import {
+  BinPanel,
+  DatePartsPanel,
+  DistinctPanel,
+  FillNullPanel,
+  ReplacePanel,
+  SamplePanel,
+  SplitPanel,
+  TextCleanPanel,
+  UnpivotPanel,
+} from "./simple/panels";
+import { ConfigPanel as UnionPanel } from "./union/ConfigPanel";
+import { ConfigPanel as WindowPanel } from "./window/ConfigPanel";
 import { ConfigPanel as CastPanel } from "./cast/ConfigPanel";
 import { ConfigPanel as FilterPanel } from "./filter/ConfigPanel";
 import { ConfigPanel as GroupByPanel } from "./group_by/ConfigPanel";
@@ -59,6 +76,21 @@ const PANELS = {
   output: OutputPanel,
   note: NotePanel,
   frame: FramePanel,
+  distinct: DistinctPanel,
+  sample: SamplePanel,
+  text_clean: TextCleanPanel,
+  replace: ReplacePanel,
+  fill_null: FillNullPanel,
+  date_parts: DatePartsPanel,
+  bin: BinPanel,
+  split: SplitPanel,
+  conditional: ConditionalPanel,
+  unpivot: UnpivotPanel,
+  window: WindowPanel,
+  pivot: PivotPanel,
+  join: JoinPanel,
+  union: UnionPanel,
+  lookup: LookupPanel,
 } as unknown as Record<string, ComponentType<AnyPanelProps> | undefined>;
 
 /** Renders the config panel of a node type. Components are static; only the lookup is dynamic. */

@@ -90,6 +90,16 @@ def value_type(v: PivotValue, schema: Schema) -> LogicalType:
     return agg_type(Aggregation(column=v.column, fn=v.fn), schema)
 
 
+def value_label(cv: str | None, cfg: PivotConfig, schema: Schema) -> str:
+    """How a value of the "Colunas" field is shown in generated column names."""
+    if cv is None:
+        return NULL_LABEL
+    f = cfg.columns
+    if f is not None and schema.has(f.column) and schema.type_of(f.column) is L.BOOLEAN:
+        return {"true": "verdadeiro", "false": "falso"}.get(cv, cv)
+    return cv
+
+
 def output_columns(cfg: PivotConfig, schema: Schema) -> list[tuple[str, LogicalType]]:
     out = [(field_name(f), L.TEXT if cfg.totals else field_type(f, schema)) for f in cfg.rows]
     if cfg.columns is None:
@@ -97,12 +107,11 @@ def output_columns(cfg: PivotConfig, schema: Schema) -> list[tuple[str, LogicalT
         return out
     for cv in cfg.column_values:
         for v in cfg.values:
+            shown = value_label(cv, cfg, schema)
             name = (
-                cfg.name_template.replace("{valor}", NULL_LABEL if cv is None else cv).replace(
-                    "{medida}", measure_label(v)
-                )
+                cfg.name_template.replace("{valor}", shown).replace("{medida}", measure_label(v))
                 if len(cfg.values) > 1
-                else (NULL_LABEL if cv is None else cv)
+                else shown
             )
             out.append((name, value_type(v, schema)))
     return out

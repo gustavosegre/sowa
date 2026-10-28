@@ -457,6 +457,18 @@ export const t = {
     hint: "Somente SELECT. Use aspas duplas para colunas com espaço ou acento.",
     notConnected: "Conecte uma tabela à entrada do nó.",
   },
+  inputs: {
+    title: "Entradas",
+    none: "(nenhuma)",
+    handle: (h: string) =>
+      ({
+        in: "Entrada",
+        left: "Entrada esquerda",
+        right: "Entrada direita",
+        main: "Tabela principal",
+        lookup: "Tabela de consulta",
+      })[h] ?? (h.startsWith("in_") ? `Entrada ${Number(h.slice(3)) + 1}` : h),
+  },
   lineage: {
     title: "Linhagem",
     fromFile: (file: string) => `vem do arquivo "${file}"`,

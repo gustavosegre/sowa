@@ -12,7 +12,7 @@ from forja.compiler.hashing import node_hashes
 from forja.engine import service
 from forja.engine.duck import Engine
 from forja.engine.matcache import MaterializedCache, get_cache
-from helpers import FakeSources, chain_of, src
+from helpers import FakeSources, chain_of, pipeline, src
 
 GROUP = {"type": "group_by", "config": {"keys": ["uf"], "aggs": [{"column": "valor", "fn": "sum", "as": "total"}]}}
 SORT = {"type": "sort", "config": {"keys": [{"column": "uf"}]}}
@@ -51,6 +51,23 @@ def test_editing_a_node_invalidates_it_and_downstream_only(engine: Engine, sourc
     assert new["n1"] != old["n1"]
     assert new["n2"] != old["n2"]
     assert compile_chain(a2, "n2", cache=get_cache()).cached == frozenset()
+
+
+def test_runtime_issues_of_a_cached_node_still_see_its_inputs(engine: Engine, sources: FakeSources) -> None:
+    # Self-join on "uf": the join is cacheable, so the first count materializes it; the
+    # row-multiplication check then queries the inputs, which must still be in the chain.
+    get_cache().clear()
+    service.count_cache.clear()
+    join = {"type": "join", "config": {"how": "left", "keys": [{"left": "uf", "right": "uf"}]}}
+    p = pipeline(
+        [{"id": "a", **src()}, {"id": "b", **src()}, {"id": "j", **join}],
+        [("a", "j", "left"), ("b", "j", "right")],
+    )
+    a = analyze(p, sources)
+    for _ in range(2):  # second run: the join comes from the cache
+        st = service.stats(engine, a, "j", timeout=None)
+        assert [i.code for i in st.issues] == ["JOIN_ROW_MULTIPLICATION"]
+    assert compile_chain(a, "j", cache=get_cache()).cached == {"j"}
 
 
 def test_copy_as_sql_never_uses_the_cache(engine: Engine, sources: FakeSources) -> None:

@@ -12,6 +12,7 @@ import { t } from "@/i18n/pt-BR";
 import { usePipelineStore } from "@/stores/pipelineStore";
 
 import { useNodeAnalysis, useServerPipeline } from "./analysis";
+import { InputsEditor } from "./InputsEditor";
 
 function SqlDialog({ nodeId, open, onClose }: { nodeId: string; open: boolean; onClose: () => void }) {
   const pipeline = useServerPipeline((s) => s.pipeline);
@@ -144,6 +145,7 @@ export function ConfigSidebar() {
             update={(next) => store.updateConfig(node.id, next)}
           />
         }
+        <InputsEditor node={node} />
       </div>
       <SqlDialog nodeId={node.id} open={sqlOpen} onClose={() => setSqlOpen(false)} />
     </aside>

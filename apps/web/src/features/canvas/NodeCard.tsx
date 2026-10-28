@@ -5,6 +5,7 @@ import { memo, useState } from "react";
 import { useCachedStats } from "@/api/hooks";
 import type { NodeAnalysis, PipelineNode } from "@/api/types";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui";
+import { handleName, inputHandles, lastVariadicInput } from "@/features/nodes/handles";
 import { getMeta, nodeSummary } from "@/features/nodes/registry";
 import { CATEGORY_COLOR } from "@/features/nodes/types";
 import { t } from "@/i18n/pt-BR";
@@ -20,18 +21,6 @@ export interface CardData extends Record<string, unknown> {
 }
 
 export type CardNode = Node<CardData, "card">;
-
-const HANDLE_LABELS: Record<string, string> = {
-  left: "esq",
-  right: "dir",
-  main: "principal",
-  lookup: "consulta",
-};
-
-/** Variadic inputs (union): the connected ones plus one free handle, at least two. */
-function variadicHandles(connected: number): string[] {
-  return Array.from({ length: Math.max(2, connected + 1) }, (_, i) => `in_${i}`);
-}
 
 function RowBadge({ id, analysis }: { id: string; analysis: NodeAnalysis | undefined }) {
   const stats = useCachedStats(id, analysis?.hash);
@@ -83,9 +72,7 @@ function NodeCardImpl({ data, selected }: NodeProps<CardNode>) {
   const { node, analysis } = data;
   const meta = getMeta(node.type);
   const [menuOpen, setMenuOpen] = useState(false);
-  const connected = usePipelineStore(
-    (s) => s.pipeline.edges.filter((e) => e.target === node.id && e.target_handle.startsWith("in_")).length,
-  );
+  const lastInput = usePipelineStore((s) => lastVariadicInput(s.pipeline.edges, node.id));
   if (!meta) return null;
   const Icon = meta.icon;
   const status = analysis?.status ?? "ok";
@@ -94,7 +81,7 @@ function NodeCardImpl({ data, selected }: NodeProps<CardNode>) {
   const firstError = analysis?.issues.find((i) => i.severity === "error");
   const warnings = analysis?.issues.filter((i) => i.severity === "warning").length ?? 0;
   const fallback = node.type === "source" && data.sourceName ? data.sourceName : meta.label;
-  const handles = meta.inputs[0]?.startsWith("in_") ? variadicHandles(connected) : meta.inputs;
+  const handles = inputHandles(meta, lastInput);
 
   return (
     <div
@@ -110,7 +97,7 @@ function NodeCardImpl({ data, selected }: NodeProps<CardNode>) {
       <div className="h-1 rounded-t-lg" style={{ background: color }} />
       {handles.map((h, i) => {
         const top = handles.length === 1 ? "50%" : `${((i + 1) * 100) / (handles.length + 1)}%`;
-        const name = HANDLE_LABELS[h] ?? (h.startsWith("in_") ? String(Number(h.slice(3)) + 1) : null);
+        const name = handleName(h);
         return (
           <div key={h}>
             <Handle

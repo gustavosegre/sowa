@@ -114,7 +114,7 @@ def stats(engine: Engine, analysis: Analysis, node_id: str, timeout: float | Non
         for handle, up in r.inputs.items():
             out.input_row_counts[handle] = count_rows(engine, analysis, up, timeout, hashes)
         if r.spec is not None and r.config is not None:
-            chain = compile_chain(analysis, node_id, cache=get_cache())
+            chain = compile_chain(analysis, node_id, cache=get_cache(), keep_inputs=True)
             schemas = {h: s for h, u in r.inputs.items() if (s := analysis.results[u].schema) is not None}
             found = r.spec.runtime_issues(
                 r.config,

@@ -60,8 +60,15 @@ class CacheLookup(Protocol):
 
 
 def compile_chain(
-    analysis: Analysis, node_id: str, *, for_display: bool = False, cache: CacheLookup | None = None
+    analysis: Analysis,
+    node_id: str,
+    *,
+    for_display: bool = False,
+    cache: CacheLookup | None = None,
+    keep_inputs: bool = False,
 ) -> Chain:
+    """Query chain up to ``node_id``. ``keep_inputs`` keeps the CTEs of the node's direct inputs
+    even when the node itself comes from the cache (``runtime_issues`` queries them)."""
     r = analysis.results.get(node_id)
     if r is None:
         raise CompileError([Issue(node_id=node_id, code=IssueCode.NODE_NOT_FOUND, message="Nó não encontrado.")])
@@ -89,7 +96,7 @@ def compile_chain(
         if n in needed:
             continue
         needed.add(n)
-        if n not in cached:
+        if n not in cached or (keep_inputs and n == node_id):
             stack.extend(analysis.results[n].inputs.values())
 
     ctes: list[tuple[str, exp.Select]] = []

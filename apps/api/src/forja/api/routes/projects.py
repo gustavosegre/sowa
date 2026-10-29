@@ -15,17 +15,16 @@ from forja.api.schemas import (
     VersionDetail,
     VersionOut,
 )
-from forja.api.security import CurrentUser
 from forja.domain.migrations import migrate
 from forja.domain.pipeline import Pipeline
 from forja.storage.db import PipelineVersionRow, ProjectRow, get_session, utcnow
-from forja.storage.repos import ProjectRepo, UserRepo, VersionRepo
+from forja.storage.repos import ProjectRepo, VersionRepo
 
 router = APIRouter(prefix="/projects", tags=["projects"])
 Db = Annotated[Session, Depends(get_session)]
 
 
-def _out(row: ProjectRow, owners: dict[str, str] | None = None) -> ProjectOut:
+def _out(row: ProjectRow) -> ProjectOut:
     return ProjectOut(
         id=row.id,
         name=row.name,
@@ -33,8 +32,12 @@ def _out(row: ProjectRow, owners: dict[str, str] | None = None) -> ProjectOut:
         created_at=row.created_at,
         updated_at=row.updated_at,
         node_count=len((row.pipeline or {}).get("nodes", [])),
-        owner=(owners or {}).get(row.owner_id or ""),
+        workspace=row.workspace,
     )
+
+
+def _workspace(name: str | None) -> str | None:
+    return " ".join((name or "").split()) or None
 
 
 def _get(db: Session, project_id: str) -> ProjectRow:
@@ -46,14 +49,12 @@ def _get(db: Session, project_id: str) -> ProjectRow:
 
 @router.get("", response_model=list[ProjectOut])
 def list_projects(db: Db) -> list[ProjectOut]:
-    owners = {u.id: u.username for u in UserRepo(db).list()}
-    return [_out(r, owners) for r in ProjectRepo(db).list()]
+    return [_out(r) for r in ProjectRepo(db).list()]
 
 
 @router.post("", response_model=ProjectOut, status_code=201)
-def create_project(body: ProjectCreate, db: Db, user: CurrentUser) -> ProjectOut:
-    row = ProjectRepo(db).create(body.name, body.pipeline, owner_id=user.id if user else None)
-    return _out(row, {user.id: user.username} if user else None)
+def create_project(body: ProjectCreate, db: Db) -> ProjectOut:
+    return _out(ProjectRepo(db).create(body.name, body.pipeline, workspace=_workspace(body.workspace)))
 
 
 @router.get("/{project_id}", response_model=ProjectOut)
@@ -62,9 +63,13 @@ def get_project(project_id: str, db: Db) -> ProjectOut:
 
 
 @router.patch("/{project_id}", response_model=ProjectOut)
-def rename_project(project_id: str, body: ProjectUpdate, db: Db) -> ProjectOut:
+def update_project(project_id: str, body: ProjectUpdate, db: Db) -> ProjectOut:
+    """Rename and/or move to another workspace."""
     row = _get(db, project_id)
-    row.name = body.name
+    if body.name is not None:
+        row.name = body.name
+    if "workspace" in body.model_fields_set:
+        row.workspace = _workspace(body.workspace)
     row.updated_at = utcnow()
     return _out(row)
 

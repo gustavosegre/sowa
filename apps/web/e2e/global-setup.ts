@@ -1,17 +1,18 @@
-import { request, type FullConfig } from "@playwright/test";
+import { mkdirSync, writeFileSync } from "node:fs";
+import { dirname } from "node:path";
 
-export const E2E_USER = { username: "e2e", password: "e2e-senha-forte" };
-export const STORAGE_STATE = ".auth/e2e.json";
+import type { FullConfig } from "@playwright/test";
 
-/** Logs the E2E user in (creating it on a fresh data dir) and saves the session cookie. */
-export default async function globalSetup(config: FullConfig) {
+import { E2E_TOKEN, STORAGE_STATE } from "./token";
+
+/** Stores the E2E token in the browser's localStorage, as opening the #token= address would. */
+export default function globalSetup(config: FullConfig) {
   const baseURL = config.projects[0]?.use.baseURL;
-  const ctx = await request.newContext({ baseURL });
-  const status = (await (await ctx.get("/api/auth/status")).json()) as { setup_required: boolean };
-  const res = await ctx.post(status.setup_required ? "/api/auth/setup" : "/api/auth/login", {
-    data: E2E_USER,
-  });
-  if (!res.ok()) throw new Error(`E2E login failed: ${res.status()} ${await res.text()}`);
-  await ctx.storageState({ path: STORAGE_STATE });
-  await ctx.dispose();
+  if (!baseURL) throw new Error("baseURL missing in playwright.config.ts");
+  mkdirSync(dirname(STORAGE_STATE), { recursive: true });
+  const state = {
+    cookies: [],
+    origins: [{ origin: new URL(baseURL).origin, localStorage: [{ name: "forja.token", value: E2E_TOKEN }] }],
+  };
+  writeFileSync(STORAGE_STATE, JSON.stringify(state));
 }

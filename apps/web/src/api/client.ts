@@ -1,13 +1,20 @@
 import createClient from "openapi-fetch";
 
 import type { paths } from "./generated/schema";
+import { authHeaders } from "./token";
 import type { ApiErrorBody, Issue } from "./types";
 
 export const API_BASE: string = (import.meta.env.VITE_API_URL as string | undefined) ?? "/api";
 
 export const api = createClient<paths>({ baseUrl: API_BASE });
+api.use({
+  onRequest({ request }) {
+    for (const [k, v] of Object.entries(authHeaders())) request.headers.set(k, v);
+    return request;
+  },
+});
 
-/** Fired on any 401 (session expired or logged out elsewhere): the app shows the login screen. */
+/** Fired on any 401 (missing or wrong token): the app shows the token screen. */
 export const UNAUTHENTICATED_EVENT = "forja:unauthenticated";
 
 function signal401(status: number) {
@@ -56,7 +63,7 @@ export function unwrap<T>(res: { data?: T; error?: unknown; response: Response }
 export async function postRaw(path: string, body: unknown, signal?: AbortSignal): Promise<Response> {
   const res = await fetch(`${API_BASE}${path}`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify(body),
     signal,
   });
@@ -82,6 +89,7 @@ export function uploadWithProgress<T>(
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open("POST", `${API_BASE}${path}`);
+    for (const [k, v] of Object.entries(authHeaders())) xhr.setRequestHeader(k, v);
     xhr.upload.onprogress = (e) => {
       if (e.lengthComputable) onProgress(e.loaded / e.total);
     };
@@ -101,4 +109,14 @@ export function uploadWithProgress<T>(
     xhr.onerror = () => reject(new ApiError(undefined, 0));
     xhr.send(form);
   });
+}
+
+/** Starts a browser download from a signed API path (`download_path` of an export job). */
+export function downloadFromApi(path: string): void {
+  const a = document.createElement("a");
+  a.href = `${API_BASE}${path}`;
+  a.download = "";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
 }

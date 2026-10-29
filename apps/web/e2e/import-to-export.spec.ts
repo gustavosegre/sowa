@@ -91,7 +91,7 @@ test("CSV brasileiro → tipo → calculada → agrupar → exportar Excel Brasi
   await sidebar.getByLabel("Nome do arquivo").fill("vendas_por_uf");
   await expect(page.getByTestId("save-status")).toHaveText(/Salvo/, { timeout: 10_000 });
   await sidebar.getByRole("button", { name: "Exportar" }).click();
-  const link = sidebar.getByRole("link", { name: "Baixar arquivo" });
+  const link = sidebar.getByRole("button", { name: "Baixar arquivo" });
   await expect(link).toBeVisible({ timeout: 20_000 });
   await shot(page, "08-exported");
   const [download] = await Promise.all([page.waitForEvent("download"), link.click()]);

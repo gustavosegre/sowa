@@ -2,17 +2,16 @@ import { useQueryClient } from "@tanstack/react-query";
 import { LogIn } from "lucide-react";
 import { useState, type SyntheticEvent } from "react";
 
-import { errorIssue } from "@/api/client";
-import { login, setupFirstUser } from "@/api/hooks";
+import { api, ApiError, errorIssue, unwrap } from "@/api/client";
+import { clearToken, setToken } from "@/api/token";
 import { IssueItem } from "@/components/IssueList";
 import { Button, Field, Input } from "@/components/ui";
 import { t } from "@/i18n/pt-BR";
 
-/** Login, or creation of the first user when there is none yet. */
-export function LoginPage({ setup }: { setup: boolean }) {
+/** Asks for the access token (as Flowa does) when the stored one is missing or wrong. */
+export function LoginPage() {
   const qc = useQueryClient();
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [value, setValue] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<unknown>(null);
 
@@ -21,8 +20,14 @@ export function LoginPage({ setup }: { setup: boolean }) {
     setBusy(true);
     setError(null);
     try {
-      await (setup ? setupFirstUser : login)(username.trim(), password);
-      // Another user may be logging in: drop everything cached and refetch what is on screen.
+      setToken(value);
+      const status = unwrap(await api.GET("/auth/status"));
+      if (!status.authenticated) {
+        clearToken();
+        setError(new ApiError({ code: "UNAUTHENTICATED", message: t.auth.wrong }, 401));
+        return;
+      }
+      // Drop everything cached without the token and refetch what is on screen.
       await qc.resetQueries();
     } catch (err) {
       setError(err);
@@ -35,36 +40,29 @@ export function LoginPage({ setup }: { setup: boolean }) {
     <div className="flex min-h-full items-center justify-center bg-background p-4">
       <form
         onSubmit={(e) => void submit(e)}
-        className="flex w-full max-w-sm flex-col gap-4 rounded-xl border bg-card p-6 shadow-sm"
+        className="flex w-full max-w-md flex-col gap-4 rounded-xl border bg-card p-6 shadow-sm"
       >
         <div className="flex items-center gap-3">
           <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-[15px] font-bold text-primary-foreground">
             F
           </span>
-          <h1 className="text-[16px] font-semibold">{setup ? t.auth.setupTitle : t.auth.loginTitle}</h1>
+          <h1 className="text-[16px] font-semibold">{t.auth.title}</h1>
         </div>
-        {setup && <p className="text-[12px] text-muted-foreground">{t.auth.setupHint}</p>}
-        <Field label={t.auth.username}>
+        <p className="text-[13px] text-muted-foreground">{t.auth.help}</p>
+        <Field label={t.auth.token} hint={t.auth.where}>
           <Input
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            autoComplete="username"
+            type="password"
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            placeholder={t.auth.placeholder}
+            autoComplete="off"
             autoFocus
             required
           />
         </Field>
-        <Field label={t.auth.password} hint={setup ? t.auth.passwordHint : undefined}>
-          <Input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            autoComplete={setup ? "new-password" : "current-password"}
-            required
-          />
-        </Field>
         {error !== null && <IssueItem issue={errorIssue(error)} />}
-        <Button type="submit" disabled={busy || !username.trim() || !password}>
-          <LogIn /> {setup ? t.auth.create : t.auth.login}
+        <Button type="submit" disabled={busy || !value.trim()}>
+          <LogIn /> {t.auth.submit}
         </Button>
       </form>
     </div>

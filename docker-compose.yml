@@ -8,6 +8,9 @@ services:
       FORJA_DATA_DIR: /data
       FORJA_DATABASE_URL: postgresql+psycopg://forja:forja@postgres:5432/forja
       FORJA_CORS_ORIGINS: '["http://localhost:5173"]'
+      # Token de acesso: vazio = gerado em /data/token. Endereço: docker compose exec api uv run python -m forja.cli token
+      FORJA_TOKEN: ${FORJA_TOKEN:-}
+      FORJA_WEB_URL: http://localhost:${FORJA_WEB_PORT:-5173}
       FORJA_STORAGE: ${FORJA_STORAGE:-local}
       FORJA_S3_BUCKET: forja
       FORJA_S3_ENDPOINT_URL: http://minio:9000

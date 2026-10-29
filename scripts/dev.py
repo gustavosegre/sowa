@@ -9,6 +9,7 @@ import argparse
 import os
 import shutil
 import subprocess
+import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -36,7 +37,11 @@ def main() -> int:
             env=env,
         ),
     ]
-    print(f"Forja: web http://127.0.0.1:{args.web_port}  ·  api http://127.0.0.1:{args.api_port}/docs")
+    web = f"http://127.0.0.1:{args.web_port}"
+    print(f"Forja: web {web}  ·  api http://127.0.0.1:{args.api_port}/docs")
+    token = _wait_token(env, procs[0])
+    if token:
+        print(f"\n  Abra a Forja com o token de acesso:\n\n    {web}/#token={token}\n")
     try:
         while all(p.poll() is None for p in procs):
             try:
@@ -55,6 +60,21 @@ def main() -> int:
                 except subprocess.TimeoutExpired:
                     p.kill()
     return max((p.returncode or 0) for p in procs)
+
+
+def _wait_token(env: dict[str, str], api: subprocess.Popen[bytes], timeout: float = 60) -> str | None:
+    """FORJA_TOKEN, or the token file the API writes on its first start (None when login is off)."""
+    if env.get("FORJA_AUTH_ENABLED", "").lower() in ("0", "false", "no"):
+        return None
+    if env.get("FORJA_TOKEN", "").strip():
+        return env["FORJA_TOKEN"].strip()
+    path = Path(env["FORJA_DATA_DIR"]) / "token"
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline and api.poll() is None:
+        if path.exists() and (token := path.read_text(encoding="utf-8").strip()):
+            return token
+        time.sleep(0.25)
+    return None
 
 
 if __name__ == "__main__":

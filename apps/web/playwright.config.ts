@@ -1,5 +1,7 @@
 import { defineConfig } from "@playwright/test";
 
+import { E2E_TOKEN, STORAGE_STATE } from "./e2e/token";
+
 const apiPort = process.env.FORJA_API_PORT ?? "8000";
 const webPort = process.env.FORJA_WEB_PORT ?? "5173";
 
@@ -14,14 +16,14 @@ export default defineConfig({
     acceptDownloads: true,
     viewport: { width: 1440, height: 900 },
     locale: "pt-BR",
-    storageState: ".auth/e2e.json",
+    storageState: STORAGE_STATE,
   },
   webServer: [
     {
       command: `uv run --directory ../api uvicorn forja.main:app --port ${apiPort}`,
       url: `http://127.0.0.1:${apiPort}/health`,
       reuseExistingServer: true,
-      env: { FORJA_DATA_DIR: "../../.e2e-data" },
+      env: { FORJA_DATA_DIR: "../../.e2e-data", FORJA_TOKEN: E2E_TOKEN },
     },
     {
       command: `pnpm exec vite --host 127.0.0.1 --port ${webPort}`,

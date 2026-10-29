@@ -7,7 +7,7 @@ import {
 } from "@tanstack/react-query";
 import { tableFromIPC, type Table } from "apache-arrow";
 
-import { api, postRaw, unwrap, uploadWithProgress } from "./client";
+import { api, downloadFromApi, postRaw, unwrap, uploadWithProgress } from "./client";
 import type {
   Column,
   ConfirmOut,
@@ -56,8 +56,23 @@ export function useProject(id: string) {
 export function useCreateProject() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (name: string): Promise<Project> =>
-      unwrap(await api.POST("/projects", { body: { name } })),
+    mutationFn: async ({ name, workspace }: { name: string; workspace: string | null }): Promise<Project> =>
+      unwrap(await api.POST("/projects", { body: { name, workspace } })),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["projects"] }),
+  });
+}
+
+/** Moves a project to another workspace (`null` takes it out of any workspace). */
+export function useMoveProject() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, workspace }: { id: string; workspace: string | null }) =>
+      unwrap(
+        await api.PATCH("/projects/{project_id}", {
+          params: { path: { project_id: id } },
+          body: { workspace },
+        }),
+      ),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["projects"] }),
   });
 }
@@ -354,8 +369,10 @@ export function useExportJob(jobId: string | null) {
   });
 }
 
-export function exportDownloadUrl(jobId: string): string {
-  return `${import.meta.env.VITE_API_URL ?? "/api"}/exports/${jobId}/download`;
+/** Downloads an export: asks for a fresh signed link (valid for a few minutes) and follows it. */
+export async function downloadExport(jobId: string): Promise<void> {
+  const job = unwrap(await api.GET("/exports/{job_id}", { params: { path: { job_id: jobId } } }));
+  if (job.download_path) downloadFromApi(job.download_path);
 }
 
 /* ---------------------------------------------------------------- versions */
@@ -420,6 +437,7 @@ export function useDeleteTemplate() {
 
 /* ---------------------------------------------------------------- auth */
 
+/** Whether the access token is required and whether the stored one is accepted. */
 export function useAuthStatus() {
   return useQuery({
     queryKey: ["auth"],
@@ -427,28 +445,4 @@ export function useAuthStatus() {
     staleTime: Infinity,
     retry: false,
   });
-}
-
-export async function login(username: string, password: string) {
-  return unwrap(await api.POST("/auth/login", { body: { username, password } }));
-}
-
-export async function setupFirstUser(username: string, password: string) {
-  return unwrap(await api.POST("/auth/setup", { body: { username, password } }));
-}
-
-export async function logout() {
-  await api.POST("/auth/logout");
-}
-
-export function useUsers(enabled: boolean) {
-  return useQuery({
-    queryKey: ["users"],
-    enabled,
-    queryFn: async () => unwrap(await api.GET("/auth/users")),
-  });
-}
-
-export async function createUser(username: string, password: string) {
-  return unwrap(await api.POST("/auth/users", { body: { username, password } }));
 }

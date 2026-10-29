@@ -106,12 +106,12 @@ Ao criar o projeto, usar a versão estável mais recente de cada lib e fixar nos
 | POST | `/sources/{id}/replace` | "Substituir fonte": troca o arquivo, mantém o id e as escolhas de coluna; exige confirmar de novo |
 | POST | `/formula/render` | Re-renderiza uma fórmula em outro locale (troca de `;`/`,` e nomes de função) |
 | GET | `/nodes` | Catálogo de nós com o JSON Schema de cada config |
-| GET/POST/PATCH/DELETE | `/projects`, `/projects/{id}` | CRUD de projetos |
+| GET/POST/PATCH/DELETE | `/projects`, `/projects/{id}` | CRUD de projetos (`workspace` opcional agrupa por equipe; o `PATCH` só muda os campos enviados) |
 | GET/POST | `/projects/{id}/versions` · GET `/projects/{id}/versions/{v}` · POST `.../{v}/restore` | Histórico de versões do fluxo |
-| GET | `/auth/status` · POST `/auth/setup` · `/auth/login` · `/auth/logout` · GET/POST `/auth/users` | Login (usuário e senha). `status` diz se o login está ligado, se falta criar o primeiro usuário e quem está logado |
+| GET | `/auth/status` | Se o token de acesso é exigido e se a requisição o trouxe (`auth_enabled`, `authenticated`) |
 | GET/POST | `/templates` · GET/PUT/DELETE `/templates/{id}` | Templates (trechos reutilizáveis do fluxo, globais). `PUT` com `flow` incrementa `version` |
 
-Com `FORJA_AUTH_ENABLED` (padrão: ligado), toda rota exceto `/health`, `/nodes` e `/auth/*` exige a sessão (cookie HttpOnly `forja_session`); sem ela, `401 UNAUTHENTICATED` e o front volta para a tela de login. Erros de validação (422) também saem como `ApiError` em pt-BR (`INVALID_REQUEST`).
+**Token de acesso (padrão do Flowa).** Toda rota exceto `/health`, `/nodes` e `/auth/status` exige `Authorization: Bearer <token>`; sem ele, `401 UNAUTHENTICATED` e o front mostra a tela do token. O token vem de `FORJA_TOKEN` ou é gerado no primeiro start em `<data_dir>/token`. O front lê `#token=` do endereço, guarda no `localStorage` e limpa a barra; o token nunca vai em cookie nem em query string (fecha CSRF). O download de exportação é link comum do navegador: usa o `download_path` do job, assinado com HMAC e válido por 5 min. Com `FORJA_AUTH_ENABLED=false` a API só atende conexões desta máquina (`403 LOCAL_ONLY`). Erros de validação (422) também saem como `ApiError` em pt-BR (`INVALID_REQUEST`).
 
 A prévia responde `application/vnd.apache.arrow.stream` com os cabeçalhos `X-Forja-Rows` e `X-Forja-Has-More`. Toda resposta de erro é um `ApiError` (`code`, `message` em pt-BR, `hint`, `detail`, `issues`).
 
@@ -159,14 +159,14 @@ forja/
 
 ```bash
 make setup       # uv sync + pnpm install + chromium do Playwright
-make dev         # api (:8000) + web (:5173) com reload — portas: make dev API_PORT=8010
+make dev         # api (:8000) + web (:5173) com reload; mostra o endereço com o token — portas: make dev API_PORT=8010
 make test        # pytest + vitest
 make e2e         # playwright (FORJA_API_PORT/FORJA_WEB_PORT para reaproveitar servidores já no ar)
 make lint        # ruff (check + format --check) + mypy + eslint + prettier --check + tsc --noEmit
 make format      # ruff format/--fix + prettier --write
 make types       # regenera tipos TS a partir do OpenAPI (rodar após mudar modelos Pydantic)
 make db-migrate  # alembic upgrade head (a API também migra ao subir, FORJA_AUTO_MIGRATE)
-cd apps/api && uv run python -m forja.cli create-user NOME   # ou set-password NOME (pede a senha)
+cd apps/api && uv run python -m forja.cli token   # endereço com #token= (--new gera outro; reinicie a API)
 ```
 
 As receitas do Makefile são `cd x && cmd` para rodarem tanto em sh quanto no cmd.exe; `make dev` usa `scripts/dev.py` (multiplataforma). Configuração por variáveis `FORJA_*` (ver `.env.example`); o Vite faz proxy de `/api` para `FORJA_API_URL`.
@@ -428,7 +428,7 @@ Modelo único:
 
 **Fase 3 — Escala e colaboração**: cache materializado; jobs assíncronos; modo amostra; histórico de versões; templates e sub-fluxos reutilizáveis; parâmetros globais (`{data_corte}`); nó `sql`; linhagem de colunas (clicar numa coluna e ver de onde ela vem); "Substituir fonte"; autenticação e compartilhamento (seguir o padrão do Flowa); particionamento Parquet.
 
-**Estado atual** (out/2026): Fases 0, 1 e 2 completas. Da Fase 3 estão feitos: cache materializado (`engine/matcache.py`: nós `cacheable` viram Parquet pelo hash ao serem contados; `compile_chain(..., cache=)` lê do cache e poda o subgrafo; LRU por `FORJA_CACHE_MAX_GB`), jobs assíncronos, modo amostra, histórico de versões (snapshot automático a cada 2 min de edição, até 100 por projeto, versões nomeadas, restaurar guarda o estado atual antes), parâmetros globais (`settings.params`, `{nome}` em fórmulas e em valores de filtros visuais), nó `sql` (validação na AST, schema via `DESCRIBE` pelo `Describer` do engine), linhagem de colunas (no perfil da coluna, calculada da análise estática), "Substituir fonte", particionamento Parquet (`.zip` com pastas `coluna=valor`) e templates/sub-fluxos (aba Templates da biblioteca; "Salvar como template" no painel do nó salva a seleção; inserir como sub-fluxo ou como nós editáveis). Também feito: `FileStorage` S3/MinIO (`FORJA_STORAGE=s3`, extra `s3` com boto3; `storage/files.py`): o disco é a cópia de trabalho e o bucket o armazenamento durável — originais, Parquet normalizado e exportações sobem com `persist()` ao serem gravados e descem com `ensure_local()` quando faltam; cache de nós e temporários ficam só no disco. O DuckDB continua sem acesso à rede. Autenticação básica: usuário e senha (scrypt da stdlib), sessão em cookie HttpOnly guardada no banco como SHA-256; no primeiro acesso a tela pede o primeiro usuário, e qualquer usuário logado cria outros (menu do usuário) ou via `forja.cli`. Compartilhamento: um workspace único — todos os usuários veem e editam todos os projetos; o projeto guarda quem o criou (`owner`). Nos testes o login fica desligado (`conftest.py`), exceto em `test_auth.py`; o E2E entra com o usuário `e2e` no `global-setup.ts`.
+**Estado atual** (out/2026): Fases 0, 1 e 2 completas. Da Fase 3 estão feitos: cache materializado (`engine/matcache.py`: nós `cacheable` viram Parquet pelo hash ao serem contados; `compile_chain(..., cache=)` lê do cache e poda o subgrafo; LRU por `FORJA_CACHE_MAX_GB`), jobs assíncronos, modo amostra, histórico de versões (snapshot automático a cada 2 min de edição, até 100 por projeto, versões nomeadas, restaurar guarda o estado atual antes), parâmetros globais (`settings.params`, `{nome}` em fórmulas e em valores de filtros visuais), nó `sql` (validação na AST, schema via `DESCRIBE` pelo `Describer` do engine), linhagem de colunas (no perfil da coluna, calculada da análise estática), "Substituir fonte", particionamento Parquet (`.zip` com pastas `coluna=valor`) e templates/sub-fluxos (aba Templates da biblioteca; "Salvar como template" no painel do nó salva a seleção; inserir como sub-fluxo ou como nós editáveis). Também feito: `FileStorage` S3/MinIO (`FORJA_STORAGE=s3`, extra `s3` com boto3; `storage/files.py`): o disco é a cópia de trabalho e o bucket o armazenamento durável — originais, Parquet normalizado e exportações sobem com `persist()` ao serem gravados e descem com `ensure_local()` quando faltam; cache de nós e temporários ficam só no disco. O DuckDB continua sem acesso à rede. Autenticação e compartilhamento seguindo o Flowa (`flowa-dev/flowa`, `flowa/api/security.py`): um token de acesso por instalação (`forja/auth.py`, ver §5), sem usuários; quem tem o token acessa tudo. Compartilhar = passar o endereço com `#token=`. Projetos se agrupam em **workspaces** (por equipe ou área, como os workspaces de pipelines do Flowa), em seções recolhíveis na tela de projetos. Os testes rodam com o login ligado (`FORJA_TOKEN` no `conftest.py`, o `TestClient` manda o cabeçalho); o E2E sobe a API com `FORJA_TOKEN` e o `global-setup.ts` grava o token no `localStorage`.
 
 **Fase 3 concluída.**
 

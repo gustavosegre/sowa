@@ -25,22 +25,9 @@ class ApiError(BaseModel):
 # ---------------------------------------------------------------- auth
 
 
-class Credentials(BaseModel):
-    username: str = Field(min_length=3, max_length=64, pattern=r"^[A-Za-z0-9._@-]+$")
-    password: str = Field(min_length=8, max_length=200)
-
-
-class UserOut(BaseModel):
-    id: str
-    username: str
-    created_at: datetime
-
-
 class AuthStatus(BaseModel):
-    auth_enabled: bool
-    # No user exists yet: the first one is created on the login screen.
-    setup_required: bool
-    user: UserOut | None
+    auth_enabled: bool  # False: login off, only this machine is answered
+    authenticated: bool  # this request carries the access token (always True when off)
 
 
 # ---------------------------------------------------------------- projects
@@ -48,11 +35,15 @@ class AuthStatus(BaseModel):
 
 class ProjectCreate(BaseModel):
     name: str = Field(min_length=1, max_length=200)
+    workspace: str | None = Field(default=None, max_length=100)  # groups projects by team or domain
     pipeline: Pipeline | None = None
 
 
 class ProjectUpdate(BaseModel):
-    name: str = Field(min_length=1, max_length=200)
+    """Only the fields sent change; `workspace: null` (or "") removes the project from its workspace."""
+
+    name: str | None = Field(default=None, min_length=1, max_length=200)
+    workspace: str | None = Field(default=None, max_length=100)
 
 
 class ProjectOut(BaseModel):
@@ -62,7 +53,7 @@ class ProjectOut(BaseModel):
     created_at: datetime
     updated_at: datetime
     node_count: int = 0
-    owner: str | None = None  # username of who created it
+    workspace: str | None = None
 
 
 class VersionOut(BaseModel):
@@ -311,6 +302,8 @@ class ExportJobOut(BaseModel):
     error: Issue | None
     created_at: datetime
     finished_at: datetime | None
+    # Signed link (valid for a few minutes) once the file is ready: browser downloads carry no token.
+    download_path: str | None = None
 
 
 # ---------------------------------------------------------------- node catalog

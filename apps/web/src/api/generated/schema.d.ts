@@ -50,7 +50,7 @@ export interface paths {
     };
     /**
      * Status
-     * @description Whether login is on, whether the first user must be created, and who is logged in.
+     * @description Whether the access token is required and whether this request carries it.
      */
     get: operations["status_auth_status_get"];
     put?: never;
@@ -61,75 +61,20 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/auth/setup": {
+  "/exports/{job_id}/download": {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    get?: never;
-    put?: never;
     /**
-     * Setup
-     * @description First run: create the first user and log in.
+     * Download
+     * @description The exported file. Use `download_path` from the job (signed, valid for a few minutes).
      */
-    post: operations["setup_auth_setup_post"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/auth/login": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
+    get: operations["download_exports__job_id__download_get"];
     put?: never;
-    /** Login */
-    post: operations["login_auth_login_post"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/auth/logout": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Logout */
-    post: operations["logout_auth_logout_post"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/auth/users": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** List Users */
-    get: operations["list_users_auth_users_get"];
-    put?: never;
-    /**
-     * Create User
-     * @description Any logged-in user can add another one (one shared workspace).
-     */
-    post: operations["create_user_auth_users_post"];
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -169,8 +114,11 @@ export interface paths {
     delete: operations["delete_project_projects__project_id__delete"];
     options?: never;
     head?: never;
-    /** Rename Project */
-    patch: operations["rename_project_projects__project_id__patch"];
+    /**
+     * Update Project
+     * @description Rename and/or move to another workspace.
+     */
+    patch: operations["update_project_projects__project_id__patch"];
     trace?: never;
   };
   "/projects/{project_id}/pipeline": {
@@ -600,23 +548,6 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/exports/{job_id}/download": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Download */
-    get: operations["download_exports__job_id__download_get"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
   "/templates": {
     parameters: {
       query?: never;
@@ -678,9 +609,8 @@ export interface components {
     AuthStatus: {
       /** Auth Enabled */
       auth_enabled: boolean;
-      /** Setup Required */
-      setup_required: boolean;
-      user: components["schemas"]["UserOut"] | null;
+      /** Authenticated */
+      authenticated: boolean;
     };
     /** Body_replace_file_sources__source_id__replace_post */
     Body_replace_file_sources__source_id__replace_post: {
@@ -738,13 +668,6 @@ export interface components {
     ConfirmOut: {
       source: components["schemas"]["SourceOut"];
       report: components["schemas"]["ImportReport"];
-    };
-    /** Credentials */
-    Credentials: {
-      /** Username */
-      username: string;
-      /** Password */
-      password: string;
     };
     /** CsvImportOptions */
     CsvImportOptions: {
@@ -890,6 +813,8 @@ export interface components {
       created_at: string;
       /** Finished At */
       finished_at: string | null;
+      /** Download Path */
+      download_path?: string | null;
     };
     /** ExportRequest */
     ExportRequest: {
@@ -1386,6 +1311,8 @@ export interface components {
     ProjectCreate: {
       /** Name */
       name: string;
+      /** Workspace */
+      workspace?: string | null;
       pipeline?: components["schemas"]["Pipeline"] | null;
     };
     /** ProjectOut */
@@ -1411,13 +1338,18 @@ export interface components {
        * @default 0
        */
       node_count: number;
-      /** Owner */
-      owner?: string | null;
+      /** Workspace */
+      workspace?: string | null;
     };
-    /** ProjectUpdate */
+    /**
+     * ProjectUpdate
+     * @description Only the fields sent change; `workspace: null` (or "") removes the project from its workspace.
+     */
     ProjectUpdate: {
       /** Name */
-      name: string;
+      name?: string | null;
+      /** Workspace */
+      workspace?: string | null;
     };
     /** SavedPipeline */
     SavedPipeline: {
@@ -1556,18 +1488,6 @@ export interface components {
       source: components["schemas"]["SourceOut"];
       detection: components["schemas"]["Detection"] | null;
       error?: components["schemas"]["ApiError"] | null;
-    };
-    /** UserOut */
-    UserOut: {
-      /** Id */
-      id: string;
-      /** Username */
-      username: string;
-      /**
-       * Created At
-       * Format: date-time
-       */
-      created_at: string;
     };
     /** ValidationError */
     ValidationError: {
@@ -2765,131 +2685,26 @@ export interface operations {
       };
     };
   };
-  setup_auth_setup_post: {
+  download_exports__job_id__download_get: {
     parameters: {
-      query?: never;
+      query?: {
+        exp?: number;
+        sig?: string;
+      };
       header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["Credentials"];
+      path: {
+        job_id: string;
       };
-    };
-    responses: {
-      /** @description Successful Response */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["UserOut"];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  login_auth_login_post: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["Credentials"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["UserOut"];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  logout_auth_logout_post: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
       cookie?: never;
     };
     requestBody?: never;
     responses: {
       /** @description Successful Response */
-      204: {
+      200: {
         headers: {
           [name: string]: unknown;
         };
         content?: never;
-      };
-    };
-  };
-  list_users_auth_users_get: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["UserOut"][];
-        };
-      };
-    };
-  };
-  create_user_auth_users_post: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["Credentials"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["UserOut"];
-        };
       };
       /** @description Validation Error */
       422: {
@@ -3015,7 +2830,7 @@ export interface operations {
       };
     };
   };
-  rename_project_projects__project_id__patch: {
+  update_project_projects__project_id__patch: {
     parameters: {
       query?: never;
       header?: never;
@@ -3910,35 +3725,6 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["ExportJobOut"];
         };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  download_exports__job_id__download_get: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        job_id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
       };
       /** @description Validation Error */
       422: {

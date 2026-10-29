@@ -1,4 +1,4 @@
-"""Basic username/password login (CLAUDE.md §19)."""
+"""Access token, as in Flowa (CLAUDE.md §19)."""
 
 from __future__ import annotations
 
@@ -7,63 +7,111 @@ from collections.abc import Iterator
 import pytest
 from fastapi.testclient import TestClient
 
-from forja.auth import hash_password, verify_password
+from conftest import TOKEN
+from forja import auth
+from forja.cli import main as cli
 from forja.settings import get_settings
 
 
 @pytest.fixture
-def auth_on(client: TestClient) -> Iterator[TestClient]:
+def anon(client: TestClient) -> TestClient:
+    """Same app, without the Authorization header."""
+    return TestClient(client.app)
+
+
+@pytest.fixture
+def token_settings() -> Iterator[None]:
+    """Lets a test change auth settings; restores them and the cached token afterwards."""
     s = get_settings()
-    s.auth_enabled = True
-    client.cookies.clear()
+    saved = (s.auth_enabled, s.token)
     try:
-        yield client
+        yield
     finally:
-        s.auth_enabled = False
-        client.cookies.clear()
+        s.auth_enabled, s.token = saved
+        auth.get_auth.cache_clear()
 
 
-def test_password_hash() -> None:
-    h = hash_password("segredo123")
-    assert h.startswith("scrypt$")
-    assert verify_password("segredo123", h)
-    assert not verify_password("segredo124", h)
-    assert not verify_password("x", "lixo")
-
-
-def test_login_flow(auth_on: TestClient) -> None:
-    c = auth_on
-    assert c.get("/health").status_code == 200
-    r = c.get("/projects")
+def test_token_required(client: TestClient, anon: TestClient) -> None:
+    assert anon.get("/health").status_code == 200
+    assert anon.get("/nodes").status_code == 200
+    r = anon.get("/projects")
     assert r.status_code == 401
-    assert r.json()["message"] == "Faça login para continuar."
+    assert r.json()["code"] == "UNAUTHENTICATED"
+    assert r.json()["message"] == "Informe o token de acesso para continuar."
+    assert anon.get("/projects", headers={"Authorization": "Bearer errado"}).status_code == 401
+    assert anon.get("/projects", headers={"Authorization": f"Basic {TOKEN}"}).status_code == 401
+    assert anon.get("/projects", headers={"Authorization": f"Bearer {TOKEN}"}).status_code == 200
 
-    st = c.get("/auth/status").json()
-    assert st == {"auth_enabled": True, "setup_required": True, "user": None}
+    assert anon.get("/auth/status").json() == {"auth_enabled": True, "authenticated": False}
+    assert client.get("/auth/status").json() == {"auth_enabled": True, "authenticated": True}
 
-    short = c.post("/auth/setup", json={"username": "ana", "password": "curta"})
-    assert short.status_code == 422
-    assert short.json()["message"] == 'Dados inválidos em "password": texto curto demais (limite: 8).'
-    r = c.post("/auth/setup", json={"username": "ana", "password": "senha-forte"})
-    assert r.status_code == 201
-    assert c.get("/auth/status").json()["user"]["username"] == "ana"
-    assert c.post("/auth/setup", json={"username": "bia", "password": "senha-forte"}).status_code == 409
 
-    # Logged in: the project records who created it.
-    p = c.post("/projects", json={"name": "Do login"}).json()
-    assert p["owner"] == "ana"
-    assert any(x["id"] == p["id"] and x["owner"] == "ana" for x in c.get("/projects").json())
+def test_token_file_generated(token_settings: None) -> None:
+    s = get_settings()
+    s.token = ""
+    auth.token_path().unlink(missing_ok=True)
+    first = auth.resolve_token()
+    assert first.token
+    assert len(first.token) >= 40
+    assert first.source == str(auth.token_path())
+    assert auth.token_path().read_text(encoding="utf-8") == first.token
+    assert auth.resolve_token().token == first.token  # reused on the next start
 
-    # Another user, created by ana; same workspace.
-    assert c.post("/auth/users", json={"username": "bia", "password": "outra-senha"}).status_code == 201
-    assert c.post("/auth/users", json={"username": "bia", "password": "outra-senha"}).status_code == 409
-    assert [u["username"] for u in c.get("/auth/users").json()] == ["ana", "bia"]
+    s.token = "da-variavel"
+    assert auth.resolve_token() == auth.AuthSettings("da-variavel", "FORJA_TOKEN")
+    s.auth_enabled = False
+    assert auth.resolve_token().token is None
 
-    assert c.post("/auth/logout").status_code == 204
-    assert c.get("/projects").status_code == 401
-    bad = c.post("/auth/login", json={"username": "bia", "password": "errada-123"})
-    assert bad.status_code == 401
-    assert bad.json()["message"] == "Usuário ou senha incorretos."
-    assert c.post("/auth/login", json={"username": "bia", "password": "outra-senha"}).status_code == 200
-    assert any(x["id"] == p["id"] for x in c.get("/projects").json())
-    assert c.post("/auth/users", json={"username": "zeca", "password": "12345678"}).status_code == 201
+
+def test_cli_prints_url_and_rotates(token_settings: None, capsys: pytest.CaptureFixture[str]) -> None:
+    s = get_settings()
+    s.token = ""
+    cli(["token"])
+    old = auth.token_path().read_text(encoding="utf-8")
+    assert f"{s.web_url}/#token={old}" in capsys.readouterr().out
+    cli(["token", "--new"])
+    new = auth.token_path().read_text(encoding="utf-8")
+    assert new != old
+    assert f"#token={new}" in capsys.readouterr().out
+    s.token = "da-variavel"
+    with pytest.raises(SystemExit):
+        cli(["token", "--new"])
+
+
+def test_login_off_only_answers_this_machine(client: TestClient, token_settings: None) -> None:
+    get_settings().auth_enabled = False
+    auth.get_auth.cache_clear()
+    remote = TestClient(client.app, client=("192.168.0.10", 50000))
+    r = remote.get("/projects")
+    assert r.status_code == 403
+    assert r.json()["code"] == "LOCAL_ONLY"
+    local = TestClient(client.app, client=("127.0.0.1", 50000))
+    assert local.get("/projects").status_code == 200
+    assert local.get("/auth/status").json() == {"auth_enabled": False, "authenticated": True}
+
+
+def test_signed_download_link(client: TestClient, anon: TestClient) -> None:
+    access = auth.get_auth()
+    query = auth.sign_download("exp_x", access, now=1_000)
+    exp, sig = (part.split("=")[1] for part in query.split("&"))
+    assert auth.download_ok("exp_x", int(exp), sig, access) is False  # expired long ago
+    query = auth.sign_download("exp_x", access)
+    exp, sig = (part.split("=")[1] for part in query.split("&"))
+    assert auth.download_ok("exp_x", int(exp), sig, access)
+    assert not auth.download_ok("exp_y", int(exp), sig, access)  # bound to the job id
+    # Unknown job, valid signature: passes auth and gets 404; bad signature: 401.
+    assert anon.get(f"/exports/exp_x/download?{query}").status_code == 404
+    r = anon.get(f"/exports/exp_x/download?exp={exp}&sig={'0' * 64}")
+    assert r.status_code == 401
+    assert r.json()["code"] == "LINK_EXPIRED"
+    assert anon.get("/exports/exp_x/download").json()["code"] == "UNAUTHENTICATED"
+
+
+def test_project_workspaces(client: TestClient) -> None:
+    p = client.post("/projects", json={"name": "Vendas", "workspace": "  Comercial  "}).json()
+    assert p["workspace"] == "Comercial"
+    r = client.patch(f"/projects/{p['id']}", json={"name": "Vendas 2026"}).json()
+    assert (r["name"], r["workspace"]) == ("Vendas 2026", "Comercial")  # untouched when not sent
+    assert client.patch(f"/projects/{p['id']}", json={"workspace": "RH"}).json()["workspace"] == "RH"
+    assert client.patch(f"/projects/{p['id']}", json={"workspace": ""}).json()["workspace"] is None
+    assert client.post("/projects", json={"name": "Solto"}).json()["workspace"] is None

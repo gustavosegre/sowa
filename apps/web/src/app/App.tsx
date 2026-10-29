@@ -3,6 +3,7 @@ import { useEffect, useState, type ReactNode } from "react";
 
 import { UNAUTHENTICATED_EVENT } from "@/api/client";
 import { useAuthStatus } from "@/api/hooks";
+import { captureTokenFromUrl, TOKEN_EVENT } from "@/api/token";
 import { Spinner, TooltipProvider } from "@/components/ui";
 import { Editor } from "@/features/editor/Editor";
 import { useUiStore } from "@/stores/uiStore";
@@ -31,14 +32,25 @@ function useProjectParam(): [string | null, (id: string | null) => void] {
   return [id, go];
 }
 
-/** Login screen until there is a session (when login is enabled on the server). */
+// `#token=...` from the address printed by the API (before the first request).
+captureTokenFromUrl();
+
+/** Token screen until the server accepts the stored token (when login is on). */
 function AuthGate({ children }: { children: ReactNode }) {
   const qc = useQueryClient();
   const { data: status, isLoading, error } = useAuthStatus();
   useEffect(() => {
-    const onExpired = () => void qc.invalidateQueries({ queryKey: ["auth"] });
-    window.addEventListener(UNAUTHENTICATED_EVENT, onExpired);
-    return () => window.removeEventListener(UNAUTHENTICATED_EVENT, onExpired);
+    const recheck = () => void qc.invalidateQueries({ queryKey: ["auth"] });
+    // Pasting the #token= address into an open tab only changes the hash.
+    const onHash = () => captureTokenFromUrl();
+    window.addEventListener(UNAUTHENTICATED_EVENT, recheck);
+    window.addEventListener(TOKEN_EVENT, recheck);
+    window.addEventListener("hashchange", onHash);
+    return () => {
+      window.removeEventListener(UNAUTHENTICATED_EVENT, recheck);
+      window.removeEventListener(TOKEN_EVENT, recheck);
+      window.removeEventListener("hashchange", onHash);
+    };
   }, [qc]);
   if (isLoading) {
     return (
@@ -48,7 +60,7 @@ function AuthGate({ children }: { children: ReactNode }) {
     );
   }
   if (error) return <p className="p-6 text-danger">{error.message}</p>;
-  if (status?.auth_enabled && !status.user) return <LoginPage setup={status.setup_required} />;
+  if (status && !status.authenticated) return <LoginPage />;
   return children;
 }
 

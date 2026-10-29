@@ -12,7 +12,8 @@ from fastapi.openapi.utils import get_openapi
 
 from forja.api import errors
 from forja.api.routes import auth, exports, formula, meta, pipeline, projects, sources, templates
-from forja.api.security import current_user
+from forja.api.security import require_token
+from forja.auth import get_auth
 from forja.nodes.registry import all_specs
 from forja.settings import get_settings
 
@@ -34,6 +35,11 @@ def run_migrations() -> None:
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     if get_settings().auto_migrate:
         run_migrations()
+    access = get_auth()  # generates the token file on first start
+    if access.token:
+        log.info("[auth] token de acesso: %s (endereço com o token: python -m forja.cli token)", access.source)
+    else:
+        log.warning("[auth] login desligado: só conexões desta máquina são atendidas")
     yield
 
 
@@ -48,11 +54,12 @@ def create_app() -> FastAPI:
         expose_headers=["X-Forja-Rows", "X-Forja-Has-More", "X-Forja-Cached"],
     )
     errors.install(app)
-    # /health, /nodes and /auth are public; everything else needs a logged-in user.
+    # /health, /nodes and /auth/status are public; everything else needs the access token.
     app.include_router(meta.router)
     app.include_router(auth.router)
+    app.include_router(exports.download_router)
     for r in (projects.router, sources.router, pipeline.router, formula.router, exports.router, templates.router):
-        app.include_router(r, dependencies=[Depends(current_user)])
+        app.include_router(r, dependencies=[Depends(require_token)])
 
     def openapi() -> dict[str, Any]:
         if app.openapi_schema:

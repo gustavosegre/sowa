@@ -3,12 +3,14 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from forja.api.errors import HttpError, not_found
 from forja.api.schemas import ExportJobOut, ExportRequest
+from forja.api.security import Bearer, authenticated, unauthenticated
+from forja.auth import download_ok, get_auth, sign_download
 from forja.compiler.build import CompileError
 from forja.deps import get_storage
 from forja.domain.issues import Issue
@@ -19,6 +21,8 @@ from forja.storage.db import ExportJobRow, get_session
 from forja.storage.repos import DbSourceResolver, ExportRepo
 
 router = APIRouter(prefix="/exports", tags=["exports"])
+# The download is a plain browser link: it checks the signed query string (or the token) itself.
+download_router = APIRouter(prefix="/exports", tags=["exports"])
 Db = Annotated[Session, Depends(get_session)]
 
 MEDIA = {
@@ -44,7 +48,13 @@ def _out(row: ExportJobRow) -> ExportJobOut:
         error=Issue.model_validate(row.error) if row.error else None,
         created_at=row.created_at,
         finished_at=row.finished_at,
+        download_path=_download_path(row.id) if row.status == "done" else None,
     )
+
+
+def _download_path(job_id: str) -> str:
+    query = sign_download(job_id, get_auth())
+    return f"/exports/{job_id}/download" + (f"?{query}" if query else "")
 
 
 @router.post("", response_model=ExportJobOut, status_code=202)
@@ -76,8 +86,16 @@ def get_export(job_id: str, db: Db) -> ExportJobOut:
     return _out(row)
 
 
-@router.get("/{job_id}/download", response_class=FileResponse)
-def download(job_id: str, db: Db) -> FileResponse:
+@download_router.get("/{job_id}/download", response_class=FileResponse)
+def download(job_id: str, request: Request, db: Db, credentials: Bearer, exp: int = 0, sig: str = "") -> FileResponse:
+    """The exported file. Use `download_path` from the job (signed, valid for a few minutes)."""
+    auth = get_auth()
+    if not (sig and download_ok(job_id, exp, sig, auth)) and not authenticated(request, credentials, auth):
+        raise (
+            unauthenticated()
+            if not sig
+            else HttpError(401, "LINK_EXPIRED", "O link de download expirou.", hint='Clique em "Baixar" de novo.')
+        )
     row = ExportRepo(db).get(job_id)
     if row is None:
         raise not_found("Exportação")

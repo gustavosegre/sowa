@@ -2,7 +2,7 @@ import { Download, Play } from "lucide-react";
 import { useState } from "react";
 
 import { ApiError, errorIssue } from "@/api/client";
-import { exportDownloadUrl, startExport, useExportJob } from "@/api/hooks";
+import { downloadExport, startExport, useExportJob } from "@/api/hooks";
 import type { OutputConfig } from "@/api/types";
 import { IssueItem } from "@/components/IssueList";
 import { Button, Field, Input, Select, Spinner, Switch } from "@/components/ui";
@@ -58,10 +58,16 @@ function ExportButton({ nodeId }: { nodeId: string }) {
       {job?.status === "done" && (
         <div className="flex flex-col gap-1.5 rounded-md border bg-muted/50 p-2">
           <p className="text-xs">{tt.done(fmtInt(job.rows), fmtBytes(job.size_bytes ?? 0))}</p>
-          <Button asChild variant="outline" size="sm">
-            <a href={exportDownloadUrl(job.id)} download>
-              <Download /> {tt.download}
-            </a>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              void downloadExport(job.id).catch((e: unknown) =>
+                setError(e instanceof ApiError ? e : new ApiError(undefined, 0)),
+              )
+            }
+          >
+            <Download /> {tt.download}
           </Button>
         </div>
       )}

@@ -15,7 +15,7 @@ api.use({
 });
 
 /** Fired on any 401 (missing or wrong token): the app shows the token screen. */
-export const UNAUTHENTICATED_EVENT = "forja:unauthenticated";
+export const UNAUTHENTICATED_EVENT = "sowa:unauthenticated";
 
 function signal401(status: number) {
   if (status === 401) window.dispatchEvent(new Event(UNAUTHENTICATED_EVENT));

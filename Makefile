@@ -1,4 +1,4 @@
-# Forja — comandos do monorepo (CLAUDE.md §7). Recipes are plain `cd x && cmd`
+# SOWA — comandos do monorepo (CLAUDE.md §7). Recipes are plain `cd x && cmd`
 # so they run both under sh and under cmd.exe (Windows).
 API_PORT ?= 8000
 WEB_PORT ?= 5173
@@ -24,7 +24,7 @@ start:
 
 # Address with the access token of `make start` (TOKEN_ARGS=--new generates another one).
 token:
-	cd $(API) && uv run python -m forja.cli --data-dir ../../data --web-url http://127.0.0.1:$(PORT) token $(TOKEN_ARGS)
+	cd $(API) && uv run python -m sowa.cli --data-dir ../../data --web-url http://127.0.0.1:$(PORT) token $(TOKEN_ARGS)
 
 test:
 	cd $(API) && uv run pytest

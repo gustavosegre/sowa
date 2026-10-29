@@ -12,7 +12,7 @@ export default function globalSetup(config: FullConfig) {
   mkdirSync(dirname(STORAGE_STATE), { recursive: true });
   const state = {
     cookies: [],
-    origins: [{ origin: new URL(baseURL).origin, localStorage: [{ name: "forja.token", value: E2E_TOKEN }] }],
+    origins: [{ origin: new URL(baseURL).origin, localStorage: [{ name: "sowa.token", value: E2E_TOKEN }] }],
   };
   writeFileSync(STORAGE_STATE, JSON.stringify(state));
 }

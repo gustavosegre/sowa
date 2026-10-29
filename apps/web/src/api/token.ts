@@ -1,8 +1,9 @@
 // Access token (the Flowa pattern): read once from the URL fragment (#token=...), kept in
 // localStorage, removed from the address bar, sent as a Bearer header.
 
-const KEY = "forja.token";
-export const TOKEN_EVENT = "forja:token";
+const KEY = "sowa.token";
+const LEGACY_KEY = "forja.token"; // the project was called Forja
+export const TOKEN_EVENT = "sowa:token";
 
 function storage(): Storage | null {
   try {
@@ -24,7 +25,13 @@ export function captureTokenFromUrl(location: Location = window.location): strin
 
 export function getToken(): string {
   try {
-    return storage()?.getItem(KEY) ?? "";
+    const s = storage();
+    const legacy = s?.getItem(LEGACY_KEY);
+    if (s && legacy && !s.getItem(KEY)) {
+      s.setItem(KEY, legacy);
+      s.removeItem(LEGACY_KEY);
+    }
+    return s?.getItem(KEY) ?? "";
   } catch {
     return "";
   }

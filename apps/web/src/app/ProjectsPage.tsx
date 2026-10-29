@@ -20,7 +20,7 @@ import { useUiStore } from "@/stores/uiStore";
 
 import { SignOutButton } from "./SignOutButton";
 
-const WORKSPACES_LIST = "forja-workspaces";
+const WORKSPACES_LIST = "sowa-workspaces";
 
 /** Workspaces in alphabetical order, then the projects without one (as Flowa groups pipelines). */
 function groupByWorkspace(projects: Project[]): { name: string | null; projects: Project[] }[] {

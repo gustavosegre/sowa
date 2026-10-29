@@ -1,8 +1,8 @@
-# Forja
+# SOWA
 
 **Construtor visual de datasets.** Você sobe arquivos (CSV, Excel, Parquet, JSON), monta as transformações como blocos ligados num quadro, vê o resultado de cada etapa na hora e exporta o dataset final.
 
-Pense em *tabela dinâmica + campo calculado do Excel + Power Query*, só que visual, rastreável e rápido. A Forja fala a língua de quem usa Excel no Brasil: fórmulas com `;`, vírgula decimal, datas `dd/mm/aaaa` e nomes de função em português (`SE`, `SOMA`, `PROCV`…).
+Pense em *tabela dinâmica + campo calculado do Excel + Power Query*, só que visual, rastreável e rápido. O SOWA fala a língua de quem usa Excel no Brasil: fórmulas com `;`, vírgula decimal, datas `dd/mm/aaaa` e nomes de função em português (`SE`, `SOMA`, `PROCV`…).
 
 - **Visual, mas nunca mágico:** cada transformação é um bloco visível e editável no quadro.
 - **Não destrutivo:** o arquivo original nunca é alterado. O fluxo é uma receita que pode ser reaplicada.
@@ -15,7 +15,7 @@ Pense em *tabela dinâmica + campo calculado do Excel + Power Query*, só que vi
 
 1. [Requisitos](#1-requisitos)
 2. [Instalação](#2-instalação)
-3. [Como abrir a Forja](#3-como-abrir-a-forja)
+3. [Como abrir o SOWA](#3-como-abrir-o-sowa)
 4. [Primeiro acesso: o token](#4-primeiro-acesso-o-token)
 5. [Tour rápido: do arquivo ao dataset](#5-tour-rápido-do-arquivo-ao-dataset)
 6. [Projetos e workspaces](#6-projetos-e-workspaces)
@@ -29,7 +29,7 @@ Pense em *tabela dinâmica + campo calculado do Excel + Power Query*, só que vi
 14. [Atalhos de teclado](#14-atalhos-de-teclado)
 15. [Configuração](#15-configuração)
 16. [Onde ficam os dados, backup e limpeza](#16-onde-ficam-os-dados-backup-e-limpeza)
-17. [Atualizar a Forja](#17-atualizar-a-forja)
+17. [Atualizar o SOWA](#17-atualizar-o-sowa)
 18. [Solução de problemas](#18-solução-de-problemas)
 19. [Limites conhecidos](#19-limites-conhecidos)
 20. [Para desenvolvedores](#20-para-desenvolvedores)
@@ -70,12 +70,12 @@ corepack enable pnpm            # ou: npm install -g pnpm
 ## 2. Instalação
 
 ```bash
-git clone <endereço-do-repositório> forja
-cd forja
+git clone <endereço-do-repositório> sowa
+cd sowa
 make setup
 ```
 
-Sem `make`, os dois primeiros passos do `make setup` bastam para usar a Forja:
+Sem `make`, os dois primeiros passos do `make setup` bastam para usar o SOWA:
 
 ```bash
 cd apps/api && uv sync && cd ../..
@@ -84,20 +84,20 @@ pnpm install
 
 O terceiro passo do `make setup` (`playwright install chromium`) baixa um navegador para os testes automáticos. Só quem for desenvolver precisa dele.
 
-## 3. Como abrir a Forja
+## 3. Como abrir o SOWA
 
 ```bash
 make start
 ```
 
-Na primeira vez, a interface é compilada (cerca de 10 s). Depois, a Forja sobe e **abre o navegador sozinha** já no endereço certo, com o token de acesso. No terminal aparece:
+Na primeira vez, a interface é compilada (cerca de 10 s). Depois, o SOWA sobe e **abre o navegador sozinho** já no endereço certo, com o token de acesso. No terminal aparece:
 
 ```
-  Forja no ar. Abra:
+  SOWA no ar. Abra:
 
     http://127.0.0.1:8765/#token=…
 
-  Dados em …/forja/data. Ctrl+C para parar.
+  Dados em …/sowa/data. Ctrl+C para parar.
 ```
 
 - Para **parar**, use `Ctrl+C` no terminal.
@@ -112,24 +112,24 @@ cd apps/api
 uv run python ../../scripts/start.py            # --port 8770 --no-browser --build
 ```
 
-A Forja escuta só em `127.0.0.1`, então nenhum outro computador da rede consegue acessá-la. Tudo roda num único processo: a API serve a interface já compilada, e o Node não fica rodando.
+O SOWA escuta só em `127.0.0.1`, então nenhum outro computador da rede consegue acessá-lo. Tudo roda num único processo: a API serve a interface já compilada, e o Node não fica rodando.
 
 ## 4. Primeiro acesso: o token
 
-A Forja protege o acesso com um **token**, igual ao Flowa. Ele é gerado no primeiro start e salvo em `data/token`.
+O SOWA protege o acesso com um **token**, igual ao Flowa. Ele é gerado no primeiro start e salvo em `data/token`.
 
 - O endereço que o `make start` mostra (e abre) já traz o token depois de `#token=`. A interface guarda o token no navegador e o apaga da barra de endereço.
-- Se aparecer a tela **"Entrar na Forja"** (por exemplo, num navegador novo), pegue o endereço com o token:
+- Se aparecer a tela **"Entrar no SOWA"** (por exemplo, num navegador novo), pegue o endereço com o token:
 
   ```bash
   make token
-  # sem make: cd apps/api && uv run python -m forja.cli --data-dir ../../data --web-url http://127.0.0.1:8765 token
+  # sem make: cd apps/api && uv run python -m sowa.cli --data-dir ../../data --web-url http://127.0.0.1:8765 token
   ```
 
   Abra esse endereço ou cole só o token no campo da tela.
 - **Sair:** o botão com o ícone de saída, no topo, esquece o token neste navegador.
-- **Trocar o token**, se alguém viu o seu: `make token TOKEN_ARGS=--new` e depois reinicie a Forja. O token antigo deixa de valer.
-- **Fixar um token** próprio: defina `FORJA_TOKEN` (veja a [seção 15](#15-configuração)).
+- **Trocar o token**, se alguém viu o seu: `make token TOKEN_ARGS=--new` e depois reinicie o SOWA. O token antigo deixa de valer.
+- **Fixar um token** próprio: defina `SOWA_TOKEN` (veja a [seção 15](#15-configuração)).
 
 Quem tem o token acessa tudo. Não há usuários separados.
 
@@ -153,15 +153,15 @@ Tudo é salvo sozinho, e o indicador **"Salvo"** aparece no topo.
 
 ## 7. Importar arquivos
 
-**Formatos:** CSV/TSV/TXT, Excel (`.xlsx`, com escolha da aba e do intervalo), Parquet, JSON e NDJSON. O limite padrão é de 500 MB por arquivo (`FORJA_MAX_UPLOAD_MB`).
+**Formatos:** CSV/TSV/TXT, Excel (`.xlsx`, com escolha da aba e do intervalo), Parquet, JSON e NDJSON. O limite padrão é de 500 MB por arquivo (`SOWA_MAX_UPLOAD_MB`).
 
 **Assistente em 3 passos:**
 
 1. **Arquivo:** arraste ou escolha. Há barra de progresso.
-2. **Configurações:** a Forja detecta o encoding (UTF-8, UTF-8 com BOM, Latin-1/Windows-1252, comum em exports do Excel BR), o delimitador (`;` `,` tab `|`), o cabeçalho, as linhas a pular, o separador decimal, o formato de data e as aspas. Tudo pode ser editado, e a amostra é relida na hora. No **Excel**, escolha a **aba** e, se a tabela não começar em A1 (relatórios com título, linha de total embaixo…), informe o **intervalo**: `B3:F200`, `B3:F` (até a última linha) ou `B:F` (colunas inteiras).
-3. **Tipos das colunas:** a Forja sugere um tipo para cada coluna e reconhece padrões brasileiros como `1.234,56`, `R$ 1.234,56` e `31/12/2025`. Você pode trocar o tipo ou não importar uma coluna.
+2. **Configurações:** o SOWA detecta o encoding (UTF-8, UTF-8 com BOM, Latin-1/Windows-1252, comum em exports do Excel BR), o delimitador (`;` `,` tab `|`), o cabeçalho, as linhas a pular, o separador decimal, o formato de data e as aspas. Tudo pode ser editado, e a amostra é relida na hora. No **Excel**, escolha a **aba** e, se a tabela não começar em A1 (relatórios com título, linha de total embaixo…), informe o **intervalo**: `B3:F200`, `B3:F` (até a última linha) ou `B:F` (colunas inteiras).
+3. **Tipos das colunas:** o SOWA sugere um tipo para cada coluna e reconhece padrões brasileiros como `1.234,56`, `R$ 1.234,56` e `31/12/2025`. Você pode trocar o tipo ou não importar uma coluna.
 
-Nomes de coluna são preservados. Nomes repetidos viram `valor`, `valor_2`, e colunas sem nome viram `coluna_3`. Ao confirmar, a Forja gera uma cópia otimizada (Parquet) e guarda o original intacto.
+Nomes de coluna são preservados. Nomes repetidos viram `valor`, `valor_2`, e colunas sem nome viram `coluna_3`. Ao confirmar, o SOWA gera uma cópia otimizada (Parquet) e guarda o original intacto.
 
 **Substituir arquivo** (no painel do nó Fonte): troca o arquivo por uma versão nova, por exemplo o mês seguinte, mantendo o fluxo inteiro. O assistente pede para confirmar de novo, e o fluxo é revalidado.
 
@@ -270,10 +270,10 @@ A ajuda de cada função, com assinatura, descrição e exemplo, aparece no auto
 |---|---|
 | **CSV** | Delimitador, encoding (UTF-8, UTF-8 com BOM, Latin-1), separador decimal, formato de data, cabeçalho, aspas. Predefinição **Excel Brasil**: `;` + vírgula decimal + UTF-8 com BOM + `dd/mm/aaaa`, que abre direto e certo no Excel |
 | **Parquet** | Compressão (zstd, snappy, nenhuma), tamanho do row group, particionamento por coluna (gera um `.zip` com pastas `coluna=valor`) |
-| **XLSX** | A Forja confere antes o limite do Excel (1.048.576 linhas e 16.384 colunas) e, se passar, sugere CSV ou Parquet |
+| **XLSX** | O SOWA confere antes o limite do Excel (1.048.576 linhas e 16.384 colunas) e, se passar, sugere CSV ou Parquet |
 | **JSON** / **NDJSON** | Array JSON ou um objeto por linha |
 
-A exportação usa **todos os dados** (nunca a amostra) e roda em segundo plano, com barra de progresso. Ao terminar, clique em **Baixar arquivo**. As exportações ficam guardadas por 7 dias e depois são apagadas sozinhas (`FORJA_EXPORT_RETENTION_DAYS`).
+A exportação usa **todos os dados** (nunca a amostra) e roda em segundo plano, com barra de progresso. Ao terminar, clique em **Baixar arquivo**. As exportações ficam guardadas por 7 dias e depois são apagadas sozinhas (`SOWA_EXPORT_RETENTION_DAYS`).
 
 ## 13. Recursos avançados
 
@@ -281,7 +281,7 @@ A exportação usa **todos os dados** (nunca a amostra) e roda em segundo plano,
 - **Histórico** (botão **Histórico**): a cada poucos minutos de edição, uma versão é guardada sozinha (até 100 por projeto). Você também pode **Salvar versão** com um nome. **Restaurar** guarda o estado atual antes, então dá para desfazer.
 - **Templates e sub-fluxos:** selecione nós (Ctrl+clique ou Shift+arrastar) e use **Salvar como template** no painel do nó. Na aba **Templates** da biblioteca, insira o template **como sub-fluxo** (um nó só, que pode ser **atualizado** quando o template mudar) ou **como nós editáveis**. Um sub-fluxo pode ser **expandido** a qualquer momento.
 - **Nó SQL:** para quem conhece SQL, permite um `SELECT` livre sobre as entradas, validado antes de rodar (só leitura, sem acesso a arquivos).
-- **Cache:** etapas pesadas (junções, agrupamentos, dinâmicas…) guardam o resultado. Editar um nó invalida só ele e os seguintes. O tamanho máximo é configurável (`FORJA_CACHE_MAX_GB`).
+- **Cache:** etapas pesadas (junções, agrupamentos, dinâmicas…) guardam o resultado. Editar um nó invalida só ele e os seguintes. O tamanho máximo é configurável (`SOWA_CACHE_MAX_GB`).
 
 ## 14. Atalhos de teclado
 
@@ -301,24 +301,24 @@ No Mac, use `Cmd` no lugar de `Ctrl`. Tudo no editor pode ser feito pelo teclado
 
 ## 15. Configuração
 
-A configuração usa variáveis de ambiente com o prefixo `FORJA_`, ou o arquivo `apps/api/.env` (copie de [`.env.example`](.env.example)). Os padrões servem para a maioria dos casos.
+A configuração usa variáveis de ambiente com o prefixo `SOWA_`, ou o arquivo `apps/api/.env` (copie de [`.env.example`](.env.example)). Os padrões servem para a maioria dos casos.
 
 | Variável | Padrão | O que faz |
 |---|---|---|
-| `FORJA_DATA_DIR` | `data/` na raiz (`make start`) | Onde ficam banco, token, arquivos e exportações |
-| `FORJA_MAX_UPLOAD_MB` | `500` | Tamanho máximo de um arquivo importado |
-| `FORJA_DUCKDB_MEMORY_LIMIT` | `2GB` | Memória do motor; o excesso vai para o disco |
-| `FORJA_DUCKDB_THREADS` | `4` | Núcleos usados pelo motor |
-| `FORJA_PREVIEW_TIMEOUT_S` | `15` | Tempo máximo de uma prévia |
-| `FORJA_CACHE_MAX_GB` | `2` | Tamanho máximo do cache de etapas |
-| `FORJA_EXPORT_RETENTION_DAYS` | `7` | Dias que as exportações ficam guardadas (`0` = para sempre) |
-| `FORJA_TOKEN` | gerado em `data/token` | Token de acesso fixo |
-| `FORJA_AUTH_ENABLED` | `true` | `false` desliga o token; a Forja passa a atender só este computador |
+| `SOWA_DATA_DIR` | `data/` na raiz (`make start`) | Onde ficam banco, token, arquivos e exportações |
+| `SOWA_MAX_UPLOAD_MB` | `500` | Tamanho máximo de um arquivo importado |
+| `SOWA_DUCKDB_MEMORY_LIMIT` | `2GB` | Memória do motor; o excesso vai para o disco |
+| `SOWA_DUCKDB_THREADS` | `4` | Núcleos usados pelo motor |
+| `SOWA_PREVIEW_TIMEOUT_S` | `15` | Tempo máximo de uma prévia |
+| `SOWA_CACHE_MAX_GB` | `2` | Tamanho máximo do cache de etapas |
+| `SOWA_EXPORT_RETENTION_DAYS` | `7` | Dias que as exportações ficam guardadas (`0` = para sempre) |
+| `SOWA_TOKEN` | gerado em `data/token` | Token de acesso fixo |
+| `SOWA_AUTH_ENABLED` | `true` | `false` desliga o token; o SOWA passa a atender só este computador |
 
 Exemplo (PowerShell), para uma máquina com bastante memória:
 
 ```powershell
-$env:FORJA_DUCKDB_MEMORY_LIMIT = "8GB"; $env:FORJA_DUCKDB_THREADS = "8"; make start
+$env:SOWA_DUCKDB_MEMORY_LIMIT = "8GB"; $env:SOWA_DUCKDB_THREADS = "8"; make start
 ```
 
 ## 16. Onde ficam os dados, backup e limpeza
@@ -327,7 +327,7 @@ Tudo fica numa pasta só, `data/` na raiz do projeto (fora do Git):
 
 ```
 data/
-├── forja.db          projetos, fluxos, versões, templates (SQLite)
+├── sowa.db          projetos, fluxos, versões, templates (SQLite)
 ├── token             token de acesso
 └── files/
     ├── sources/      arquivos originais + cópia otimizada (Parquet) de cada importação
@@ -336,11 +336,11 @@ data/
     └── tmp/          temporários do motor
 ```
 
-- **Backup:** pare a Forja (`Ctrl+C`) e copie a pasta `data/` inteira. Para restaurar, coloque a pasta de volta.
-- **Liberar espaço:** com a Forja parada, apague `data/files/cache/`. Ela é recriada quando precisar.
-- **OneDrive, Dropbox e afins:** se o projeto estiver numa pasta sincronizada, os arquivos grandes de `data/` também serão sincronizados. Para dados volumosos, aponte `FORJA_DATA_DIR` para uma pasta fora da sincronização.
+- **Backup:** pare o SOWA (`Ctrl+C`) e copie a pasta `data/` inteira. Para restaurar, coloque a pasta de volta.
+- **Liberar espaço:** com o SOWA parado, apague `data/files/cache/`. A pasta é recriada quando precisar.
+- **OneDrive, Dropbox e afins:** se o projeto estiver numa pasta sincronizada, os arquivos grandes de `data/` também serão sincronizados. Para dados volumosos, aponte `SOWA_DATA_DIR` para uma pasta fora da sincronização.
 
-## 17. Atualizar a Forja
+## 17. Atualizar o SOWA
 
 ```bash
 git pull
@@ -348,24 +348,24 @@ make setup        # ou: cd apps/api && uv sync && cd ../.. && pnpm install
 make start
 ```
 
-A interface é recompilada sozinha, e o banco é migrado sozinho ao subir. Seus projetos são mantidos. Por segurança, faça um backup de `data/` antes de atualizar.
+A interface é recompilada sozinha, e o banco é migrado sozinho ao subir. Seus projetos são mantidos. Quem usava a versão anterior, chamada **Forja**, não perde nada: o banco e o token salvo no navegador são aproveitados automaticamente. Por segurança, faça um backup de `data/` antes de atualizar.
 
 ## 18. Solução de problemas
 
 | Problema | Solução |
 |---|---|
 | **A porta já está em uso** (`address already in use`) | `make start PORT=8770`. Depois use `make token PORT=8770` |
-| **Aparece "Entrar na Forja"** | `make token` e abra o endereço mostrado (ou cole o token) |
+| **Aparece "Entrar no SOWA"** | `make token` e abra o endereço mostrado (ou cole o token) |
 | **"Token incorreto"** | O token foi trocado ou vem de outra pasta de dados. Rode `make token` de novo |
-| **"O arquivo passa do limite de 500 MB"** | Aumente `FORJA_MAX_UPLOAD_MB` |
+| **"O arquivo passa do limite de 500 MB"** | Aumente `SOWA_MAX_UPLOAD_MB` |
 | **Acentos estranhos ou colunas grudadas na importação** | No passo **Configurações** do assistente, troque o encoding (Latin-1 para exports antigos do Excel) ou o delimitador |
 | **Números viraram texto** | No passo **Tipos das colunas**, escolha Decimal. Depois, use o nó **Alterar tipo** ou `VALOR()` |
-| **A prévia demora ou dá tempo esgotado** | Use o **modo amostra** no nó Fonte, aumente `FORJA_DUCKDB_MEMORY_LIMIT` ou `FORJA_PREVIEW_TIMEOUT_S` |
+| **A prévia demora ou dá tempo esgotado** | Use o **modo amostra** no nó Fonte, aumente `SOWA_DUCKDB_MEMORY_LIMIT` ou `SOWA_PREVIEW_TIMEOUT_S` |
 | **Exportação XLSX recusada** | Passou do limite do Excel; exporte em CSV (Excel Brasil) ou Parquet |
 | **`pnpm` não encontrado** | `corepack enable pnpm` (ou `npm install -g pnpm`) e reabra o terminal. No Git Bash do Windows, prefira PowerShell ou cmd |
 | **`make` não encontrado** | Use os comandos "sem make" de cada seção ou instale o `make` ([seção 1](#1-requisitos)) |
 | **O navegador não abriu** | Copie o endereço mostrado no terminal |
-| **"A Forja não subiu"** | Leia a mensagem acima no terminal; rode `cd apps/api && uv sync` e tente de novo |
+| **"O SOWA não subiu"** | Leia a mensagem acima no terminal; rode `cd apps/api && uv sync` e tente de novo |
 
 ## 19. Limites conhecidos
 
@@ -381,7 +381,7 @@ As regras de arquitetura, convenções e contratos ficam no [`CLAUDE.md`](CLAUDE
 ```bash
 make dev          # API (:8000) + interface com recarga automática (:5173); mostra o endereço com o token
 make test         # pytest + vitest
-make e2e          # Playwright (FORJA_API_PORT / FORJA_WEB_PORT para usar outras portas)
+make e2e          # Playwright (SOWA_API_PORT / SOWA_WEB_PORT para usar outras portas)
 make lint         # ruff + mypy + eslint + prettier + tsc
 make format       # formata o código
 make types        # regenera os tipos TypeScript a partir da API

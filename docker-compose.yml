@@ -1,27 +1,27 @@
-# Forja — ambiente completo: API + web + Postgres (metadados). Arquivos em volume local (FileStorage local).
-# `docker compose up --build` e abra http://localhost:5173 (portas do host: FORJA_API_PORT, FORJA_WEB_PORT)
-# Arquivos no MinIO (S3): `docker compose --profile s3 up --build` com FORJA_STORAGE=s3 (ver .env.example).
+# SOWA — ambiente completo: API + web + Postgres (metadados). Arquivos em volume local (FileStorage local).
+# `docker compose up --build` e abra http://localhost:5173 (portas do host: SOWA_API_PORT, SOWA_WEB_PORT)
+# Arquivos no MinIO (S3): `docker compose --profile s3 up --build` com SOWA_STORAGE=s3 (ver .env.example).
 services:
   api:
     build: ./apps/api
     environment:
-      FORJA_DATA_DIR: /data
-      FORJA_DATABASE_URL: postgresql+psycopg://forja:forja@postgres:5432/forja
-      FORJA_CORS_ORIGINS: '["http://localhost:5173"]'
-      # Token de acesso: vazio = gerado em /data/token. Endereço: docker compose exec api uv run python -m forja.cli token
-      FORJA_TOKEN: ${FORJA_TOKEN:-}
-      FORJA_WEB_URL: http://localhost:${FORJA_WEB_PORT:-5173}
-      FORJA_STORAGE: ${FORJA_STORAGE:-local}
-      FORJA_S3_BUCKET: forja
-      FORJA_S3_ENDPOINT_URL: http://minio:9000
-      FORJA_S3_REGION: us-east-1
-      FORJA_S3_CREATE_BUCKET: "true"
-      AWS_ACCESS_KEY_ID: forja
-      AWS_SECRET_ACCESS_KEY: forja-minio
+      SOWA_DATA_DIR: /data
+      SOWA_DATABASE_URL: postgresql+psycopg://sowa:sowa@postgres:5432/sowa
+      SOWA_CORS_ORIGINS: '["http://localhost:5173"]'
+      # Token de acesso: vazio = gerado em /data/token. Endereço: docker compose exec api uv run python -m sowa.cli token
+      SOWA_TOKEN: ${SOWA_TOKEN:-}
+      SOWA_WEB_URL: http://localhost:${SOWA_WEB_PORT:-5173}
+      SOWA_STORAGE: ${SOWA_STORAGE:-local}
+      SOWA_S3_BUCKET: sowa
+      SOWA_S3_ENDPOINT_URL: http://minio:9000
+      SOWA_S3_REGION: us-east-1
+      SOWA_S3_CREATE_BUCKET: "true"
+      AWS_ACCESS_KEY_ID: sowa
+      AWS_SECRET_ACCESS_KEY: sowa-minio
     volumes:
-      - forja-data:/data
+      - sowa-data:/data
     ports:
-      - "${FORJA_API_PORT:-8000}:8000"
+      - "${SOWA_API_PORT:-8000}:8000"
     depends_on:
       postgres:
         condition: service_healthy
@@ -29,35 +29,35 @@ services:
   web:
     build: ./apps/web
     environment:
-      FORJA_API_URL: http://api:8000
+      SOWA_API_URL: http://api:8000
     ports:
-      - "${FORJA_WEB_PORT:-5173}:5173"
+      - "${SOWA_WEB_PORT:-5173}:5173"
     depends_on:
       - api
 
   postgres:
     image: postgres:17-alpine
     environment:
-      POSTGRES_USER: forja
-      POSTGRES_PASSWORD: forja
-      POSTGRES_DB: forja
+      POSTGRES_USER: sowa
+      POSTGRES_PASSWORD: sowa
+      POSTGRES_DB: sowa
     volumes:
       - pg-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U forja"]
+      test: ["CMD-SHELL", "pg_isready -U sowa"]
       interval: 5s
       retries: 10
 
   # MinIO deixou de publicar imagens no Docker Hub/quay; esta é a build da Chainguard (fixada pelo digest).
-  # O bucket é criado pela API (FORJA_S3_CREATE_BUCKET).
+  # O bucket é criado pela API (SOWA_S3_CREATE_BUCKET).
   minio:
     profiles: ["s3"]
     image: chainguard/minio@sha256:e70b2b1e74d79457f808710483bd726ff364529ca30736eaa15a6ab547d3a5a7
     user: root  # o volume nomeado nasce como root; a imagem roda como 65532
     command: ["server", "/data", "--console-address", ":9001"]
     environment:
-      MINIO_ROOT_USER: forja
-      MINIO_ROOT_PASSWORD: forja-minio
+      MINIO_ROOT_USER: sowa
+      MINIO_ROOT_PASSWORD: sowa-minio
     volumes:
       - minio-data:/data
     ports:
@@ -65,6 +65,6 @@ services:
       - "9001:9001"
 
 volumes:
-  forja-data:
+  sowa-data:
   pg-data:
   minio-data:

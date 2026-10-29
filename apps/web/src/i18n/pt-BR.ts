@@ -1,7 +1,7 @@
 /** All user-facing text. Code is in English; the interface is pt-BR (CLAUDE.md §3.7). */
 export const t = {
   app: {
-    name: "Forja",
+    name: "SOWA",
     tagline: "Construtor visual de datasets",
   },
   common: {
@@ -33,9 +33,9 @@ export const t = {
     row: "linha",
   },
   auth: {
-    title: "Entrar na Forja",
-    help: "A Forja usa um token de acesso. Abra o endereço com #token= que aparece ao iniciar a API, ou cole o token aqui.",
-    where: "Para ver o endereço com o token: uv run python -m forja.cli token (em apps/api).",
+    title: "Entrar no SOWA",
+    help: "O SOWA usa um token de acesso. Abra o endereço com #token= que aparece ao iniciar a API, ou cole o token aqui.",
+    where: "Para ver o endereço com o token: uv run python -m sowa.cli token (em apps/api).",
     token: "Token de acesso",
     placeholder: "Cole o token",
     submit: "Entrar",

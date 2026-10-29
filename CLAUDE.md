@@ -1,4 +1,4 @@
-# CLAUDE.md — Forja
+# CLAUDE.md — SOWA
 
 > Construtor visual de datasets. O usuário sobe arquivos, monta transformações num canvas (whiteboard) e exporta o resultado.
 > Pense em "tabela dinâmica + campo calculado do Excel + Power Query", só que visual, rastreável e rápido.
@@ -55,7 +55,7 @@ Princípios de produto:
 - Lark (gramática e parser das fórmulas)
 - charset-normalizer (detecção de encoding)
 - SQLAlchemy 2 + Alembic para metadados (projetos, fontes, versões); SQLite em dev, Postgres em prod
-- Arquivos atrás da interface `FileStorage`: disco local em dev, S3-compatível (MinIO) em prod (`FORJA_STORAGE=s3`; o disco vira cópia de trabalho, ver §19)
+- Arquivos atrás da interface `FileStorage`: disco local em dev, S3-compatível (MinIO) em prod (`SOWA_STORAGE=s3`; o disco vira cópia de trabalho, ver §19)
 
 **Qualidade**: Ruff + mypy (strict) no back; ESLint + Prettier + `tsc --noEmit` no front; pytest, Vitest + Testing Library, Playwright.
 
@@ -111,21 +111,21 @@ Ao criar o projeto, usar a versão estável mais recente de cada lib e fixar nos
 | GET | `/auth/status` | Se o token de acesso é exigido e se a requisição o trouxe (`auth_enabled`, `authenticated`) |
 | GET/POST | `/templates` · GET/PUT/DELETE `/templates/{id}` | Templates (trechos reutilizáveis do fluxo, globais). `PUT` com `flow` incrementa `version` |
 
-**Token de acesso (padrão do Flowa).** Toda rota exceto `/health`, `/nodes` e `/auth/status` exige `Authorization: Bearer <token>`; sem ele, `401 UNAUTHENTICATED` e o front mostra a tela do token. O token vem de `FORJA_TOKEN` ou é gerado no primeiro start em `<data_dir>/token`. O front lê `#token=` do endereço, guarda no `localStorage` e limpa a barra; o token nunca vai em cookie nem em query string (fecha CSRF). O download de exportação é link comum do navegador: usa o `download_path` do job, assinado com HMAC e válido por 5 min. Com `FORJA_AUTH_ENABLED=false` a API só atende conexões desta máquina (`403 LOCAL_ONLY`). Erros de validação (422) também saem como `ApiError` em pt-BR (`INVALID_REQUEST`).
+**Token de acesso (padrão do Flowa).** Toda rota exceto `/health`, `/nodes` e `/auth/status` exige `Authorization: Bearer <token>`; sem ele, `401 UNAUTHENTICATED` e o front mostra a tela do token. O token vem de `SOWA_TOKEN` ou é gerado no primeiro start em `<data_dir>/token`. O front lê `#token=` do endereço, guarda no `localStorage` e limpa a barra; o token nunca vai em cookie nem em query string (fecha CSRF). O download de exportação é link comum do navegador: usa o `download_path` do job, assinado com HMAC e válido por 5 min. Com `SOWA_AUTH_ENABLED=false` a API só atende conexões desta máquina (`403 LOCAL_ONLY`). Erros de validação (422) também saem como `ApiError` em pt-BR (`INVALID_REQUEST`).
 
-A prévia responde `application/vnd.apache.arrow.stream` com os cabeçalhos `X-Forja-Rows` e `X-Forja-Has-More`. Toda resposta de erro é um `ApiError` (`code`, `message` em pt-BR, `hint`, `detail`, `issues`).
+A prévia responde `application/vnd.apache.arrow.stream` com os cabeçalhos `X-Sowa-Rows` e `X-Sowa-Has-More`. Toda resposta de erro é um `ApiError` (`code`, `message` em pt-BR, `hint`, `detail`, `issues`).
 
 ## 6. Estrutura de pastas
 
 ```
-forja/
+sowa/
 ├── CLAUDE.md
 ├── Makefile
 ├── docker-compose.yml
 ├── apps/
 │   ├── api/
 │   │   ├── pyproject.toml
-│   │   ├── src/forja/
+│   │   ├── src/sowa/
 │   │   │   ├── main.py
 │   │   │   ├── api/routes/      # finas: só HTTP ↔ domínio
 │   │   │   ├── domain/          # Pipeline, NodeConfig, Schema, LogicalType, Issue, migrations/
@@ -162,17 +162,17 @@ make setup       # uv sync + pnpm install + chromium do Playwright
 make dev         # api (:8000) + web (:5173) com reload; mostra o endereço com o token — portas: make dev API_PORT=8010
 make start       # uso no dia a dia: um processo em 127.0.0.1:8765 servindo a interface compilada; abre o navegador (PORT=…)
 make test        # pytest + vitest
-make e2e         # playwright (FORJA_API_PORT/FORJA_WEB_PORT para reaproveitar servidores já no ar)
+make e2e         # playwright (SOWA_API_PORT/SOWA_WEB_PORT para reaproveitar servidores já no ar)
 make lint        # ruff (check + format --check) + mypy + eslint + prettier --check + tsc --noEmit
 make format      # ruff format/--fix + prettier --write
 make types       # regenera tipos TS a partir do OpenAPI (rodar após mudar modelos Pydantic)
-make db-migrate  # alembic upgrade head (a API também migra ao subir, FORJA_AUTO_MIGRATE)
-cd apps/api && uv run python -m forja.cli token   # endereço com #token= (--new gera outro; reinicie a API)
+make db-migrate  # alembic upgrade head (a API também migra ao subir, SOWA_AUTO_MIGRATE)
+cd apps/api && uv run python -m sowa.cli token   # endereço com #token= (--new gera outro; reinicie a API)
 ```
 
-`make start` (`scripts/start.py`) compila a interface quando `apps/web/dist` falta ou está desatualizado, sobe só o uvicorn (sem reload) com `FORJA_SERVE_WEB` e guarda os dados em `data/` na raiz. A API serve o `dist` em `/` (`api/webui.py`, montado depois das rotas) e aceita as rotas também com o prefixo `/api`, igual ao proxy do Vite — o mesmo build funciona nos dois modos. Exportações prontas são apagadas depois de `FORJA_EXPORT_RETENTION_DAYS` (padrão 7), ao subir e a cada nova exportação. A Forja roda localmente; não há deploy com nginx/TLS (o compose é só para testar Postgres e MinIO). Instalação e uso para quem vai usar: `README.md`.
+`make start` (`scripts/start.py`) compila a interface quando `apps/web/dist` falta ou está desatualizado, sobe só o uvicorn (sem reload) com `SOWA_SERVE_WEB` e guarda os dados em `data/` na raiz. A API serve o `dist` em `/` (`api/webui.py`, montado depois das rotas) e aceita as rotas também com o prefixo `/api`, igual ao proxy do Vite — o mesmo build funciona nos dois modos. Exportações prontas são apagadas depois de `SOWA_EXPORT_RETENTION_DAYS` (padrão 7), ao subir e a cada nova exportação. O SOWA roda localmente; não há deploy com nginx/TLS (o compose é só para testar Postgres e MinIO). Instalação e uso para quem vai usar: `README.md`.
 
-As receitas do Makefile são `cd x && cmd` para rodarem tanto em sh quanto no cmd.exe; `make dev` usa `scripts/dev.py` (multiplataforma). Configuração por variáveis `FORJA_*` (ver `.env.example`); o Vite faz proxy de `/api` para `FORJA_API_URL`.
+As receitas do Makefile são `cd x && cmd` para rodarem tanto em sh quanto no cmd.exe; `make dev` usa `scripts/dev.py` (multiplataforma). Configuração por variáveis `SOWA_*` (ver `.env.example`); o Vite faz proxy de `/api` para `SOWA_API_URL`.
 
 Versões: TypeScript fixado em 6.0.x porque o typescript-eslint ainda não suporta o TS 7. Glide Data Grid declara peer React ≤ 18, mas funciona com React 19 (validado no E2E).
 
@@ -414,7 +414,7 @@ Modelo único:
 
 ## 18. Checklist: novo tipo de nó
 
-1. `apps/api/src/forja/nodes/<type>.py`: config Pydantic (`NodeConfig`) + `validate`, `infer_schema`, `compile` (e `runtime_issues` se houver aviso que dependa de dados); registrar com `@register_node`. O módulo é importado automaticamente pelo registro.
+1. `apps/api/src/sowa/nodes/<type>.py`: config Pydantic (`NodeConfig`) + `validate`, `infer_schema`, `compile` (e `runtime_issues` se houver aviso que dependa de dados); registrar com `@register_node`. O módulo é importado automaticamente pelo registro.
 2. Fixtures + testes: entrada em `FIXTURES` (ou `MULTI_CASES`) de `tests/test_schema_contract.py` — o teste falha se um tipo de nó não tiver fixture —, golden test em `tests/golden/` (gerar com `UPDATE_GOLDEN=1` e conferir o resultado à mão), casos de erro.
 3. `make types` e o alias do config em `apps/web/src/api/types.ts`.
 4. `apps/web/src/features/nodes/<type>/`: `meta.ts` (ícone, categoria, handles — `inputsFor`/`inputLabel` se dependerem da config —, config padrão, próximos nós sugeridos), `summary.ts` e `ConfigPanel.tsx`; registrar em `registry.ts` (metadados, sem React) e em `panels.tsx` (painéis). O card do canvas é genérico (`features/canvas/NodeCard.tsx`, usa meta + summary); painéis pequenos podem ficar em `nodes/simple/panels.tsx`. Textos novos vão para `i18n/pt-BR.ts`.
@@ -431,9 +431,11 @@ Modelo único:
 
 **Fase 3 — Escala e colaboração**: cache materializado; jobs assíncronos; modo amostra; histórico de versões; templates e sub-fluxos reutilizáveis; parâmetros globais (`{data_corte}`); nó `sql`; linhagem de colunas (clicar numa coluna e ver de onde ela vem); "Substituir fonte"; autenticação e compartilhamento (seguir o padrão do Flowa); particionamento Parquet.
 
-**Estado atual** (out/2026): Fases 0, 1 e 2 completas. Da Fase 3 estão feitos: cache materializado (`engine/matcache.py`: nós `cacheable` viram Parquet pelo hash ao serem contados; `compile_chain(..., cache=)` lê do cache e poda o subgrafo; LRU por `FORJA_CACHE_MAX_GB`), jobs assíncronos, modo amostra, histórico de versões (snapshot automático a cada 2 min de edição, até 100 por projeto, versões nomeadas, restaurar guarda o estado atual antes), parâmetros globais (`settings.params`, `{nome}` em fórmulas e em valores de filtros visuais), nó `sql` (validação na AST, schema via `DESCRIBE` pelo `Describer` do engine), linhagem de colunas (no perfil da coluna, calculada da análise estática), "Substituir fonte", particionamento Parquet (`.zip` com pastas `coluna=valor`) e templates/sub-fluxos (aba Templates da biblioteca; "Salvar como template" no painel do nó salva a seleção; inserir como sub-fluxo ou como nós editáveis). Também feito: `FileStorage` S3/MinIO (`FORJA_STORAGE=s3`, extra `s3` com boto3; `storage/files.py`): o disco é a cópia de trabalho e o bucket o armazenamento durável — originais, Parquet normalizado e exportações sobem com `persist()` ao serem gravados e descem com `ensure_local()` quando faltam; cache de nós e temporários ficam só no disco. O DuckDB continua sem acesso à rede. Autenticação e compartilhamento seguindo o Flowa (`flowa-dev/flowa`, `flowa/api/security.py`): um token de acesso por instalação (`forja/auth.py`, ver §5), sem usuários; quem tem o token acessa tudo. Compartilhar = passar o endereço com `#token=`. Projetos se agrupam em **workspaces** (por equipe ou área, como os workspaces de pipelines do Flowa), em seções recolhíveis na tela de projetos. Os testes rodam com o login ligado (`FORJA_TOKEN` no `conftest.py`, o `TestClient` manda o cabeçalho); o E2E sobe a API com `FORJA_TOKEN` e o `global-setup.ts` grava o token no `localStorage`.
+**Estado atual** (out/2026): Fases 0, 1 e 2 completas. Da Fase 3 estão feitos: cache materializado (`engine/matcache.py`: nós `cacheable` viram Parquet pelo hash ao serem contados; `compile_chain(..., cache=)` lê do cache e poda o subgrafo; LRU por `SOWA_CACHE_MAX_GB`), jobs assíncronos, modo amostra, histórico de versões (snapshot automático a cada 2 min de edição, até 100 por projeto, versões nomeadas, restaurar guarda o estado atual antes), parâmetros globais (`settings.params`, `{nome}` em fórmulas e em valores de filtros visuais), nó `sql` (validação na AST, schema via `DESCRIBE` pelo `Describer` do engine), linhagem de colunas (no perfil da coluna, calculada da análise estática), "Substituir fonte", particionamento Parquet (`.zip` com pastas `coluna=valor`) e templates/sub-fluxos (aba Templates da biblioteca; "Salvar como template" no painel do nó salva a seleção; inserir como sub-fluxo ou como nós editáveis). Também feito: `FileStorage` S3/MinIO (`SOWA_STORAGE=s3`, extra `s3` com boto3; `storage/files.py`): o disco é a cópia de trabalho e o bucket o armazenamento durável — originais, Parquet normalizado e exportações sobem com `persist()` ao serem gravados e descem com `ensure_local()` quando faltam; cache de nós e temporários ficam só no disco. O DuckDB continua sem acesso à rede. Autenticação e compartilhamento seguindo o Flowa (`flowa-dev/flowa`, `flowa/api/security.py`): um token de acesso por instalação (`sowa/auth.py`, ver §5), sem usuários; quem tem o token acessa tudo. Compartilhar = passar o endereço com `#token=`. Projetos se agrupam em **workspaces** (por equipe ou área, como os workspaces de pipelines do Flowa), em seções recolhíveis na tela de projetos. Os testes rodam com o login ligado (`SOWA_TOKEN` no `conftest.py`, o `TestClient` manda o cabeçalho); o E2E sobe a API com `SOWA_TOKEN` e o `global-setup.ts` grava o token no `localStorage`.
 
 **Fase 3 concluída.**
+
+**Nome:** o projeto se chamava **Forja** e foi renomeado para **SOWA** (pacote Python `sowa-core`, módulo `sowa`, variáveis `SOWA_*`, cabeçalhos `X-Sowa-*`). Para não perder dados de instalações antigas, `settings._adopt_legacy_db` renomeia `forja.db` para `sowa.db` uma vez, e o front migra a chave `forja.token` do `localStorage`. Em pt-BR o nome é masculino: "o SOWA".
 
 Sub-fluxos por dentro (`nodes/subflow.py`): o `Flow` é analisado como um pipeline próprio (`analyze(..., slots=)`), com cada entrada virando um nó interno `subflow_input` que lê a CTE externa; ids internos ganham o prefixo `<id do nó>/` para as CTEs não sombrearem as de fora. Erros e avisos internos aparecem no nó como `Em "<etapa>": …`. O `Chain.wrap` monta o `WITH` direto na AST (o builder `with_()` do SQLGlot re-parseia nomes e falha com `/`).
 
@@ -450,9 +452,9 @@ Parâmetros: `{nome}` é resolvido como literal tipado (`typed_literal`) no code
 - Colaboração em tempo real (avaliar Yjs depois).
 - Conectores de banco de dados e APIs. O design do `source` deve permitir adicioná-los depois.
 
-## 21. Glossário Excel / Power Query → Forja
+## 21. Glossário Excel / Power Query → SOWA
 
-| No Excel | Na Forja |
+| No Excel | No SOWA |
 |---|---|
 | Tabela dinâmica | nó Tabela dinâmica (`pivot`) |
 | Campo calculado da dinâmica | medida calculada dentro do `pivot` / `group_by` |

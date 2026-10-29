@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from forja.compiler.analyze import analyze
-from forja.compiler.graph import build_graph, upstream_of
-from forja.domain.issues import IssueCode
 from helpers import FakeSources, chain_of, pipeline, src
+from sowa.compiler.analyze import analyze
+from sowa.compiler.graph import build_graph, upstream_of
+from sowa.domain.issues import IssueCode
 
 
 def test_topological_order_and_upstream() -> None:

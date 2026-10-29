@@ -8,9 +8,9 @@ import pytest
 from fastapi.testclient import TestClient
 
 from conftest import TOKEN
-from forja import auth
-from forja.cli import main as cli
-from forja.settings import get_settings
+from sowa import auth
+from sowa.cli import main as cli
+from sowa.settings import get_settings
 
 
 @pytest.fixture
@@ -58,7 +58,7 @@ def test_token_file_generated(token_settings: None) -> None:
     assert auth.resolve_token().token == first.token  # reused on the next start
 
     s.token = "da-variavel"
-    assert auth.resolve_token() == auth.AuthSettings("da-variavel", "FORJA_TOKEN")
+    assert auth.resolve_token() == auth.AuthSettings("da-variavel", "SOWA_TOKEN")
     s.auth_enabled = False
     assert auth.resolve_token().token is None
 

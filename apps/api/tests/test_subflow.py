@@ -4,12 +4,12 @@ from __future__ import annotations
 
 from typing import Any
 
-from forja.compiler.analyze import analyze
-from forja.compiler.build import compile_chain, to_sql
-from forja.engine import service
-from forja.engine.describe import make_describer
-from forja.engine.duck import Engine
 from helpers import FakeSources, actual_schema, pipeline, run, src
+from sowa.compiler.analyze import analyze
+from sowa.compiler.build import compile_chain, to_sql
+from sowa.engine import service
+from sowa.engine.describe import make_describer
+from sowa.engine.duck import Engine
 
 # Inner nodes reuse the ids "n0"/"n1" on purpose: the outer pipeline uses them too.
 CLEAN: dict[str, Any] = {

@@ -8,22 +8,22 @@ from pathlib import Path
 import pytest
 
 # Isolated data dir for the whole session (settings are cached on first use).
-_DATA = Path(tempfile.mkdtemp(prefix="forja-tests-"))
-os.environ["FORJA_DATA_DIR"] = str(_DATA)
-os.environ.pop("FORJA_DATABASE_URL", None)
-os.environ["FORJA_TOKEN"] = TOKEN = "token-dos-testes"
-os.environ.pop("FORJA_AUTH_ENABLED", None)
+_DATA = Path(tempfile.mkdtemp(prefix="sowa-tests-"))
+os.environ["SOWA_DATA_DIR"] = str(_DATA)
+os.environ.pop("SOWA_DATABASE_URL", None)
+os.environ["SOWA_TOKEN"] = TOKEN = "token-dos-testes"
+os.environ.pop("SOWA_AUTH_ENABLED", None)
 
 from fastapi.testclient import TestClient  # noqa: E402
 from sqlglot import exp  # noqa: E402
 
-from forja.deps import get_storage  # noqa: E402
-from forja.domain.schema import Column, Schema  # noqa: E402
-from forja.domain.types import from_duckdb  # noqa: E402
-from forja.engine.duck import Engine, get_engine  # noqa: E402
-from forja.io.sql import copy_to  # noqa: E402
-from forja.nodes.base import SourceInfo  # noqa: E402
 from helpers import FakeSources  # noqa: E402
+from sowa.deps import get_storage  # noqa: E402
+from sowa.domain.schema import Column, Schema  # noqa: E402
+from sowa.domain.types import from_duckdb  # noqa: E402
+from sowa.engine.duck import Engine, get_engine  # noqa: E402
+from sowa.io.sql import copy_to  # noqa: E402
+from sowa.nodes.base import SourceInfo  # noqa: E402
 
 
 @pytest.fixture(scope="session")
@@ -33,7 +33,7 @@ def engine() -> Engine:
 
 @pytest.fixture(scope="session")
 def client() -> Iterator[TestClient]:
-    from forja.main import app
+    from sowa.main import app
 
     with TestClient(app, headers={"Authorization": f"Bearer {TOKEN}"}) as c:
         yield c

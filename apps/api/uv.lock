@@ -325,74 +325,6 @@ wheels = [
 ]
 
 [[package]]
-name = "forja-api"
-version = "0.1.0"
-source = { editable = "." }
-dependencies = [
-    { name = "alembic" },
-    { name = "charset-normalizer" },
-    { name = "duckdb" },
-    { name = "fastapi" },
-    { name = "lark" },
-    { name = "pyarrow" },
-    { name = "pydantic" },
-    { name = "pydantic-settings" },
-    { name = "python-calamine" },
-    { name = "python-multipart" },
-    { name = "sqlalchemy" },
-    { name = "sqlglot" },
-    { name = "uvicorn", extra = ["standard"] },
-    { name = "xlsxwriter" },
-]
-
-[package.optional-dependencies]
-postgres = [
-    { name = "psycopg", extra = ["binary"] },
-]
-s3 = [
-    { name = "boto3" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "httpx2" },
-    { name = "mypy" },
-    { name = "pyarrow-stubs" },
-    { name = "pytest" },
-    { name = "ruff" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "alembic", specifier = ">=1.20.1" },
-    { name = "boto3", marker = "extra == 's3'", specifier = ">=1.43.121" },
-    { name = "charset-normalizer", specifier = ">=3.5.2" },
-    { name = "duckdb", specifier = ">=2.0.0" },
-    { name = "fastapi", specifier = ">=0.162.0" },
-    { name = "lark", specifier = ">=1.3.1" },
-    { name = "psycopg", extras = ["binary"], marker = "extra == 'postgres'", specifier = ">=3.3.6" },
-    { name = "pyarrow", specifier = ">=26.0.0" },
-    { name = "pydantic", specifier = ">=2.14.1" },
-    { name = "pydantic-settings", specifier = ">=2.16.1" },
-    { name = "python-calamine", specifier = ">=0.9.0" },
-    { name = "python-multipart", specifier = ">=0.0.32" },
-    { name = "sqlalchemy", specifier = ">=2.1.6" },
-    { name = "sqlglot", specifier = ">=30.25.0" },
-    { name = "uvicorn", extras = ["standard"], specifier = ">=0.54.0" },
-    { name = "xlsxwriter", specifier = ">=3.3.0" },
-]
-provides-extras = ["postgres", "s3"]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "httpx2", specifier = ">=2.16.0" },
-    { name = "mypy", specifier = ">=2.4.0" },
-    { name = "pyarrow-stubs", specifier = ">=20.0.0.20260819" },
-    { name = "pytest", specifier = ">=9.2.0" },
-    { name = "ruff", specifier = ">=0.17.3" },
-]
-
-[[package]]
 name = "h11"
 version = "0.16.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1392,6 +1324,74 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/94/e7/b2c673351809dca68a0e064b6af791aa332cf192da575fd474ed7d6f16a2/six-1.17.0.tar.gz", hash = "sha256:ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81", size = 34031, upload-time = "2024-12-04T17:35:28.174Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/b7/ce/149a00dd41f10bc29e5921b496af8b574d8413afcd5e30dfa0ed46c2cc5e/six-1.17.0-py2.py3-none-any.whl", hash = "sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274", size = 11050, upload-time = "2024-12-04T17:35:26.475Z" },
+]
+
+[[package]]
+name = "sowa-core"
+version = "0.1.0"
+source = { editable = "." }
+dependencies = [
+    { name = "alembic" },
+    { name = "charset-normalizer" },
+    { name = "duckdb" },
+    { name = "fastapi" },
+    { name = "lark" },
+    { name = "pyarrow" },
+    { name = "pydantic" },
+    { name = "pydantic-settings" },
+    { name = "python-calamine" },
+    { name = "python-multipart" },
+    { name = "sqlalchemy" },
+    { name = "sqlglot" },
+    { name = "uvicorn", extra = ["standard"] },
+    { name = "xlsxwriter" },
+]
+
+[package.optional-dependencies]
+postgres = [
+    { name = "psycopg", extra = ["binary"] },
+]
+s3 = [
+    { name = "boto3" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "httpx2" },
+    { name = "mypy" },
+    { name = "pyarrow-stubs" },
+    { name = "pytest" },
+    { name = "ruff" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "alembic", specifier = ">=1.20.1" },
+    { name = "boto3", marker = "extra == 's3'", specifier = ">=1.43.121" },
+    { name = "charset-normalizer", specifier = ">=3.5.2" },
+    { name = "duckdb", specifier = ">=2.0.0" },
+    { name = "fastapi", specifier = ">=0.162.0" },
+    { name = "lark", specifier = ">=1.3.1" },
+    { name = "psycopg", extras = ["binary"], marker = "extra == 'postgres'", specifier = ">=3.3.6" },
+    { name = "pyarrow", specifier = ">=26.0.0" },
+    { name = "pydantic", specifier = ">=2.14.1" },
+    { name = "pydantic-settings", specifier = ">=2.16.1" },
+    { name = "python-calamine", specifier = ">=0.9.0" },
+    { name = "python-multipart", specifier = ">=0.0.32" },
+    { name = "sqlalchemy", specifier = ">=2.1.6" },
+    { name = "sqlglot", specifier = ">=30.25.0" },
+    { name = "uvicorn", extras = ["standard"], specifier = ">=0.54.0" },
+    { name = "xlsxwriter", specifier = ">=3.3.0" },
+]
+provides-extras = ["postgres", "s3"]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "httpx2", specifier = ">=2.16.0" },
+    { name = "mypy", specifier = ">=2.4.0" },
+    { name = "pyarrow-stubs", specifier = ">=20.0.0.20260819" },
+    { name = "pytest", specifier = ">=9.2.0" },
+    { name = "ruff", specifier = ">=0.17.3" },
 ]
 
 [[package]]

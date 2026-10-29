@@ -10,7 +10,7 @@ from typing import Any
 import pytest
 from fastapi.testclient import TestClient
 
-from forja.storage.files import S3FileStorage
+from sowa.storage.files import S3FileStorage
 from test_api import confirm, upload, wait_export
 
 
@@ -47,16 +47,16 @@ class FakeS3:
 
 def test_files_survive_losing_the_local_disk(tmp_path: Path) -> None:
     s3 = FakeS3()
-    st = S3FileStorage(tmp_path / "a", s3, "bucket", prefix="/forja/")
+    st = S3FileStorage(tmp_path / "a", s3, "bucket", prefix="/sowa/")
     original = st.original_path("src_1", "vendas.csv")
     size, _ = st.save_stream(io.BytesIO(b"uf;valor\nPR;1\n"), original, max_bytes=1000)
     st.persist(original)
     st.persist(st.parquet_path("src_1"))  # not written yet: nothing to upload
-    assert set(s3.objects) == {("bucket", "forja/sources/src_1/original_vendas.csv")}
+    assert set(s3.objects) == {("bucket", "sowa/sources/src_1/original_vendas.csv")}
 
     # A new machine (empty disk) with the same bucket.
     shutil.rmtree(tmp_path / "a")
-    other = S3FileStorage(tmp_path / "b", s3, "bucket", prefix="forja")
+    other = S3FileStorage(tmp_path / "b", s3, "bucket", prefix="sowa")
     path = other.ensure_local(other.original_path("src_1", "vendas.csv"))
     assert path.read_bytes() == b"uf;valor\nPR;1\n"
     assert size == len(path.read_bytes())
@@ -82,13 +82,13 @@ def test_delete_source_removes_every_object_of_it(tmp_path: Path) -> None:
 
 
 def test_api_with_s3_storage_survives_losing_the_disk(client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
-    from forja import deps
-    from forja.api.routes import exports as export_routes
-    from forja.api.routes import sources as source_routes
-    from forja.jobs import exports as export_jobs
+    from sowa import deps
+    from sowa.api.routes import exports as export_routes
+    from sowa.api.routes import sources as source_routes
+    from sowa.jobs import exports as export_jobs
 
     s3 = FakeS3()
-    st = S3FileStorage(deps.get_storage().root, s3, "bucket", "forja")
+    st = S3FileStorage(deps.get_storage().root, s3, "bucket", "sowa")
     for mod in (deps, source_routes, export_routes, export_jobs):
         monkeypatch.setattr(mod, "get_storage", lambda: st)
 
@@ -96,7 +96,7 @@ def test_api_with_s3_storage_survives_losing_the_disk(client: TestClient, monkey
     confirm(client, up)
     sid = up["source"]["id"]
     keys = {k for _, k in s3.objects}
-    assert {f"forja/sources/{sid}/normalized.parquet", f"forja/sources/{sid}/original_vendas_latin1.csv"} <= keys
+    assert {f"sowa/sources/{sid}/normalized.parquet", f"sowa/sources/{sid}/original_vendas_latin1.csv"} <= keys
 
     shutil.rmtree(st.root / "sources" / sid)  # e.g. a new container
     pipeline = {
@@ -108,11 +108,11 @@ def test_api_with_s3_storage_survives_losing_the_disk(client: TestClient, monkey
     }
     prev = client.post("/pipeline/preview", json={"pipeline": pipeline, "node_id": "s", "limit": 10})
     assert prev.status_code == 200, prev.text
-    assert prev.headers["x-forja-rows"] == "4"
+    assert prev.headers["x-sowa-rows"] == "4"
 
     job = wait_export(client, client.post("/exports", json={"pipeline": pipeline, "node_id": "o"}).json()["id"])
     assert job["status"] == "done", job
-    assert f"forja/exports/{job['id']}/saida.csv" in {k for _, k in s3.objects}
+    assert f"sowa/exports/{job['id']}/saida.csv" in {k for _, k in s3.objects}
     shutil.rmtree(st.root / "exports" / job["id"])
     r = client.get(f"/exports/{job['id']}/download")
     assert r.status_code == 200

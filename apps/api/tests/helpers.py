@@ -5,13 +5,13 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from forja.compiler.analyze import Analysis
-from forja.compiler.build import compile_chain
-from forja.domain.pipeline import Pipeline
-from forja.domain.schema import Column, Schema
-from forja.domain.types import from_duckdb
-from forja.engine.duck import Engine
-from forja.nodes.base import SourceInfo
+from sowa.compiler.analyze import Analysis
+from sowa.compiler.build import compile_chain
+from sowa.domain.pipeline import Pipeline
+from sowa.domain.schema import Column, Schema
+from sowa.domain.types import from_duckdb
+from sowa.engine.duck import Engine
+from sowa.nodes.base import SourceInfo
 
 FILES = Path(__file__).parent / "fixtures" / "files"
 

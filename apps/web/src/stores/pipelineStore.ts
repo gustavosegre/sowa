@@ -25,7 +25,7 @@ export const EMPTY_PIPELINE: Pipeline = {
 };
 
 export interface ClipboardPayload {
-  kind: "forja/nodes";
+  kind: "sowa/nodes";
   nodes: PipelineNode[];
   edges: PipelineEdge[];
 }
@@ -262,7 +262,7 @@ export const usePipelineStore = create<State>()(
         const { pipeline } = get();
         const nodes = pipeline.nodes.filter((n) => ids.includes(n.id));
         const edges = pipeline.edges.filter((e) => ids.includes(e.source) && ids.includes(e.target));
-        return get().paste({ kind: "forja/nodes", nodes, edges }, { x: 40, y: 40 });
+        return get().paste({ kind: "sowa/nodes", nodes, edges }, { x: 40, y: 40 });
       },
 
       paste: (payload, offset = { x: 40, y: 40 }) => {

@@ -1,7 +1,7 @@
 {
  "openapi": "3.1.0",
  "info": {
-  "title": "Forja API",
+  "title": "SOWA API",
   "description": "Construtor visual de datasets.",
   "version": "0.1.0"
  },
@@ -6248,7 +6248,7 @@
   "securitySchemes": {
    "HTTPBearer": {
     "type": "http",
-    "description": "Token de acesso da Forja",
+    "description": "Token de acesso do SOWA",
     "scheme": "bearer"
    }
   }

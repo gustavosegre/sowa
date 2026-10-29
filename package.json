@@ -1,9 +1,9 @@
 {
-  "name": "forja",
+  "name": "sowa",
   "private": true,
   "packageManager": "pnpm@12.15.0",
   "scripts": {
-    "dev": "pnpm --filter forja-web dev",
-    "build": "pnpm --filter forja-web build"
+    "dev": "pnpm --filter sowa-web dev",
+    "build": "pnpm --filter sowa-web build"
   }
 }

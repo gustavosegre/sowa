@@ -23,6 +23,13 @@ describe("access token", () => {
     expect(authHeaders()).toEqual({});
   });
 
+  it("keeps the token saved under the old name (Forja)", () => {
+    window.localStorage.setItem("forja.token", "antigo");
+    expect(getToken()).toBe("antigo");
+    expect(window.localStorage.getItem("forja.token")).toBeNull();
+    expect(window.localStorage.getItem("sowa.token")).toBe("antigo");
+  });
+
   it("announces changes", () => {
     const seen = vi.fn();
     window.addEventListener(TOKEN_EVENT, seen);

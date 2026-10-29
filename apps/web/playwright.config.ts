@@ -2,8 +2,8 @@ import { defineConfig } from "@playwright/test";
 
 import { E2E_TOKEN, STORAGE_STATE } from "./e2e/token";
 
-const apiPort = process.env.FORJA_API_PORT ?? "8000";
-const webPort = process.env.FORJA_WEB_PORT ?? "5173";
+const apiPort = process.env.SOWA_API_PORT ?? "8000";
+const webPort = process.env.SOWA_WEB_PORT ?? "5173";
 
 export default defineConfig({
   testDir: "./e2e",
@@ -20,16 +20,16 @@ export default defineConfig({
   },
   webServer: [
     {
-      command: `uv run --directory ../api uvicorn forja.main:app --port ${apiPort}`,
+      command: `uv run --directory ../api uvicorn sowa.main:app --port ${apiPort}`,
       url: `http://127.0.0.1:${apiPort}/health`,
       reuseExistingServer: true,
-      env: { FORJA_DATA_DIR: "../../.e2e-data", FORJA_TOKEN: E2E_TOKEN },
+      env: { SOWA_DATA_DIR: "../../.e2e-data", SOWA_TOKEN: E2E_TOKEN },
     },
     {
       command: `pnpm exec vite --host 127.0.0.1 --port ${webPort}`,
       url: `http://127.0.0.1:${webPort}`,
       reuseExistingServer: true,
-      env: { FORJA_API_URL: `http://127.0.0.1:${apiPort}` },
+      env: { SOWA_API_URL: `http://127.0.0.1:${apiPort}` },
     },
   ],
 });

@@ -6,13 +6,13 @@ import os
 import time
 from pathlib import Path
 
-from forja.compiler.analyze import analyze
-from forja.compiler.build import compile_chain, to_sql
-from forja.compiler.hashing import node_hashes
-from forja.engine import service
-from forja.engine.duck import Engine
-from forja.engine.matcache import MaterializedCache, get_cache
 from helpers import FakeSources, chain_of, pipeline, src
+from sowa.compiler.analyze import analyze
+from sowa.compiler.build import compile_chain, to_sql
+from sowa.compiler.hashing import node_hashes
+from sowa.engine import service
+from sowa.engine.duck import Engine
+from sowa.engine.matcache import MaterializedCache, get_cache
 
 GROUP = {"type": "group_by", "config": {"keys": ["uf"], "aggs": [{"column": "valor", "fn": "sum", "as": "total"}]}}
 SORT = {"type": "sort", "config": {"keys": [{"column": "uf"}]}}

@@ -8,7 +8,7 @@ test.use({ storageState: { cookies: [], origins: [] } });
 
 test("token de acesso: tela, endereço com #token= e sair", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: "Entrar na Forja" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Entrar no SOWA" })).toBeVisible();
   await page.getByLabel("Token de acesso").fill("token-errado");
   await page.getByRole("button", { name: "Entrar" }).click();
   await expect(page.getByText("Token incorreto.")).toBeVisible();
@@ -17,14 +17,14 @@ test("token de acesso: tela, endereço com #token= e sair", async ({ page }) => 
 
   await page.getByLabel("Token de acesso").fill(E2E_TOKEN);
   await page.getByRole("button", { name: "Entrar" }).click();
-  await expect(page.getByRole("heading", { name: "Forja", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "SOWA", exact: true })).toBeVisible();
 
   await page.getByRole("button", { name: "Sair" }).click();
-  await expect(page.getByRole("heading", { name: "Entrar na Forja" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Entrar no SOWA" })).toBeVisible();
 
   // The address printed by the API logs in and the token leaves the address bar.
   await page.goto(`/#token=${E2E_TOKEN}`);
-  await expect(page.getByRole("heading", { name: "Forja", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "SOWA", exact: true })).toBeVisible();
   expect(new URL(page.url()).hash).toBe("");
 });
 

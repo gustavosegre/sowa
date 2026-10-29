@@ -4,9 +4,9 @@ from pathlib import Path
 
 import pytest
 
-from forja.domain.types import LogicalType as L
-from forja.io.detect import detect_encoding, detect_format, file_decimal_separator, guess_type, normalize_names
 from helpers import FILES
+from sowa.domain.types import LogicalType as L
+from sowa.io.detect import detect_encoding, detect_format, file_decimal_separator, guess_type, normalize_names
 
 
 @pytest.mark.parametrize(

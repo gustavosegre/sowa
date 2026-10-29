@@ -10,9 +10,9 @@ from typing import Any
 
 import pytest
 
-from forja.compiler.analyze import analyze
-from forja.engine.duck import Engine
 from helpers import FakeSources, chain_of, run, src
+from sowa.compiler.analyze import analyze
+from sowa.engine.duck import Engine
 
 
 def pivot(engine: Engine, sources: FakeSources, cfg: dict[str, Any]) -> list[tuple[Any, ...]]:

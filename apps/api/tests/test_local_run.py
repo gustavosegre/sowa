@@ -8,12 +8,12 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from forja.api.webui import StripApiPrefix, mount_web
-from forja.deps import get_storage
-from forja.jobs.exports import purge_old
-from forja.settings import get_settings
-from forja.storage.db import ExportJobRow, session_scope, utcnow
-from forja.storage.repos import ExportRepo
+from sowa.api.webui import StripApiPrefix, mount_web
+from sowa.deps import get_storage
+from sowa.jobs.exports import purge_old
+from sowa.settings import get_settings
+from sowa.storage.db import ExportJobRow, session_scope, utcnow
+from sowa.storage.repos import ExportRepo
 
 
 def test_api_prefix_is_stripped(client: TestClient) -> None:
@@ -25,7 +25,7 @@ def test_api_prefix_is_stripped(client: TestClient) -> None:
 def test_built_web_app_is_served(tmp_path: Path) -> None:
     assert not mount_web(FastAPI(), tmp_path)  # not built: nothing mounted
     (tmp_path / "assets").mkdir()
-    (tmp_path / "index.html").write_text("<!doctype html><title>Forja</title>", encoding="utf-8")
+    (tmp_path / "index.html").write_text("<!doctype html><title>SOWA</title>", encoding="utf-8")
     (tmp_path / "assets" / "app.js").write_text("console.log(1)", encoding="utf-8")
     app = FastAPI()
     app.add_middleware(StripApiPrefix)
@@ -36,7 +36,7 @@ def test_built_web_app_is_served(tmp_path: Path) -> None:
 
     assert mount_web(app, tmp_path)
     c = TestClient(app)
-    assert "<title>Forja</title>" in c.get("/").text
+    assert "<title>SOWA</title>" in c.get("/").text
     assert c.get("/?project=prj_1").status_code == 200
     assert c.get("/assets/app.js").text == "console.log(1)"
     assert c.get("/api/health").json() == {"status": "ok"}  # API routes keep priority
@@ -62,3 +62,17 @@ def test_old_exports_are_purged() -> None:
         assert s.get(ExportJobRow, ids[2]) is not None
     assert not (st.root / "exports" / ids[0]).exists()
     assert (st.root / "exports" / ids[2] / "x.csv").exists()
+
+
+def test_legacy_forja_db_is_adopted(tmp_path: Path) -> None:
+    from sowa.settings import _adopt_legacy_db
+
+    (tmp_path / "forja.db").write_bytes(b"db")
+    (tmp_path / "forja.db-wal").write_bytes(b"wal")
+    _adopt_legacy_db(tmp_path)
+    assert (tmp_path / "sowa.db").read_bytes() == b"db"
+    assert (tmp_path / "sowa.db-wal").read_bytes() == b"wal"
+    assert not (tmp_path / "forja.db").exists()
+    (tmp_path / "forja.db").write_bytes(b"outro")
+    _adopt_legacy_db(tmp_path)  # sowa.db already exists: nothing is overwritten
+    assert (tmp_path / "sowa.db").read_bytes() == b"db"

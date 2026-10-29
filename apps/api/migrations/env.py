@@ -3,8 +3,8 @@ from __future__ import annotations
 from alembic import context
 from sqlalchemy import create_engine
 
-from forja.settings import get_settings
-from forja.storage.db import Base
+from sowa.settings import get_settings
+from sowa.storage.db import Base
 
 config = context.config
 target_metadata = Base.metadata

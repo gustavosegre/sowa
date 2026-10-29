@@ -167,7 +167,7 @@ def test_end_to_end_excel_brasil(client: TestClient) -> None:
     r = client.post("/pipeline/preview", json={"pipeline": pipeline, "node_id": "n5", "limit": 2})
     assert r.status_code == 200
     assert r.headers["content-type"] == "application/vnd.apache.arrow.stream"
-    assert r.headers["x-forja-has-more"] == "1"
+    assert r.headers["x-sowa-has-more"] == "1"
     t = read_arrow(r.content)
     assert t.column_names == ["uf", "receita_total", "ultima_venda"]
     assert t.to_pylist()[0]["uf"] == "PR"
@@ -356,7 +356,7 @@ def test_templates_crud_and_subflow_from_template(client: TestClient) -> None:
     assert schema["nodes"]["x"]["status"] == "ok"
     assert "dobro" in [c["name"] for c in schema["nodes"]["x"]["columns"]]
     prev = client.post("/pipeline/preview", json={"pipeline": pipeline, "node_id": "x", "limit": 10})
-    assert prev.headers["x-forja-rows"] == "4"
+    assert prev.headers["x-sowa-rows"] == "4"
 
     r = client.put(f"/templates/{tpl['id']}", json={"flow": {**flow, "nodes": [{**flow["nodes"][0], "ui": {"x": 5}}]}})
     assert r.json()["version"] == 2

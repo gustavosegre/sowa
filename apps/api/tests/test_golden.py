@@ -16,11 +16,11 @@ from typing import Any
 import pytest
 import sqlglot
 
-from forja.compiler.analyze import analyze
-from forja.compiler.build import compile_chain, to_sql
-from forja.domain.pipeline import Pipeline
-from forja.engine.duck import Engine
 from helpers import FakeSources
+from sowa.compiler.analyze import analyze
+from sowa.compiler.build import compile_chain, to_sql
+from sowa.domain.pipeline import Pipeline
+from sowa.engine.duck import Engine
 
 GOLDEN = Path(__file__).parent / "golden"
 CASES = sorted(GOLDEN.glob("*.json"))

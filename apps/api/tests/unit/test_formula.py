@@ -8,14 +8,14 @@ from typing import Any
 import duckdb
 import pytest
 
-from forja.domain.issues import IssueCode
-from forja.domain.schema import Schema
-from forja.domain.types import LogicalType as L
-from forja.domain.types import from_duckdb
-from forja.formula.parser import parse
-from forja.formula.render import render
-from forja.formula.service import compile_formula
-from forja.formula.typecheck import FormulaError
+from sowa.domain.issues import IssueCode
+from sowa.domain.schema import Schema
+from sowa.domain.types import LogicalType as L
+from sowa.domain.types import from_duckdb
+from sowa.formula.parser import parse
+from sowa.formula.render import render
+from sowa.formula.service import compile_formula
+from sowa.formula.typecheck import FormulaError
 
 SCHEMA = Schema.of(
     ("preço", L.DECIMAL),

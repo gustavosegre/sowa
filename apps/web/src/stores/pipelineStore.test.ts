@@ -82,7 +82,7 @@ describe("pipelineStore", () => {
   it("pastes nodes with new ids and internal edges only", () => {
     const { pipeline } = store();
     const ids = store().paste({
-      kind: "forja/nodes",
+      kind: "sowa/nodes",
       nodes: pipeline.nodes.slice(0, 2),
       edges: pipeline.edges,
     });

@@ -37,7 +37,7 @@ import { VersionsDialog } from "./VersionsDialog";
 import { switchLocale } from "./locale";
 import { ProjectContext } from "./project";
 
-const CLIP_KEY = "forja-clipboard";
+const CLIP_KEY = "sowa-clipboard";
 
 function isTyping(e: KeyboardEvent): boolean {
   const el = e.target as HTMLElement | null;
@@ -322,7 +322,7 @@ function EditorInner({ projectId, onBack }: { projectId: string; onBack: () => v
       } else if (key === "c" && selected.length) {
         const ids = new Set(selected);
         const payload: ClipboardPayload = {
-          kind: "forja/nodes",
+          kind: "sowa/nodes",
           nodes: store.pipeline.nodes.filter((n) => ids.has(n.id)),
           edges: store.pipeline.edges.filter((x) => ids.has(x.source) && ids.has(x.target)),
         };
@@ -334,7 +334,7 @@ function EditorInner({ projectId, onBack }: { projectId: string; onBack: () => v
           if (!text) return;
           try {
             const payload = JSON.parse(text) as ClipboardPayload;
-            if (payload.kind === "forja/nodes") store.paste(payload, { x: 60, y: 60 });
+            if (payload.kind === "sowa/nodes") store.paste(payload, { x: 60, y: 60 });
           } catch {
             /* not ours */
           }

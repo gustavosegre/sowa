@@ -150,8 +150,8 @@ export function usePreview(pipeline: Pipeline, nodeId: string | null, hash: stri
       const buf = await res.arrayBuffer();
       return {
         table: tableFromIPC(new Uint8Array(buf)),
-        rows: Number(res.headers.get("X-Forja-Rows") ?? "0"),
-        hasMore: res.headers.get("X-Forja-Has-More") === "1",
+        rows: Number(res.headers.get("X-Sowa-Rows") ?? "0"),
+        hasMore: res.headers.get("X-Sowa-Has-More") === "1",
       };
     },
     getNextPageParam: (last, pages) => (last.hasMore ? pages.length * PAGE_SIZE : undefined),

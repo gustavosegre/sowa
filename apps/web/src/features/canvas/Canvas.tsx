@@ -31,8 +31,8 @@ import { NodeCard, type CardData } from "./NodeCard";
 
 const nodeTypes = { card: NodeCard, note: NoteNode, frame: FrameNode };
 
-export const DND_NODE = "application/forja-node";
-export const DND_SOURCE = "application/forja-source";
+export const DND_NODE = "application/sowa-node";
+export const DND_SOURCE = "application/sowa-source";
 
 function rfType(n: PipelineNode): "card" | "note" | "frame" {
   return n.type === "note" ? "note" : n.type === "frame" ? "frame" : "card";

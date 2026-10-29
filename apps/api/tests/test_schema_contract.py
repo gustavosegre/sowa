@@ -9,10 +9,10 @@ from typing import Any
 
 import pytest
 
-from forja.compiler.analyze import analyze
-from forja.engine.duck import Engine
-from forja.nodes.registry import all_specs
 from helpers import FakeSources, actual_schema, chain_of, pipeline, src
+from sowa.compiler.analyze import analyze
+from sowa.engine.duck import Engine
+from sowa.nodes.registry import all_specs
 
 # (node type, list of configs applied on top of the "vendas" source)
 FIXTURES: dict[str, list[dict[str, Any]]] = {

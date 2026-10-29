@@ -47,7 +47,7 @@ export const useUiStore = create<UiState>()(
       setSaveStatus: (s) => set({ saveStatus: s }),
     }),
     {
-      name: "forja-ui",
+      name: "sowa-ui",
       partialize: (s) => ({
         theme: s.theme,
         previewHeight: s.previewHeight,

@@ -6,17 +6,17 @@ import datetime as dt
 
 import pytest
 
-from forja.compiler.analyze import analyze
-from forja.domain.issues import IssueCode
-from forja.domain.pipeline import Parameter
-from forja.domain.schema import Schema
-from forja.domain.types import LogicalType as L
-from forja.engine.duck import Engine
-from forja.formula.parser import parse
-from forja.formula.render import render
-from forja.formula.service import compile_formula
-from forja.formula.typecheck import FormulaError
 from helpers import FakeSources, chain_of, run, src
+from sowa.compiler.analyze import analyze
+from sowa.domain.issues import IssueCode
+from sowa.domain.pipeline import Parameter
+from sowa.domain.schema import Schema
+from sowa.domain.types import LogicalType as L
+from sowa.engine.duck import Engine
+from sowa.formula.parser import parse
+from sowa.formula.render import render
+from sowa.formula.service import compile_formula
+from sowa.formula.typecheck import FormulaError
 
 PARAMS = [
     Parameter(name="data_corte", type=L.DATE, value="15/03/2025"),

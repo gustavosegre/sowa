@@ -1,4 +1,4 @@
-"""Run Forja for everyday local use: one process (API + built web app) on 127.0.0.1. Ctrl+C stops it.
+"""Run SOWA for everyday local use: one process (API + built web app) on 127.0.0.1. Ctrl+C stops it.
 
 Builds the web app first when apps/web/dist is missing or older than the sources, then opens the
 browser at the address with the access token (#token=, as Flowa prints it).
@@ -52,11 +52,11 @@ def _wait_ready(url: str, api: subprocess.Popen[bytes], timeout: float = 90) -> 
 
 
 def _token(env: dict[str, str]) -> str | None:
-    if env.get("FORJA_AUTH_ENABLED", "").lower() in ("0", "false", "no"):
+    if env.get("SOWA_AUTH_ENABLED", "").lower() in ("0", "false", "no"):
         return None
-    if env.get("FORJA_TOKEN", "").strip():
-        return env["FORJA_TOKEN"].strip()
-    path = Path(env["FORJA_DATA_DIR"]) / "token"
+    if env.get("SOWA_TOKEN", "").strip():
+        return env["SOWA_TOKEN"].strip()
+    path = Path(env["SOWA_DATA_DIR"]) / "token"
     return path.read_text(encoding="utf-8").strip() if path.exists() else None
 
 
@@ -71,21 +71,21 @@ def main() -> int:
         _build()
 
     url = f"http://127.0.0.1:{args.port}"
-    env = {**os.environ, "FORJA_WEB_URL": url, "FORJA_SERVE_WEB": "true"}
-    env.setdefault("FORJA_DATA_DIR", str(ROOT / "data"))
+    env = {**os.environ, "SOWA_WEB_URL": url, "SOWA_SERVE_WEB": "true"}
+    env.setdefault("SOWA_DATA_DIR", str(ROOT / "data"))
     uv = shutil.which("uv") or "uv"
     api = subprocess.Popen(
-        [uv, "run", "uvicorn", "forja.main:app", "--host", "127.0.0.1", "--port", args.port],
+        [uv, "run", "uvicorn", "sowa.main:app", "--host", "127.0.0.1", "--port", args.port],
         cwd=ROOT / "apps" / "api",
         env=env,
     )
     try:
         if not _wait_ready(url, api):
-            print("A Forja não subiu; veja as mensagens acima.", flush=True)
+            print("O SOWA não subiu; veja as mensagens acima.", flush=True)
             return api.wait() or 1
         token = _token(env)
         address = f"{url}/#token={token}" if token else url
-        print(f"\n  Forja no ar. Abra:\n\n    {address}\n\n  Dados em {env['FORJA_DATA_DIR']}. Ctrl+C para parar.\n", flush=True)
+        print(f"\n  SOWA no ar. Abra:\n\n    {address}\n\n  Dados em {env['SOWA_DATA_DIR']}. Ctrl+C para parar.\n", flush=True)
         if not args.no_browser:
             webbrowser.open(address)
         return api.wait()

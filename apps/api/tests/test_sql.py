@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import pytest
 
-from forja.compiler.analyze import analyze
-from forja.domain.issues import IssueCode
-from forja.engine.describe import make_describer
-from forja.engine.duck import Engine
-from forja.nodes.sql import SqlRejected, parse_select
 from helpers import FakeSources, actual_schema, pipeline, run, src
+from sowa.compiler.analyze import analyze
+from sowa.domain.issues import IssueCode
+from sowa.engine.describe import make_describer
+from sowa.engine.duck import Engine
+from sowa.nodes.sql import SqlRejected, parse_select
 
 
 def sql_pipeline(query: str, two_inputs: bool = False):  # type: ignore[no-untyped-def]

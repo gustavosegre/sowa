@@ -67,6 +67,7 @@ def run(job_id: str, pipeline: Pipeline, node_id: str) -> None:
         assert schema is not None
         out_dir = get_storage().export_dir(job_id)
         res = export(get_engine(), chain.query(), schema, cfg, out_dir, progress)
+        get_storage().persist(res.path)
         _update(
             job_id,
             status="done",

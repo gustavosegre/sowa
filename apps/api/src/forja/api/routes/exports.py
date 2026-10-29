@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 from forja.api.errors import HttpError, not_found
 from forja.api.schemas import ExportJobOut, ExportRequest
 from forja.compiler.build import CompileError
+from forja.deps import get_storage
 from forja.domain.issues import Issue
 from forja.engine.describe import analyze_live
 from forja.jobs import exports as jobs
@@ -80,7 +81,8 @@ def download(job_id: str, db: Db) -> FileResponse:
     row = ExportRepo(db).get(job_id)
     if row is None:
         raise not_found("Exportação")
-    if row.status != "done" or not row.file_path or not Path(row.file_path).exists():
+    st = get_storage()
+    path = st.ensure_local(st.export_dir(row.id) / Path(row.file_path).name) if row.file_path else None
+    if row.status != "done" or path is None or not path.exists():
         raise HttpError(409, "EXPORT_NOT_READY", "O arquivo ainda não está pronto.")
-    path = Path(row.file_path)
     return FileResponse(path, filename=path.name, media_type=MEDIA.get(path.suffix, "application/octet-stream"))

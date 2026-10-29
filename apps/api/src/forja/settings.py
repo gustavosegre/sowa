@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from functools import cache
 from pathlib import Path
+from typing import Literal
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -20,6 +21,14 @@ class Settings(BaseSettings):
     auto_migrate: bool = True
     cors_origins: list[str] = ["http://localhost:5173", "http://127.0.0.1:5173"]
     export_workers: int = 2
+    # File storage: "local" (disk) or "s3" (S3-compatible bucket, e.g. MinIO; needs the `s3` extra).
+    # Credentials come from the usual AWS variables (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY).
+    storage: Literal["local", "s3"] = "local"
+    s3_bucket: str = ""
+    s3_prefix: str = "forja"
+    s3_endpoint_url: str | None = None  # MinIO: http://minio:9000
+    s3_region: str | None = None
+    s3_create_bucket: bool = False  # dev (MinIO no docker compose): create the bucket if missing
 
     @property
     def db_url(self) -> str:

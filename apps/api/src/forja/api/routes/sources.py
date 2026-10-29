@@ -48,7 +48,8 @@ def _get(db: Session, source_id: str) -> SourceRow:
 
 
 def _original(row: SourceRow) -> Path:
-    return get_storage().original_path(row.id, row.filename)
+    st = get_storage()
+    return st.ensure_local(st.original_path(row.id, row.filename))
 
 
 def _detect(row: SourceRow, options: ImportOptions | None = None) -> Detection:
@@ -85,6 +86,7 @@ def upload(db: Db, file: Annotated[UploadFile, File()], project_id: Annotated[st
     except UploadTooLarge:
         st.delete_source(sid)
         raise HttpError(413, "UPLOAD_TOO_LARGE", f"O arquivo passa do limite de {s.max_upload_mb} MB.") from None
+    st.persist(st.original_path(sid, filename))
     row = SourceRepo(db).add(
         SourceRow(
             id=sid,
@@ -141,6 +143,7 @@ def confirm_import(source_id: str, body: ImportOptions, db: Db) -> ConfirmOut:
         schema, report = confirm(get_engine(), row.format, _original(row), st.work_dir(row.id), dest, body)
     except EngineError as e:
         raise ImportError_(f"A importação falhou: {e.issue.message}", e.issue.code) from e
+    st.persist(dest)
     row.options = body.model_dump(mode="json")
     row.schema = [c.model_dump(mode="json") for c in schema.columns]
     row.parquet_path = dest.resolve().as_posix()
@@ -176,6 +179,7 @@ def replace_file(source_id: str, db: Db, file: Annotated[UploadFile, File()]) ->
         size, sha = st.save_stream(file.file, st.original_path(row.id, filename), s.max_upload_mb * 1024 * 1024)
     except UploadTooLarge:
         raise HttpError(413, "UPLOAD_TOO_LARGE", f"O arquivo passa do limite de {s.max_upload_mb} MB.") from None
+    st.persist(st.original_path(row.id, filename))
     row.filename, row.format, row.size_bytes, row.sha256 = filename, fmt, size, sha
     row.status, row.parquet_path, row.schema, row.row_count = "pending", None, None, None
     row.name = old_name

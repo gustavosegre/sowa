@@ -1,5 +1,6 @@
 # Forja — ambiente completo: API + web + Postgres (metadados). Arquivos em volume local (FileStorage local).
 # `docker compose up --build` e abra http://localhost:5173
+# Arquivos no MinIO (S3): `docker compose --profile s3 up --build` com FORJA_STORAGE=s3 (ver .env.example).
 services:
   api:
     build: ./apps/api
@@ -7,6 +8,13 @@ services:
       FORJA_DATA_DIR: /data
       FORJA_DATABASE_URL: postgresql+psycopg://forja:forja@postgres:5432/forja
       FORJA_CORS_ORIGINS: '["http://localhost:5173"]'
+      FORJA_STORAGE: ${FORJA_STORAGE:-local}
+      FORJA_S3_BUCKET: forja
+      FORJA_S3_ENDPOINT_URL: http://minio:9000
+      FORJA_S3_REGION: us-east-1
+      FORJA_S3_CREATE_BUCKET: "true"
+      AWS_ACCESS_KEY_ID: forja
+      AWS_SECRET_ACCESS_KEY: forja-minio
     volumes:
       - forja-data:/data
     ports:
@@ -37,6 +45,23 @@ services:
       interval: 5s
       retries: 10
 
+  # MinIO deixou de publicar imagens no Docker Hub/quay; esta é a build da Chainguard (fixada pelo digest).
+  # O bucket é criado pela API (FORJA_S3_CREATE_BUCKET).
+  minio:
+    profiles: ["s3"]
+    image: chainguard/minio@sha256:e70b2b1e74d79457f808710483bd726ff364529ca30736eaa15a6ab547d3a5a7
+    user: root  # o volume nomeado nasce como root; a imagem roda como 65532
+    command: ["server", "/data", "--console-address", ":9001"]
+    environment:
+      MINIO_ROOT_USER: forja
+      MINIO_ROOT_PASSWORD: forja-minio
+    volumes:
+      - minio-data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+
 volumes:
   forja-data:
   pg-data:
+  minio-data:

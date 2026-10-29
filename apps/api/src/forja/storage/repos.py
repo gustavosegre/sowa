@@ -153,12 +153,19 @@ class SourceRepo:
 
 
 def source_info(row: SourceRow) -> SourceInfo:
+    from forja.deps import get_storage
+
     schema = Schema.model_validate({"columns": row.schema or []})
+    path = None
+    if row.status == "ready":
+        # Rebuilt from the storage layout (not the stored absolute path), fetched if missing.
+        st = get_storage()
+        path = st.ensure_local(st.parquet_path(row.id)).as_posix()
     return SourceInfo(
         id=row.id,
         name=row.name,
         status=row.status,
-        parquet_path=row.parquet_path,
+        parquet_path=path,
         schema=schema,
         row_count=row.row_count,
         # Changes whenever the file or its import options change (cache key).

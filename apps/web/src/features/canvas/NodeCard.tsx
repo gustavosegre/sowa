@@ -87,7 +87,7 @@ function NodeCardImpl({ data, selected }: NodeProps<CardNode>) {
     <div
       className={cn(
         "group relative w-[240px] rounded-lg border bg-card shadow-sm transition-shadow",
-        selected && "shadow-md ring-2 ring-primary/60",
+        selected && "shadow-md ring-2 ring-ring/70",
         status === "error" && "border-danger ring-danger/40",
         status === "blocked" && "opacity-55 grayscale",
       )}

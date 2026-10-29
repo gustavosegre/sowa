@@ -1,3 +1,5 @@
+<img src="docs/brand/sowa-logo.png" alt="" width="96" align="right" />
+
 # SOWA
 
 **Construtor visual de datasets.** Você sobe arquivos (CSV, Excel, Parquet, JSON), monta as transformações como blocos ligados num quadro, vê o resultado de cada etapa na hora e exporta o dataset final.

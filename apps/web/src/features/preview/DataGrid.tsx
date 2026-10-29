@@ -28,20 +28,21 @@ const ICON: Record<LogicalType, GridColumnIcon> = {
   other: GridColumnIcon.HeaderCode,
 };
 
+// Canvas-rendered, so the grid takes colors, not CSS variables: keep in sync with index.css.
 const LIGHT: Partial<Theme> = {
-  accentColor: "#c2410c",
-  accentLight: "rgba(194, 65, 12, 0.12)",
-  textDark: "#1f2430",
-  textMedium: "#5b6070",
-  textLight: "#9aa0ad",
-  textHeader: "#3a3f4c",
+  accentColor: "#805ad5",
+  accentLight: "rgba(128, 90, 213, 0.12)",
+  textDark: "#13241f",
+  textMedium: "#586661",
+  textLight: "#98a29e",
+  textHeader: "#2a3a35",
   bgCell: "#ffffff",
-  bgCellMedium: "#f7f8fa",
-  bgHeader: "#f5f6f8",
-  bgHeaderHasFocus: "#eceef2",
-  bgHeaderHovered: "#eceef2",
-  borderColor: "rgba(115, 120, 135, 0.18)",
-  horizontalBorderColor: "rgba(115, 120, 135, 0.12)",
+  bgCellMedium: "#f8f6fc",
+  bgHeader: "#f4f1fa",
+  bgHeaderHasFocus: "#ebe6f4",
+  bgHeaderHovered: "#ebe6f4",
+  borderColor: "rgba(88, 102, 97, 0.18)",
+  horizontalBorderColor: "rgba(88, 102, 97, 0.12)",
   fontFamily: "Inter, ui-sans-serif, system-ui, Segoe UI, sans-serif",
   baseFontStyle: "12.5px",
   headerFontStyle: "600 12px",
@@ -50,23 +51,25 @@ const LIGHT: Partial<Theme> = {
 
 const DARK: Partial<Theme> = {
   ...LIGHT,
-  accentColor: "#f97316",
-  accentLight: "rgba(249, 115, 22, 0.18)",
-  textDark: "#e7e9ee",
-  textMedium: "#a7acb8",
-  textLight: "#6f7584",
-  textHeader: "#d5d8df",
-  bgCell: "#1d2028",
-  bgCellMedium: "#22252e",
-  bgHeader: "#252832",
-  bgHeaderHasFocus: "#2e323d",
-  bgHeaderHovered: "#2e323d",
-  borderColor: "rgba(200, 205, 220, 0.12)",
-  horizontalBorderColor: "rgba(200, 205, 220, 0.08)",
+  accentColor: "#c4b5fd",
+  accentFg: "#063d32",
+  accentLight: "rgba(196, 181, 253, 0.16)",
+  textDark: "#f4f1fa",
+  textMedium: "#9db0a9",
+  textLight: "#62756f",
+  textHeader: "#dde3e0",
+  bgCell: "#0a241f",
+  bgCellMedium: "#0d2a24",
+  bgHeader: "#0f2e28",
+  bgHeaderHasFocus: "#163a33",
+  bgHeaderHovered: "#163a33",
+  borderColor: "rgba(196, 220, 210, 0.12)",
+  horizontalBorderColor: "rgba(196, 220, 210, 0.08)",
 };
 
-const HIGHLIGHT_LIGHT = { bgHeader: "#fdebd7", bgCell: "#fffaf4" };
-const HIGHLIGHT_DARK = { bgHeader: "#4a2f1a", bgCell: "#262119" };
+// New/changed columns (comparison mode): a Lima tint.
+const HIGHLIGHT_LIGHT = { bgHeader: "#e4f4d0", bgCell: "#f6fbef" };
+const HIGHLIGHT_DARK = { bgHeader: "#24451a", bgCell: "#10301f" };
 
 export interface DataGridProps {
   columns: Column[];
@@ -121,7 +124,7 @@ export function DataGrid({ columns, pages, highlight, onHeaderMenu, onCellMenu, 
           displayData: "∅",
           allowOverlay: false,
           contentAlign: type === "integer" || type === "decimal" ? "right" : "left",
-          themeOverride: { textDark: dark ? "#4b5160" : "#c3c7d0" },
+          themeOverride: { textDark: dark ? "#3f5751" : "#c6cdca" },
         };
       }
       const text = formatCell(v, type);

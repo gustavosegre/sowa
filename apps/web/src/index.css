@@ -4,31 +4,33 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Calm, dense UI. Colors as tokens so light/dark switch in one place. */
+/* Calm, dense UI. Colors as tokens so light/dark switch in one place.
+   Brand palette: Floresta #063d32 · Lima #82d42b · Violeta #805ad5 · Lavanda #c4b5fd · Neve #f4f1fa.
+   Light: Neve surfaces, Floresta actions, Violeta focus. Dark: Floresta surfaces, Lima actions, Lavanda focus. */
 :root {
-  --background: oklch(0.985 0.002 250);
-  --foreground: oklch(0.22 0.01 260);
-  --card: oklch(1 0 0);
-  --muted: oklch(0.955 0.004 250);
-  --muted-foreground: oklch(0.52 0.015 260);
-  --border: oklch(0.91 0.006 255);
-  --input: oklch(0.88 0.008 255);
-  --ring: oklch(0.62 0.15 45);
-  --primary: oklch(0.6 0.17 45);
-  --primary-foreground: oklch(0.99 0 0);
-  --accent: oklch(0.95 0.02 60);
+  --background: #f4f1fa; /* Neve */
+  --foreground: #13241f;
+  --card: #ffffff;
+  --muted: #ece8f4;
+  --muted-foreground: #586661;
+  --border: #e2ddeb;
+  --input: #d3cde0;
+  --ring: #805ad5; /* Violeta */
+  --primary: #063d32; /* Floresta */
+  --primary-foreground: #f4f1fa;
+  --accent: #ede7fc; /* Lavanda, light */
   --danger: oklch(0.58 0.2 27);
   --danger-soft: oklch(0.96 0.03 27);
   --warning: oklch(0.7 0.15 75);
   --warning-soft: oklch(0.97 0.05 85);
-  --success: oklch(0.62 0.13 155);
-  --canvas: oklch(0.975 0.003 250);
-  --canvas-dot: oklch(0.85 0.006 255);
+  --success: #4c8a16; /* Lima, dark enough for text */
+  --canvas: #efebf6;
+  --canvas-dot: #cbc3dc;
 
-  --cat-input: oklch(0.6 0.13 240);
-  --cat-columns: oklch(0.58 0.16 295);
+  --cat-input: #0f7a63; /* Floresta, lighter */
+  --cat-columns: #805ad5; /* Violeta */
   --cat-rows: oklch(0.68 0.14 70);
-  --cat-aggregate: oklch(0.6 0.13 160);
+  --cat-aggregate: #5e9e1b; /* Lima, darker */
   --cat-combine: oklch(0.6 0.17 350);
   --cat-output: oklch(0.62 0.17 40);
   --cat-advanced: oklch(0.5 0.03 260);
@@ -36,18 +38,26 @@
 }
 
 .dark {
-  --background: oklch(0.18 0.008 260);
-  --foreground: oklch(0.93 0.005 260);
-  --card: oklch(0.225 0.009 260);
-  --muted: oklch(0.26 0.01 260);
-  --muted-foreground: oklch(0.68 0.015 260);
-  --border: oklch(0.32 0.012 260);
-  --input: oklch(0.36 0.012 260);
-  --accent: oklch(0.3 0.03 60);
+  --background: #061a16;
+  --foreground: #f4f1fa; /* Neve */
+  --card: #0a241f;
+  --muted: #0f2e28;
+  --muted-foreground: #9db0a9;
+  --border: #1b3b34;
+  --input: #26493f;
+  --ring: #c4b5fd; /* Lavanda */
+  --primary: #82d42b; /* Lima */
+  --primary-foreground: #063d32; /* Floresta */
+  --accent: #2b2350; /* Violeta, dark */
   --danger-soft: oklch(0.3 0.06 27);
   --warning-soft: oklch(0.32 0.06 85);
-  --canvas: oklch(0.16 0.008 260);
-  --canvas-dot: oklch(0.3 0.01 260);
+  --success: #82d42b;
+  --canvas: #04140f;
+  --canvas-dot: #1d3a33;
+
+  --cat-input: #2fb38f;
+  --cat-columns: #a487f0;
+  --cat-aggregate: #82d42b;
 }
 
 @theme inline {
@@ -104,10 +114,12 @@
   --xy-background-color: var(--canvas);
   --xy-background-pattern-color: var(--canvas-dot);
   --xy-edge-stroke: var(--muted-foreground);
-  --xy-edge-stroke-selected: var(--primary);
+  --xy-edge-stroke-selected: var(--ring);
   --xy-handle-background-color: var(--card);
   --xy-handle-border-color: var(--muted-foreground);
   --xy-minimap-background-color: var(--card);
+  --xy-minimap-mask-background-color: color-mix(in oklch, var(--muted) 75%, transparent);
+  --xy-minimap-mask-stroke-color: var(--border);
   --xy-controls-button-background-color: var(--card);
   --xy-controls-button-color: var(--foreground);
   --xy-controls-button-border-color: var(--border);

@@ -19,6 +19,7 @@ import { useStore } from "zustand";
 import { loadPipeline, savePipeline, useProject, useRenameProject } from "@/api/hooks";
 import { SignOutButton } from "@/app/SignOutButton";
 import { Button, Select, Spinner, Tooltip } from "@/components/ui";
+import { Logo } from "@/components/Logo";
 import { Canvas } from "@/features/canvas/Canvas";
 import { CommandPalette } from "@/features/canvas/CommandPalette";
 import { autoLayout } from "@/features/canvas/layout";
@@ -135,9 +136,7 @@ function Toolbar({
           <ArrowLeft />
         </Button>
       </Tooltip>
-      <span className="flex size-6 items-center justify-center rounded-md bg-primary text-[12px] font-bold text-primary-foreground">
-        F
-      </span>
+      <Logo size={24} />
       <ProjectName projectId={projectId} />
       <SaveIndicator />
       <span className="flex-1" />

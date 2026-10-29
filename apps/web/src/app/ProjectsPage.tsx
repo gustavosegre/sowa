@@ -14,6 +14,7 @@ import { useMemo, useState } from "react";
 import { useCreateProject, useDeleteProject, useMoveProject, useProjects } from "@/api/hooks";
 import type { Project } from "@/api/types";
 import { Button, Dialog, Field, Input, Spinner } from "@/components/ui";
+import { Logo } from "@/components/Logo";
 import { t } from "@/i18n/pt-BR";
 import { fmtDateTime } from "@/lib/utils";
 import { useUiStore } from "@/stores/uiStore";
@@ -147,9 +148,7 @@ export function ProjectsPage({ onOpen }: { onOpen: (id: string) => void }) {
     <div className="min-h-full bg-background">
       <header className="border-b bg-card">
         <div className="mx-auto flex max-w-5xl items-center gap-3 px-6 py-4">
-          <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-[15px] font-bold text-primary-foreground">
-            F
-          </span>
+          <Logo size={36} decorative />
           <div className="flex-1">
             <h1 className="text-[17px] font-semibold">{t.app.name}</h1>
             <p className="text-xs text-muted-foreground">{t.app.tagline}</p>

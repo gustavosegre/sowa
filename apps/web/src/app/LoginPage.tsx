@@ -6,6 +6,7 @@ import { api, ApiError, errorIssue, unwrap } from "@/api/client";
 import { clearToken, setToken } from "@/api/token";
 import { IssueItem } from "@/components/IssueList";
 import { Button, Field, Input } from "@/components/ui";
+import { Logo } from "@/components/Logo";
 import { t } from "@/i18n/pt-BR";
 
 /** Asks for the access token (as Flowa does) when the stored one is missing or wrong. */
@@ -43,9 +44,7 @@ export function LoginPage() {
         className="flex w-full max-w-md flex-col gap-4 rounded-xl border bg-card p-6 shadow-sm"
       >
         <div className="flex items-center gap-3">
-          <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-[15px] font-bold text-primary-foreground">
-            F
-          </span>
+          <Logo size={40} decorative />
           <h1 className="text-[16px] font-semibold">{t.auth.title}</h1>
         </div>
         <p className="text-[13px] text-muted-foreground">{t.auth.help}</p>

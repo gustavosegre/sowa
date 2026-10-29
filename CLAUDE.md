@@ -369,6 +369,8 @@ Interações obrigatórias:
 
 Visual: limpo e calmo, mesmo denso em informação. Cor por categoria de nó (Entrada, Colunas, Linhas, Agregação, Combinar, Saída). Tema claro e escuro. Tudo acessível por teclado.
 
+Identidade visual: paleta **Floresta** `#063D32`, **Lima** `#82D42B`, **Violeta** `#805AD5`, **Lavanda** `#C4B5FD`, **Neve** `#F4F1FA`. Tema claro: fundo Neve, ações (`--primary`) em Floresta, foco e seleção (`--ring`) em Violeta. Tema escuro: superfícies derivadas de Floresta, ações em Lima, foco em Lavanda. Tokens em `apps/web/src/index.css`; a grade (canvas, não lê CSS) repete as cores em `features/preview/DataGrid.tsx`. Logo: original e versão arredondada em `docs/brand/`; na interface, `components/Logo.tsx` (`src/assets/logo.png`, 192px) e `public/favicon.png` / `apple-touch-icon.png`.
+
 ## 15. Erros e avisos
 
 Modelo único:

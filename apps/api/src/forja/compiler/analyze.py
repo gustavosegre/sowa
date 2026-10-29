@@ -71,7 +71,7 @@ class Analysis:
         return lambda q: describer(self, upstream, q)
 
 
-_PYDANTIC_MESSAGES = {
+PYDANTIC_MESSAGES = {
     "missing": "campo obrigatório",
     "extra_forbidden": "campo desconhecido",
     "literal_error": "valor não permitido",
@@ -80,14 +80,25 @@ _PYDANTIC_MESSAGES = {
     "float_parsing": "deveria ser um número",
     "greater_than_equal": "valor muito pequeno",
     "less_than_equal": "valor muito grande",
+    "string_too_short": "texto curto demais",
+    "string_too_long": "texto longo demais",
+    "string_pattern_mismatch": "formato inválido",
+    "json_invalid": "JSON inválido",
 }
+
+
+def pydantic_message(e: Any) -> str:
+    """pt-BR text for one pydantic error (with the limit, when there is one)."""
+    msg = PYDANTIC_MESSAGES.get(e["type"], e["msg"])
+    limit = (e.get("ctx") or {}).get("min_length") or (e.get("ctx") or {}).get("max_length")
+    return f"{msg} (limite: {limit})" if limit is not None else msg
 
 
 def config_issues(err: ValidationError) -> list[Issue]:
     out: list[Issue] = []
     for e in err.errors()[:5]:
         loc = ".".join(str(x) for x in e["loc"]) or "configuração"
-        msg = _PYDANTIC_MESSAGES.get(e["type"], e["msg"])
+        msg = pydantic_message(e)
         out.append(
             Issue(code=IssueCode.INVALID_CONFIG, message=f'Configuração inválida em "{loc}": {msg}.', detail=e["msg"])
         )

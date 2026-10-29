@@ -11,6 +11,7 @@ import pytest
 _DATA = Path(tempfile.mkdtemp(prefix="forja-tests-"))
 os.environ["FORJA_DATA_DIR"] = str(_DATA)
 os.environ.pop("FORJA_DATABASE_URL", None)
+os.environ["FORJA_AUTH_ENABLED"] = "false"  # test_auth.py turns it on
 
 from fastapi.testclient import TestClient  # noqa: E402
 from sqlglot import exp  # noqa: E402

@@ -7,6 +7,8 @@ import { t } from "@/i18n/pt-BR";
 import { fmtDateTime } from "@/lib/utils";
 import { useUiStore } from "@/stores/uiStore";
 
+import { UserMenu } from "./UserMenu";
+
 export function ProjectsPage({ onOpen }: { onOpen: (id: string) => void }) {
   const { data, isLoading, error } = useProjects();
   const create = useCreateProject();
@@ -39,6 +41,7 @@ export function ProjectsPage({ onOpen }: { onOpen: (id: string) => void }) {
           <Button variant="ghost" size="icon" onClick={ui.toggleTheme} aria-label={t.editor.theme}>
             {ui.theme === "dark" ? <Sun /> : <Moon />}
           </Button>
+          <UserMenu />
           <Button onClick={() => setOpen(true)}>
             <Plus /> {t.projects.new}
           </Button>
@@ -73,6 +76,7 @@ export function ProjectsPage({ onOpen }: { onOpen: (id: string) => void }) {
                 <span className="truncate text-[14px] font-semibold">{p.name}</span>
                 <span className="text-xs text-muted-foreground">
                   {t.projects.nodes(p.node_count)} · {t.projects.updated(fmtDateTime(p.updated_at))}
+                  {p.owner ? ` · ${t.projects.by(p.owner)}` : ""}
                 </span>
               </button>
               <div className="flex gap-1">

@@ -22,6 +22,27 @@ class ApiError(BaseModel):
     issues: list[Issue] = []
 
 
+# ---------------------------------------------------------------- auth
+
+
+class Credentials(BaseModel):
+    username: str = Field(min_length=3, max_length=64, pattern=r"^[A-Za-z0-9._@-]+$")
+    password: str = Field(min_length=8, max_length=200)
+
+
+class UserOut(BaseModel):
+    id: str
+    username: str
+    created_at: datetime
+
+
+class AuthStatus(BaseModel):
+    auth_enabled: bool
+    # No user exists yet: the first one is created on the login screen.
+    setup_required: bool
+    user: UserOut | None
+
+
 # ---------------------------------------------------------------- projects
 
 
@@ -41,6 +62,7 @@ class ProjectOut(BaseModel):
     created_at: datetime
     updated_at: datetime
     node_count: int = 0
+    owner: str | None = None  # username of who created it
 
 
 class VersionOut(BaseModel):

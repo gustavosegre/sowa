@@ -15,16 +15,17 @@ from forja.api.schemas import (
     VersionDetail,
     VersionOut,
 )
+from forja.api.security import CurrentUser
 from forja.domain.migrations import migrate
 from forja.domain.pipeline import Pipeline
 from forja.storage.db import PipelineVersionRow, ProjectRow, get_session, utcnow
-from forja.storage.repos import ProjectRepo, VersionRepo
+from forja.storage.repos import ProjectRepo, UserRepo, VersionRepo
 
 router = APIRouter(prefix="/projects", tags=["projects"])
 Db = Annotated[Session, Depends(get_session)]
 
 
-def _out(row: ProjectRow) -> ProjectOut:
+def _out(row: ProjectRow, owners: dict[str, str] | None = None) -> ProjectOut:
     return ProjectOut(
         id=row.id,
         name=row.name,
@@ -32,6 +33,7 @@ def _out(row: ProjectRow) -> ProjectOut:
         created_at=row.created_at,
         updated_at=row.updated_at,
         node_count=len((row.pipeline or {}).get("nodes", [])),
+        owner=(owners or {}).get(row.owner_id or ""),
     )
 
 
@@ -44,12 +46,14 @@ def _get(db: Session, project_id: str) -> ProjectRow:
 
 @router.get("", response_model=list[ProjectOut])
 def list_projects(db: Db) -> list[ProjectOut]:
-    return [_out(r) for r in ProjectRepo(db).list()]
+    owners = {u.id: u.username for u in UserRepo(db).list()}
+    return [_out(r, owners) for r in ProjectRepo(db).list()]
 
 
 @router.post("", response_model=ProjectOut, status_code=201)
-def create_project(body: ProjectCreate, db: Db) -> ProjectOut:
-    return _out(ProjectRepo(db).create(body.name, body.pipeline))
+def create_project(body: ProjectCreate, db: Db, user: CurrentUser) -> ProjectOut:
+    row = ProjectRepo(db).create(body.name, body.pipeline, owner_id=user.id if user else None)
+    return _out(row, {user.id: user.username} if user else None)
 
 
 @router.get("/{project_id}", response_model=ProjectOut)

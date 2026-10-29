@@ -417,3 +417,38 @@ export function useDeleteTemplate() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["templates"] }),
   });
 }
+
+/* ---------------------------------------------------------------- auth */
+
+export function useAuthStatus() {
+  return useQuery({
+    queryKey: ["auth"],
+    queryFn: async () => unwrap(await api.GET("/auth/status")),
+    staleTime: Infinity,
+    retry: false,
+  });
+}
+
+export async function login(username: string, password: string) {
+  return unwrap(await api.POST("/auth/login", { body: { username, password } }));
+}
+
+export async function setupFirstUser(username: string, password: string) {
+  return unwrap(await api.POST("/auth/setup", { body: { username, password } }));
+}
+
+export async function logout() {
+  await api.POST("/auth/logout");
+}
+
+export function useUsers(enabled: boolean) {
+  return useQuery({
+    queryKey: ["users"],
+    enabled,
+    queryFn: async () => unwrap(await api.GET("/auth/users")),
+  });
+}
+
+export async function createUser(username: string, password: string) {
+  return unwrap(await api.POST("/auth/users", { body: { username, password } }));
+}

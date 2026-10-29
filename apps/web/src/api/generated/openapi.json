@@ -53,6 +53,178 @@
         }
       }
     },
+    "/auth/status": {
+      "get": {
+        "tags": ["auth"],
+        "summary": "Status",
+        "description": "Whether login is on, whether the first user must be created, and who is logged in.",
+        "operationId": "status_auth_status_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/setup": {
+      "post": {
+        "tags": ["auth"],
+        "summary": "Setup",
+        "description": "First run: create the first user and log in.",
+        "operationId": "setup_auth_setup_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Credentials"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": ["auth"],
+        "summary": "Login",
+        "operationId": "login_auth_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Credentials"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "tags": ["auth"],
+        "summary": "Logout",
+        "operationId": "logout_auth_logout_post",
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          }
+        }
+      }
+    },
+    "/auth/users": {
+      "get": {
+        "tags": ["auth"],
+        "summary": "List Users",
+        "operationId": "list_users_auth_users_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/UserOut"
+                  },
+                  "type": "array",
+                  "title": "Response List Users Auth Users Get"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["auth"],
+        "summary": "Create User",
+        "description": "Any logged-in user can add another one (one shared workspace).",
+        "operationId": "create_user_auth_users_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Credentials"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/projects": {
       "get": {
         "tags": ["projects"],
@@ -1633,6 +1805,31 @@
         "required": ["code", "message"],
         "title": "ApiError"
       },
+      "AuthStatus": {
+        "properties": {
+          "auth_enabled": {
+            "type": "boolean",
+            "title": "Auth Enabled"
+          },
+          "setup_required": {
+            "type": "boolean",
+            "title": "Setup Required"
+          },
+          "user": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UserOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": ["auth_enabled", "setup_required", "user"],
+        "title": "AuthStatus"
+      },
       "Body_replace_file_sources__source_id__replace_post": {
         "properties": {
           "file": {
@@ -1796,6 +1993,26 @@
         "type": "object",
         "required": ["source", "report"],
         "title": "ConfirmOut"
+      },
+      "Credentials": {
+        "properties": {
+          "username": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 3,
+            "pattern": "^[A-Za-z0-9._@-]+$",
+            "title": "Username"
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 8,
+            "title": "Password"
+          }
+        },
+        "type": "object",
+        "required": ["username", "password"],
+        "title": "Credentials"
       },
       "CsvImportOptions": {
         "properties": {
@@ -3265,6 +3482,17 @@
             "type": "integer",
             "title": "Node Count",
             "default": 0
+          },
+          "owner": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner"
           }
         },
         "type": "object",
@@ -3679,6 +3907,26 @@
         "type": "object",
         "required": ["source", "detection"],
         "title": "UploadOut"
+      },
+      "UserOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "username": {
+            "type": "string",
+            "title": "Username"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": ["id", "username", "created_at"],
+        "title": "UserOut"
       },
       "ValidationError": {
         "properties": {

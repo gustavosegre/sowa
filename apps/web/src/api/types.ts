@@ -27,6 +27,8 @@ export type ExportJob = S["ExportJobOut"];
 export type FunctionInfo = S["FunctionOut"];
 export type FormulaCheck = S["FormulaCheckOut"];
 export type ApiErrorBody = S["ApiError"];
+export type AuthStatus = S["AuthStatus"];
+export type User = S["UserOut"];
 
 // Node configs (published in OpenAPI by the backend registry).
 export type SourceConfig = S["SourceConfig"];

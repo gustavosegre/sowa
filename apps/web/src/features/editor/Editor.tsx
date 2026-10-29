@@ -17,6 +17,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useStore } from "zustand";
 
 import { loadPipeline, savePipeline, useProject, useRenameProject } from "@/api/hooks";
+import { UserMenu } from "@/app/UserMenu";
 import { Button, Select, Spinner, Tooltip } from "@/components/ui";
 import { Canvas } from "@/features/canvas/Canvas";
 import { CommandPalette } from "@/features/canvas/CommandPalette";
@@ -212,6 +213,7 @@ function Toolbar({
           {ui.theme === "dark" ? <Sun /> : <Moon />}
         </Button>
       </Tooltip>
+      <UserMenu />
     </header>
   );
 }

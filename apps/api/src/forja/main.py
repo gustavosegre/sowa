@@ -6,12 +6,13 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
 
 from forja.api import errors
-from forja.api.routes import exports, formula, meta, pipeline, projects, sources, templates
+from forja.api.routes import auth, exports, formula, meta, pipeline, projects, sources, templates
+from forja.api.security import current_user
 from forja.nodes.registry import all_specs
 from forja.settings import get_settings
 
@@ -47,16 +48,11 @@ def create_app() -> FastAPI:
         expose_headers=["X-Forja-Rows", "X-Forja-Has-More", "X-Forja-Cached"],
     )
     errors.install(app)
-    for r in (
-        meta.router,
-        projects.router,
-        sources.router,
-        pipeline.router,
-        formula.router,
-        exports.router,
-        templates.router,
-    ):
-        app.include_router(r)
+    # /health, /nodes and /auth are public; everything else needs a logged-in user.
+    app.include_router(meta.router)
+    app.include_router(auth.router)
+    for r in (projects.router, sources.router, pipeline.router, formula.router, exports.router, templates.router):
+        app.include_router(r, dependencies=[Depends(current_user)])
 
     def openapi() -> dict[str, Any]:
         if app.openapi_schema:

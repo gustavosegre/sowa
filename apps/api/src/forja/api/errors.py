@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 from forja.api.schemas import ApiError
+from forja.compiler.analyze import pydantic_message
 from forja.compiler.build import CompileError
 from forja.domain.issues import Issue
 from forja.domain.migrations import PipelineVersionError
@@ -34,6 +36,17 @@ def install(app: FastAPI) -> None:
     @app.exception_handler(HttpError)
     async def _http(_: Request, e: HttpError) -> JSONResponse:
         return JSONResponse(e.body.model_dump(mode="json"), status_code=e.status)
+
+    @app.exception_handler(RequestValidationError)
+    async def _invalid(_: Request, e: RequestValidationError) -> JSONResponse:
+        first = e.errors()[0] if e.errors() else {"type": "", "msg": "", "loc": ()}
+        loc = ".".join(str(x) for x in first["loc"] if x not in ("body", "query", "path")) or "requisição"
+        body = ApiError(
+            code="INVALID_REQUEST",
+            message=f'Dados inválidos em "{loc}": {pydantic_message(first)}.',
+            detail=str(e.errors())[:2000],
+        )
+        return JSONResponse(body.model_dump(mode="json"), status_code=422)
 
     @app.exception_handler(CompileError)
     async def _compile(_: Request, e: CompileError) -> JSONResponse:

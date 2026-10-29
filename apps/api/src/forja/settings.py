@@ -21,6 +21,10 @@ class Settings(BaseSettings):
     auto_migrate: bool = True
     cors_origins: list[str] = ["http://localhost:5173", "http://127.0.0.1:5173"]
     export_workers: int = 2
+    # Login (username + password). Off only for local experiments and tests.
+    auth_enabled: bool = True
+    session_days: int = 30
+    cookie_secure: bool = False  # True behind HTTPS
     # File storage: "local" (disk) or "s3" (S3-compatible bucket, e.g. MinIO; needs the `s3` extra).
     # Credentials come from the usual AWS variables (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY).
     storage: Literal["local", "s3"] = "local"

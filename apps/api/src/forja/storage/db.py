@@ -1,4 +1,4 @@
-"""Metadata database (projects, sources, templates, export jobs). SQLite in dev, Postgres in prod."""
+"""Metadata database (users, projects, sources, templates, export jobs). SQLite in dev, Postgres in prod."""
 
 from __future__ import annotations
 
@@ -30,8 +30,28 @@ class ProjectRow(Base):
     name: Mapped[str] = mapped_column(String(200))
     pipeline: Mapped[dict[str, Any]] = mapped_column(JSON)
     version: Mapped[int] = mapped_column(Integer, default=1)
+    # Who created it (projects are shared by every user: one workspace).
+    owner_id: Mapped[str | None] = mapped_column(String(32), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class UserRow(Base):
+    __tablename__ = "users"
+
+    id: Mapped[str] = mapped_column(String(32), primary_key=True)
+    username: Mapped[str] = mapped_column(String(64), unique=True)
+    password_hash: Mapped[str] = mapped_column(String(255))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class SessionRow(Base):
+    __tablename__ = "sessions"
+
+    token_hash: Mapped[str] = mapped_column(String(64), primary_key=True)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 
 class PipelineVersionRow(Base):

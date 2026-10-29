@@ -5,6 +5,7 @@ const webPort = process.env.FORJA_WEB_PORT ?? "5173";
 
 export default defineConfig({
   testDir: "./e2e",
+  globalSetup: "./e2e/global-setup.ts",
   timeout: 90_000,
   workers: 1,
   use: {
@@ -13,6 +14,7 @@ export default defineConfig({
     acceptDownloads: true,
     viewport: { width: 1440, height: 900 },
     locale: "pt-BR",
+    storageState: ".auth/e2e.json",
   },
   webServer: [
     {

@@ -10,10 +10,20 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from forja.auth import hash_password, new_token, token_hash
 from forja.domain.pipeline import Flow, Pipeline
 from forja.domain.schema import Schema
 from forja.nodes.base import SourceInfo
-from forja.storage.db import ExportJobRow, PipelineVersionRow, ProjectRow, SourceRow, TemplateRow, utcnow
+from forja.storage.db import (
+    ExportJobRow,
+    PipelineVersionRow,
+    ProjectRow,
+    SessionRow,
+    SourceRow,
+    TemplateRow,
+    UserRow,
+    utcnow,
+)
 
 
 def new_id(prefix: str) -> str:
@@ -30,8 +40,13 @@ class ProjectRepo:
     def get(self, project_id: str) -> ProjectRow | None:
         return self.s.get(ProjectRow, project_id)
 
-    def create(self, name: str, pipeline: Pipeline | None = None) -> ProjectRow:
-        row = ProjectRow(id=new_id("prj"), name=name, pipeline=(pipeline or Pipeline()).model_dump(mode="json"))
+    def create(self, name: str, pipeline: Pipeline | None = None, owner_id: str | None = None) -> ProjectRow:
+        row = ProjectRow(
+            id=new_id("prj"),
+            name=name,
+            pipeline=(pipeline or Pipeline()).model_dump(mode="json"),
+            owner_id=owner_id,
+        )
         self.s.add(row)
         self.s.flush()
         return row
@@ -96,6 +111,57 @@ class VersionRepo:
         auto = [v for v in self.list(project_id) if v.label is None]
         for old in auto[MAX_VERSIONS:]:
             self.s.delete(old)
+
+
+class UserRepo:
+    def __init__(self, s: Session) -> None:
+        self.s = s
+
+    def count(self) -> int:
+        return len(self.s.scalars(select(UserRow.id)).all())
+
+    def list(self) -> Sequence[UserRow]:
+        return self.s.scalars(select(UserRow).order_by(UserRow.username)).all()
+
+    def get(self, user_id: str) -> UserRow | None:
+        return self.s.get(UserRow, user_id)
+
+    def by_username(self, username: str) -> UserRow | None:
+        return self.s.scalars(select(UserRow).where(UserRow.username == username)).first()
+
+    def create(self, username: str, password: str) -> UserRow:
+        row = UserRow(id=new_id("usr"), username=username, password_hash=hash_password(password))
+        self.s.add(row)
+        self.s.flush()
+        return row
+
+
+class SessionRepo:
+    def __init__(self, s: Session) -> None:
+        self.s = s
+
+    def create(self, user: UserRow, days: int) -> str:
+        """New session; returns the token (only its hash is stored)."""
+        token = new_token()
+        expires = utcnow() + timedelta(days=days)
+        self.s.add(SessionRow(token_hash=token_hash(token), user_id=user.id, expires_at=expires))
+        self.s.flush()
+        return token
+
+    def user(self, token: str) -> UserRow | None:
+        row = self.s.get(SessionRow, token_hash(token))
+        if row is None:
+            return None
+        expires = row.expires_at if row.expires_at.tzinfo else row.expires_at.replace(tzinfo=UTC)
+        if expires < utcnow():
+            self.s.delete(row)
+            return None
+        return self.s.get(UserRow, row.user_id)
+
+    def delete(self, token: str) -> None:
+        row = self.s.get(SessionRow, token_hash(token))
+        if row is not None:
+            self.s.delete(row)
 
 
 class TemplateRepo:

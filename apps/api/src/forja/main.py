@@ -13,7 +13,9 @@ from fastapi.openapi.utils import get_openapi
 from forja.api import errors
 from forja.api.routes import auth, exports, formula, meta, pipeline, projects, sources, templates
 from forja.api.security import require_token
+from forja.api.webui import DEFAULT_DIST, StripApiPrefix, mount_web
 from forja.auth import get_auth
+from forja.jobs.exports import purge_old as purge_old_exports
 from forja.nodes.registry import all_specs
 from forja.settings import get_settings
 
@@ -40,6 +42,7 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
         log.info("[auth] token de acesso: %s (endereço com o token: python -m forja.cli token)", access.source)
     else:
         log.warning("[auth] login desligado: só conexões desta máquina são atendidas")
+    purge_old_exports()
     yield
 
 
@@ -53,6 +56,7 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
         expose_headers=["X-Forja-Rows", "X-Forja-Has-More", "X-Forja-Cached"],
     )
+    app.add_middleware(StripApiPrefix)
     errors.install(app)
     # /health, /nodes and /auth/status are public; everything else needs the access token.
     app.include_router(meta.router)
@@ -77,6 +81,9 @@ def create_app() -> FastAPI:
         return schema
 
     app.openapi = openapi  # type: ignore[method-assign]
+    # Last, so the API routes keep priority over the static files.
+    if s.serve_web:
+        mount_web(app, s.web_dist or DEFAULT_DIST)
     return app
 
 

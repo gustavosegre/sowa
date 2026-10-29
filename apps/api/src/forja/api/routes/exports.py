@@ -74,6 +74,7 @@ def start_export(body: ExportRequest, db: Db) -> ExportJobOut:
         status="pending",
     )
     db.commit()
+    jobs.purge_old()
     jobs.submit(row.id, body.pipeline, body.node_id)
     return _out(row)
 

@@ -6,6 +6,7 @@ import logging
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
+from datetime import timedelta
 from functools import cache
 from typing import Any
 
@@ -20,7 +21,7 @@ from forja.io.exporters.writer import ExportError, export
 from forja.nodes.output import OutputConfig
 from forja.settings import get_settings
 from forja.storage.db import ExportJobRow, session_scope, utcnow
-from forja.storage.repos import DbSourceResolver
+from forja.storage.repos import DbSourceResolver, ExportRepo
 
 log = logging.getLogger(__name__)
 
@@ -28,6 +29,22 @@ log = logging.getLogger(__name__)
 @cache
 def _pool() -> ThreadPoolExecutor:
     return ThreadPoolExecutor(max_workers=get_settings().export_workers, thread_name_prefix="export")
+
+
+def purge_old() -> int:
+    """Deletes finished exports older than FORJA_EXPORT_RETENTION_DAYS (files and job rows)."""
+    days = get_settings().export_retention_days
+    if days <= 0:
+        return 0
+    st = get_storage()
+    with session_scope() as s:
+        old = ExportRepo(s).finished_before(utcnow() - timedelta(days=days))
+        for row in old:
+            st.delete_export(row.id)
+            s.delete(row)
+    if old:
+        log.info("[exports] %d exportações com mais de %d dias apagadas", len(old), days)
+    return len(old)
 
 
 def _update(job_id: str, **fields: Any) -> None:

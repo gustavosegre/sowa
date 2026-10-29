@@ -45,7 +45,26 @@ const SHOW_AS: { value: PivotValue["show_as"]; label: string }[] = [
   { value: "pct_total", label: tp.showPctTotal },
   { value: "pct_row", label: tp.showPctRow },
   { value: "pct_column", label: tp.showPctColumn },
+  { value: "difference", label: tp.showDifference },
+  { value: "running_total", label: tp.showRunningTotal },
 ];
+const RELATIVE = new Set<PivotValue["show_as"]>(["difference", "running_total"]);
+const BASE_ITEMS: { value: PivotValue["base_item"]; label: string }[] = [
+  { value: "previous", label: tp.basePrevious },
+  { value: "fixed", label: tp.baseFixed },
+];
+const GROUP_SUFFIX: Record<PivotField["date_group"], string> = {
+  none: "",
+  year: "ano",
+  quarter: "trimestre",
+  month: "mês",
+  day: "dia",
+};
+
+/** Field name as the generated table shows it (same rule as the backend's `field_name`). */
+export function pivotFieldName(f: PivotField): string {
+  return f.date_group === "none" ? f.column : `${f.column} (${GROUP_SUFFIX[f.date_group]})`;
+}
 const DATE_GROUPS: { value: PivotField["date_group"]; label: string }[] = [
   { value: "none", label: tp.none },
   { value: "year", label: tp.year },
@@ -81,7 +100,15 @@ export function addToZone(
         ...cfg,
         values: [
           ...cfg.values,
-          { column, fn: numeric ? "sum" : "count_non_null", show_as: "normal", label: null },
+          {
+            column,
+            fn: numeric ? "sum" : "count_non_null",
+            show_as: "normal",
+            base_field: null,
+            base_item: "previous",
+            base_value: null,
+            label: null,
+          },
         ],
       };
     }
@@ -276,6 +303,16 @@ export function ConfigPanel({ node, config, update, columns }: ConfigPanelProps<
 
   const setValue = (i: number, patch: Partial<PivotValue>) =>
     update({ ...config, values: config.values.map((v, j) => (j === i ? { ...v, ...patch } : v)) });
+  const columnsName = config.columns ? pivotFieldName(config.columns) : null;
+  const baseFields = [...config.rows.map(pivotFieldName), ...(columnsName ? [columnsName] : [])];
+  const setShowAs = (i: number, show_as: PivotValue["show_as"]) => {
+    const current = config.values[i]?.base_field;
+    const keep = current && baseFields.includes(current);
+    setValue(
+      i,
+      RELATIVE.has(show_as) && !keep ? { show_as, base_field: baseFields[0] ?? null } : { show_as },
+    );
+  };
   const setFilter = (i: number, patch: Partial<Condition>) =>
     update({ ...config, filters: config.filters.map((f, j) => (j === i ? { ...f, ...patch } : f)) });
 
@@ -390,9 +427,45 @@ export function ConfigPanel({ node, config, update, columns }: ConfigPanelProps<
               <Select
                 value={v.show_as}
                 options={SHOW_AS}
-                onChange={(show_as) => setValue(i, { show_as })}
+                onChange={(show_as) => setShowAs(i, show_as)}
                 aria-label={tp.showAs}
               />
+              {RELATIVE.has(v.show_as) && (
+                <Select
+                  value={v.base_field ?? ""}
+                  options={baseFields.map((f) => ({ value: f, label: f }))}
+                  onChange={(base_field) => setValue(i, { base_field, base_value: null })}
+                  aria-label={tp.baseField}
+                />
+              )}
+              {v.show_as === "difference" && (
+                <Select
+                  value={v.base_item ?? "previous"}
+                  options={BASE_ITEMS}
+                  onChange={(base_item) => setValue(i, { base_item })}
+                  aria-label={tp.baseItem}
+                />
+              )}
+              {v.show_as === "difference" &&
+                v.base_item === "fixed" &&
+                (v.base_field === columnsName ? (
+                  <Select
+                    value={v.base_value ?? ""}
+                    options={config.column_values.flatMap((cv) =>
+                      cv === null ? [] : [{ value: cv, label: cv }],
+                    )}
+                    onChange={(base_value) => setValue(i, { base_value })}
+                    aria-label={tp.baseValue}
+                  />
+                ) : (
+                  <Input
+                    className="h-7"
+                    placeholder={tp.baseValue}
+                    value={v.base_value ?? ""}
+                    onChange={(e) => setValue(i, { base_value: e.target.value || null })}
+                    aria-label={tp.baseValue}
+                  />
+                ))}
               <Input
                 className="h-7"
                 placeholder={tp.label}

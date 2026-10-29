@@ -23,6 +23,8 @@ class CsvImportOptions(BaseModel):
 
 class XlsxOptions(BaseModel):
     sheet: str | None = None
+    # Excel-style range to read, e.g. "B3:F200", "B3:F" (to the last row) or "B:F" (whole columns).
+    cell_range: str | None = Field(default=None, max_length=20)
     header: bool = True
     skip_rows: int = Field(default=0, ge=0)
 

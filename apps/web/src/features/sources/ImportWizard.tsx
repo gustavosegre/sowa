@@ -344,12 +344,21 @@ export function ImportWizard() {
             </div>
           )}
           {options.xlsx && (
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               <Field label={t.wizard.sheet}>
                 <Select
                   value={options.xlsx.sheet ?? ""}
                   options={detection.sheets.map((s) => ({ value: s, label: s }))}
                   onChange={(sheet) => setXlsx({ sheet })}
+                />
+              </Field>
+              <Field label={t.wizard.cellRange} hint={t.wizard.cellRangeHint}>
+                <Input
+                  value={options.xlsx.cell_range ?? ""}
+                  placeholder="B3:F200"
+                  maxLength={20}
+                  onChange={(e) => setXlsx({ cell_range: e.target.value.trim() || null })}
+                  onKeyDown={(e) => e.key === "Enter" && void reread()}
                 />
               </Field>
               <Field label={t.wizard.skipRows}>

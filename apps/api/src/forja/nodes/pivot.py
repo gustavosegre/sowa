@@ -9,7 +9,7 @@ from sqlglot import exp
 
 from forja.domain.issues import Issue, IssueCode, column_not_found, error, plural, warning
 from forja.domain.schema import Column, Schema
-from forja.domain.types import TEMPORAL_TYPES, LogicalType
+from forja.domain.types import TEMPORAL_TYPES, LogicalType, to_duckdb
 from forja.formula.functions import tmpl
 from forja.nodes._aggs import AGG_LABELS, AggFn, Aggregation, agg_expr, agg_type, validate_agg
 from forja.nodes._conditions import Condition, ConditionBuilder, ConditionGroup
@@ -30,10 +30,20 @@ class PivotField(BaseModel):
     date_group: DateGroup = "none"
 
 
+ShowAs = Literal["normal", "pct_total", "pct_row", "pct_column", "difference", "running_total"]
+# "Diferença de" and "Soma acumulada em" of Excel: computed along a base field.
+RELATIVE: frozenset[str] = frozenset({"difference", "running_total"})
+
+
 class PivotValue(BaseModel):
     column: str | None = None
     fn: AggFn = "sum"
-    show_as: Literal["normal", "pct_total", "pct_row", "pct_column"] = "normal"
+    show_as: ShowAs = "normal"
+    # difference / running_total: a field in "Linhas" or the "Colunas" field (its name in the table,
+    # e.g. "data (mês)"); difference compares with the previous item or with a fixed one.
+    base_field: str | None = None
+    base_item: Literal["previous", "fixed"] = "previous"
+    base_value: str | None = None
     label: str | None = None
 
 
@@ -85,9 +95,58 @@ def measure_label(v: PivotValue) -> str:
 
 
 def value_type(v: PivotValue, schema: Schema) -> LogicalType:
+    t = agg_type(Aggregation(column=v.column, fn=v.fn), schema)
+    if v.show_as in RELATIVE:
+        return L.INTEGER if t is L.INTEGER else L.DECIMAL
     if v.show_as != "normal":
         return L.DECIMAL
-    return agg_type(Aggregation(column=v.column, fn=v.fn), schema)
+    return t
+
+
+def _relative_issues(cfg: PivotConfig, v: PivotValue, schema: Schema) -> list[Issue]:
+    what = "Diferença de" if v.show_as == "difference" else "Soma acumulada em"
+    label = measure_label(v)
+    rows = [field_name(f) for f in cfg.rows]
+    cols = field_name(cfg.columns) if cfg.columns else None
+    if agg_type(Aggregation(column=v.column, fn=v.fn), schema) not in (L.INTEGER, L.DECIMAL):
+        return [error(IssueCode.INVALID_CONFIG, f'"{what}" precisa de uma medida numérica ("{label}" não é).')]
+    if not v.base_field:
+        return [
+            error(
+                IssueCode.INVALID_CONFIG,
+                f'Escolha o campo base de "{what}" em "{label}".',
+                hint="Um campo de Linhas ou o campo de Colunas.",
+            )
+        ]
+    if v.base_field not in rows and v.base_field != cols:
+        return [
+            error(
+                IssueCode.INVALID_CONFIG,
+                f'O campo base "{v.base_field}" de "{label}" não está em Linhas nem em Colunas.',
+                hint="Escolha outro campo base.",
+            )
+        ]
+    out: list[Issue] = []
+    if v.base_field in rows and cfg.totals:
+        out.append(
+            error(
+                IssueCode.INVALID_CONFIG,
+                f'"{what}" com campo base em Linhas não funciona com totais ("{label}").',
+                hint="Desligue os totais ou use o campo de Colunas como base.",
+            )
+        )
+    if v.show_as == "difference" and v.base_item == "fixed":
+        if not v.base_value:
+            out.append(error(IssueCode.INVALID_CONFIG, f'Escolha o item fixo de "{what}" em "{label}".'))
+        elif v.base_field == cols and v.base_value not in cfg.column_values:
+            out.append(
+                error(
+                    IssueCode.INVALID_CONFIG,
+                    f'O item "{v.base_value}" não está entre os valores de "{cols}".',
+                    hint='Escolha outro item ou clique em "Atualizar colunas".',
+                )
+            )
+    return out
 
 
 def value_label(cv: str | None, cfg: PivotConfig, schema: Schema) -> str:
@@ -142,6 +201,8 @@ class PivotNode(NodeSpec[PivotConfig]):
             )
         for v in cfg.values:
             issues += validate_agg(Aggregation(column=v.column, fn=v.fn), schema, where)
+            if v.show_as in RELATIVE:
+                issues += _relative_issues(cfg, v, schema)
         b = ConditionBuilder(schema, ctx)
         b.group(ConditionGroup(conditions=list(cfg.filters)))
         issues += b.issues
@@ -202,7 +263,7 @@ class PivotNode(NodeSpec[PivotConfig]):
         def measure(v: PivotValue, cond: exp.Expr | None) -> exp.Expr:
             agg = Aggregation(column=v.column, fn=v.fn)
             cell = agg_expr(agg, schema, cond)
-            if v.show_as == "normal":
+            if v.show_as == "normal" or v.show_as in RELATIVE:  # relative ones are built on the plain cell
                 return cell
             dbl = exp.Cast(this=cell, to=exp.DataType.build("DOUBLE"))
             if v.show_as == "pct_row":
@@ -215,21 +276,68 @@ class PivotNode(NodeSpec[PivotConfig]):
                 denom = exp.Window(this=exp.Sum(this=base))
             return exp.Div(this=dbl, expression=exp.Nullif(this=denom, expression=lit(0)))
 
+        row_names = [field_name(f) for f in cfg.rows]
+
+        def typed(v: PivotValue, e: exp.Expr) -> exp.Expr:
+            return exp.Cast(this=e, to=to_duckdb(value_type(v, schema)))
+
+        def on_rows(v: PivotValue) -> bool:
+            return v.show_as in RELATIVE and v.base_field in row_names
+
+        def along_rows(v: PivotValue, cell: exp.Expr) -> exp.Expr:
+            """Difference / running total along a "Linhas" field, within the other row fields."""
+            idx = row_names.index(v.base_field or "")
+            base = row_exprs[idx]
+            part = [e.copy() for j, e in enumerate(row_exprs) if j != idx]
+            order = exp.Order(expressions=[exp.Ordered(this=base.copy(), nulls_first=False)])
+            if v.show_as == "running_total":
+                spec = exp.WindowSpec(kind="ROWS", start="UNBOUNDED", start_side="PRECEDING", end="CURRENT ROW")
+                return exp.Window(this=exp.Sum(this=cell), partition_by=part, order=order, spec=spec)
+            if v.base_item == "previous":
+                ref: exp.Expr = exp.Window(this=exp.func("LAG", cell.copy()), partition_by=part, order=order)
+            else:
+                hit = exp.EQ(this=as_text(base.copy()), expression=lit(v.base_value))
+                ref = exp.Window(this=exp.Max(this=exp.Case().when(hit, cell.copy())), partition_by=part)
+            return exp.Sub(this=cell, expression=ref)
+
+        def along_columns(v: PivotValue, cells: list[exp.Expr], k: int) -> exp.Expr:
+            """Difference / running total across the generated columns (in the order of column_values)."""
+            if v.show_as == "running_total":
+                total: exp.Expr = exp.Coalesce(this=cells[0].copy(), expressions=[lit(0)])
+                for c in cells[1 : k + 1]:
+                    total = exp.Add(this=total, expression=exp.Coalesce(this=c.copy(), expressions=[lit(0)]))
+                return total
+            j = k - 1 if v.base_item == "previous" else cfg.column_values.index(v.base_value)
+            return exp.Null() if j < 0 else exp.Sub(this=cells[k].copy(), expression=cells[j].copy())
+
         i = len(out)
         if cfg.columns is None:
             for v in cfg.values:
-                out.append(alias(measure(v, None), names[i]))
+                cell = measure(v, None)
+                out.append(alias(typed(v, along_rows(v, cell)) if on_rows(v) else cell, names[i]))
                 i += 1
         else:
             key = as_text(field_expr(cfg.columns, schema))
-            for cv in cfg.column_values:
-                cond = (
-                    exp.Is(this=key.copy(), expression=exp.Null())
-                    if cv is None
-                    else exp.EQ(this=key.copy(), expression=lit(cv))
-                )
-                for v in cfg.values:
-                    out.append(alias(measure(v, cond), names[i]))
+            conds: list[exp.Expr] = [
+                exp.Is(this=key.copy(), expression=exp.Null())
+                if cv is None
+                else exp.EQ(this=key.copy(), expression=lit(cv))
+                for cv in cfg.column_values
+            ]
+            across = {
+                vi: [agg_expr(Aggregation(column=v.column, fn=v.fn), schema, c) for c in conds]
+                for vi, v in enumerate(cfg.values)
+                if v.show_as in RELATIVE and not on_rows(v)
+            }
+            for k, cond in enumerate(conds):
+                for vi, v in enumerate(cfg.values):
+                    if vi in across:
+                        e = typed(v, along_columns(v, across[vi], k))
+                    elif on_rows(v):
+                        e = typed(v, along_rows(v, measure(v, cond)))
+                    else:
+                        e = measure(v, cond)
+                    out.append(alias(e, names[i]))
                     i += 1
         sel = exp.select(*out).from_(from_input(inputs["in"]))
         if cfg.filters:

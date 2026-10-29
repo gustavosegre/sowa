@@ -1544,6 +1544,8 @@ export interface components {
     XlsxOptions: {
       /** Sheet */
       sheet?: string | null;
+      /** Cell Range */
+      cell_range?: string | null;
       /**
        * Header
        * @default true
@@ -2255,7 +2257,23 @@ export interface components {
        * @default normal
        * @enum {string}
        */
-      show_as: "normal" | "pct_total" | "pct_row" | "pct_column";
+      show_as: "normal" | "pct_total" | "pct_row" | "pct_column" | "difference" | "running_total";
+      /**
+       * Base Field
+       * @default null
+       */
+      base_field: string | null;
+      /**
+       * Base Item
+       * @default previous
+       * @enum {string}
+       */
+      base_item: "previous" | "fixed";
+      /**
+       * Base Value
+       * @default null
+       */
+      base_value: string | null;
       /**
        * Label
        * @default null

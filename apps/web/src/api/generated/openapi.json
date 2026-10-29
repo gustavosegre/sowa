@@ -4413,6 +4413,18 @@
       ],
       "title": "Sheet"
      },
+     "cell_range": {
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 20
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Cell Range"
+     },
      "header": {
       "type": "boolean",
       "title": "Header",
@@ -5623,10 +5635,45 @@
        "normal",
        "pct_total",
        "pct_row",
-       "pct_column"
+       "pct_column",
+       "difference",
+       "running_total"
       ],
       "title": "Show As",
       "type": "string"
+     },
+     "base_field": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Base Field"
+     },
+     "base_item": {
+      "default": "previous",
+      "enum": [
+       "previous",
+       "fixed"
+      ],
+      "title": "Base Item",
+      "type": "string"
+     },
+     "base_value": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Base Value"
      },
      "label": {
       "anyOf": [

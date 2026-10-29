@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import secrets
 from collections.abc import Sequence
-from datetime import UTC, timedelta
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from sqlalchemy import select
@@ -211,3 +211,7 @@ class ExportRepo:
         self.s.add(row)
         self.s.flush()
         return row
+
+    def finished_before(self, cutoff: datetime) -> Sequence[ExportJobRow]:
+        q = select(ExportJobRow).where(ExportJobRow.status.in_(("done", "error")), ExportJobRow.created_at < cutoff)
+        return self.s.scalars(q).all()

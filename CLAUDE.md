@@ -160,6 +160,7 @@ forja/
 ```bash
 make setup       # uv sync + pnpm install + chromium do Playwright
 make dev         # api (:8000) + web (:5173) com reload; mostra o endereço com o token — portas: make dev API_PORT=8010
+make start       # uso no dia a dia: um processo em 127.0.0.1:8765 servindo a interface compilada; abre o navegador (PORT=…)
 make test        # pytest + vitest
 make e2e         # playwright (FORJA_API_PORT/FORJA_WEB_PORT para reaproveitar servidores já no ar)
 make lint        # ruff (check + format --check) + mypy + eslint + prettier --check + tsc --noEmit
@@ -168,6 +169,8 @@ make types       # regenera tipos TS a partir do OpenAPI (rodar após mudar mode
 make db-migrate  # alembic upgrade head (a API também migra ao subir, FORJA_AUTO_MIGRATE)
 cd apps/api && uv run python -m forja.cli token   # endereço com #token= (--new gera outro; reinicie a API)
 ```
+
+`make start` (`scripts/start.py`) compila a interface quando `apps/web/dist` falta ou está desatualizado, sobe só o uvicorn (sem reload) com `FORJA_SERVE_WEB` e guarda os dados em `data/` na raiz. A API serve o `dist` em `/` (`api/webui.py`, montado depois das rotas) e aceita as rotas também com o prefixo `/api`, igual ao proxy do Vite — o mesmo build funciona nos dois modos. Exportações prontas são apagadas depois de `FORJA_EXPORT_RETENTION_DAYS` (padrão 7), ao subir e a cada nova exportação. A Forja roda localmente; não há deploy com nginx/TLS (o compose é só para testar Postgres e MinIO). Instalação e uso para quem vai usar: `README.md`.
 
 As receitas do Makefile são `cd x && cmd` para rodarem tanto em sh quanto no cmd.exe; `make dev` usa `scripts/dev.py` (multiplataforma). Configuração por variáveis `FORJA_*` (ver `.env.example`); o Vite faz proxy de `/api` para `FORJA_API_URL`.
 
@@ -435,6 +438,8 @@ Modelo único:
 Sub-fluxos por dentro (`nodes/subflow.py`): o `Flow` é analisado como um pipeline próprio (`analyze(..., slots=)`), com cada entrada virando um nó interno `subflow_input` que lê a CTE externa; ids internos ganham o prefixo `<id do nó>/` para as CTEs não sombrearem as de fora. Erros e avisos internos aparecem no nó como `Em "<etapa>": …`. O `Chain.wrap` monta o `WITH` direto na AST (o builder `with_()` do SQLGlot re-parseia nomes e falha com `/`).
 
 Todo o editor funciona pelo teclado: a seção **Entradas** do painel do nó liga cada entrada a um nó (alternativa a arrastar arestas; é o que o E2E usa).
+
+Dinâmica, "Diferença de" / "Soma acumulada em" (`show_as` `difference` / `running_total`, com `base_field`, `base_item` e `base_value`): com o campo base em Linhas, viram janelas sobre o agregado (`LAG`, `SUM … OVER`, `MAX(CASE…) OVER`), particionadas pelos outros campos de Linhas e incompatíveis com totais; com o campo base em Colunas, viram contas entre as células geradas, na ordem de `column_values`. `base_field` usa o nome do campo na tabela (`data (mês)`), o mesmo de `pivotFieldName` no front. XLSX: `xlsx.cell_range` (`B3:F200`, `B3:F`, `B:F`) lê a grade absoluta a partir de A1 (`to_python(skip_empty_area=False)`), porque o `iter_rows` do calamine corta colunas vazias à esquerda, mas não linhas.
 
 Parâmetros: `{nome}` é resolvido como literal tipado (`typed_literal`) no codegen; parâmetro inexistente é erro `PARAM_NOT_FOUND` com posição. Mudar um parâmetro muda o hash de todos os nós (invalida o cache).
 

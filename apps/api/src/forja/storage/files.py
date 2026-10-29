@@ -30,6 +30,7 @@ class FileStorage(Protocol):
     def temp_dir(self) -> Path: ...
     def save_stream(self, stream: BinaryIO, dest: Path, max_bytes: int) -> tuple[int, str]: ...
     def delete_source(self, source_id: str) -> None: ...
+    def delete_export(self, job_id: str) -> None: ...
     # Durable files (originals, normalized Parquet, exports): call after writing / before reading.
     def persist(self, path: Path) -> None: ...
     def ensure_local(self, path: Path) -> Path: ...
@@ -91,6 +92,9 @@ class LocalFileStorage:
     def delete_source(self, source_id: str) -> None:
         shutil.rmtree(self.root / "sources" / source_id, ignore_errors=True)
 
+    def delete_export(self, job_id: str) -> None:
+        shutil.rmtree(self.root / "exports" / job_id, ignore_errors=True)
+
     def persist(self, path: Path) -> None:
         """The local disk is already the durable store."""
 
@@ -142,7 +146,13 @@ class S3FileStorage(LocalFileStorage):
 
     def delete_source(self, source_id: str) -> None:
         super().delete_source(source_id)
-        prefix = f"{self.prefix}sources/{source_id}/"
+        self._delete_prefix(f"{self.prefix}sources/{source_id}/")
+
+    def delete_export(self, job_id: str) -> None:
+        super().delete_export(job_id)
+        self._delete_prefix(f"{self.prefix}exports/{job_id}/")
+
+    def _delete_prefix(self, prefix: str) -> None:
         # List everything first, then delete (at most 1000 keys per request).
         keys: list[str] = []
         token: str | None = None

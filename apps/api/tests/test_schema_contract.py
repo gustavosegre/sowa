@@ -182,6 +182,39 @@ FIXTURES: dict[str, list[dict[str, Any]]] = {
             "totals": True,
             "filters": [{"column": "quantidade", "operator": "gt", "value": 0}],
         },
+        {
+            "rows": [{"column": "ativo"}, {"column": "uf"}],
+            "values": [
+                {"column": "quantidade", "fn": "sum", "show_as": "running_total", "base_field": "uf"},
+                {"column": "valor", "fn": "sum", "show_as": "difference", "base_field": "uf"},
+                {
+                    "column": "valor",
+                    "fn": "avg",
+                    "show_as": "difference",
+                    "base_field": "uf",
+                    "base_item": "fixed",
+                    "base_value": "PR",
+                    "label": "dif PR",
+                },
+            ],
+        },
+        {
+            "rows": [{"column": "ativo"}],
+            "columns": {"column": "uf"},
+            "column_values": ["PR", "SC", "SP"],
+            "values": [
+                {"column": "quantidade", "fn": "sum", "show_as": "running_total", "base_field": "uf"},
+                {
+                    "column": "valor",
+                    "fn": "sum",
+                    "show_as": "difference",
+                    "base_field": "uf",
+                    "base_item": "fixed",
+                    "base_value": "SC",
+                },
+            ],
+            "totals": True,
+        },
     ],
 }
 ANNOTATIONS = {"note", "frame"}

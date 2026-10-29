@@ -21,11 +21,15 @@ class Settings(BaseSettings):
     auto_migrate: bool = True
     cors_origins: list[str] = ["http://localhost:5173", "http://127.0.0.1:5173"]
     export_workers: int = 2
+    export_retention_days: int = 7  # finished exports older than this are deleted (0 = keep forever)
     # Access token, as in Flowa: FORJA_TOKEN, or a random one saved in <data_dir>/token.
     # Off (False) only answers requests coming from this machine.
     auth_enabled: bool = True
     token: str = ""
     web_url: str = "http://localhost:5173"  # address printed with #token= (make dev, forja.cli token)
+    # Built web app (apps/web/dist) served at / by the API itself, as in `make start`.
+    serve_web: bool = True
+    web_dist: Path | None = None  # default: apps/web/dist of this checkout
     # File storage: "local" (disk) or "s3" (S3-compatible bucket, e.g. MinIO; needs the `s3` extra).
     # Credentials come from the usual AWS variables (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY).
     storage: Literal["local", "s3"] = "local"

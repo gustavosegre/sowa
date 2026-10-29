@@ -2,10 +2,13 @@
 # so they run both under sh and under cmd.exe (Windows).
 API_PORT ?= 8000
 WEB_PORT ?= 5173
+PORT ?= 8765
+START_ARGS ?=
+TOKEN_ARGS ?=
 API := apps/api
 WEB := apps/web
 
-.PHONY: setup dev test e2e lint format types db-migrate build
+.PHONY: setup dev start token test e2e lint format types db-migrate build
 
 setup:
 	cd $(API) && uv sync
@@ -14,6 +17,14 @@ setup:
 
 dev:
 	cd $(API) && uv run python ../../scripts/dev.py --api-port $(API_PORT) --web-port $(WEB_PORT)
+
+# Everyday local use: one process serving the built web app on 127.0.0.1:$(PORT).
+start:
+	cd $(API) && uv run python ../../scripts/start.py --port $(PORT) $(START_ARGS)
+
+# Address with the access token of `make start` (TOKEN_ARGS=--new generates another one).
+token:
+	cd $(API) && uv run python -m forja.cli --data-dir ../../data --web-url http://127.0.0.1:$(PORT) token $(TOKEN_ARGS)
 
 test:
 	cd $(API) && uv run pytest

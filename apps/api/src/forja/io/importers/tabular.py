@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import csv
 import datetime as dt
+import re
 from pathlib import Path
 from typing import Any
 
@@ -61,22 +62,57 @@ def utf8_path(original: Path, work: Path, encoding: str) -> Path:
     return dest
 
 
-def xlsx_to_csv(original: Path, work: Path, sheet: str | None) -> tuple[Path, list[str], str]:
+_RANGE = re.compile(r"^([A-Z]{1,3})(\d*)(?::([A-Z]{1,3})(\d*))?$")
+
+
+def _col_index(letters: str) -> int:
+    n = 0
+    for ch in letters:
+        n = n * 26 + ord(ch) - 64
+    return n - 1
+
+
+def parse_cell_range(text: str) -> tuple[int, int, int | None, int | None]:
+    """Excel range -> (first_row, first_col, last_row, last_col), 0-based; None = up to the end."""
+    m = _RANGE.match(text.strip().upper().replace("$", ""))
+    if not m or (m.group(2) and int(m.group(2)) < 1) or (m.group(4) and int(m.group(4)) < 1):
+        raise ImportError_(f'Intervalo "{text}" inválido. Use o formato do Excel, como B3:F200, B3:F ou B:F.')
+    c0, r0 = _col_index(m.group(1)), int(m.group(2) or 1) - 1
+    c1 = _col_index(m.group(3)) if m.group(3) else None
+    r1 = int(m.group(4)) - 1 if m.group(4) else None
+    if (c1 is not None and c1 < c0) or (r1 is not None and r1 < r0):
+        raise ImportError_(f'Intervalo "{text}" invertido: a primeira célula deve ficar acima e à esquerda.')
+    return r0, c0, r1, c1
+
+
+def xlsx_to_csv(
+    original: Path, work: Path, sheet: str | None, cell_range: str | None = None
+) -> tuple[Path, list[str], str]:
     from python_calamine import CalamineWorkbook
 
+    bounds = parse_cell_range(cell_range) if cell_range and cell_range.strip() else None
     wb = CalamineWorkbook.from_path(str(original))
     try:
         sheets = list(wb.sheet_names)
         if not sheets:
             raise ImportError_("A planilha não tem abas.")
         name = sheet if sheet in sheets else sheets[0]
-        dest = work / f"sheet_{sheets.index(name)}.csv"
+        suffix = "_{}_{}_{}_{}".format(*("" if b is None else b for b in bounds)) if bounds else ""
+        dest = work / f"sheet_{sheets.index(name)}{suffix}.csv"
         if not dest.exists():
+            ws = wb.get_sheet_by_name(name)
             tmp = dest.with_suffix(".part")
             with tmp.open("w", encoding="utf-8", newline="") as f:
                 w = csv.writer(f)
-                for row in wb.get_sheet_by_name(name).iter_rows():
-                    w.writerow([_cell(v) for v in row])
+                if bounds is None:
+                    for row in ws.iter_rows():
+                        w.writerow([_cell(v) for v in row])
+                else:
+                    # Absolute grid from A1 (iter_rows trims leading empty columns but not rows).
+                    r0, c0, r1, c1 = bounds
+                    grid = ws.to_python(skip_empty_area=False)
+                    for row in grid[r0 : None if r1 is None else r1 + 1]:
+                        w.writerow([_cell(v) for v in row[c0 : None if c1 is None else c1 + 1]])
             tmp.replace(dest)
         return dest, sheets, name
     finally:
@@ -210,7 +246,7 @@ def detect(engine: Engine, fmt: str, original: Path, work: Path, overrides: Impo
     confidence: float | None = None
     if fmt == "xlsx":
         xo = (overrides.xlsx if overrides and overrides.xlsx else None) or XlsxOptions()
-        path, sheets, sheet = xlsx_to_csv(original, work, xo.sheet)
+        path, sheets, sheet = xlsx_to_csv(original, work, xo.sheet, xo.cell_range)
         xo = xo.model_copy(update={"sheet": sheet})
         o = CsvImportOptions(encoding="utf-8", delimiter=",", quote='"', header=xo.header, skip_rows=xo.skip_rows)
         guesses, sample, dec = _csv_detection(engine, path, o, notes, decimal_override=".")
@@ -297,7 +333,7 @@ def confirm(
     if fmt in ("csv", "xlsx"):
         if fmt == "xlsx":
             xo = options.xlsx or XlsxOptions()
-            path, _, _ = xlsx_to_csv(original, work, xo.sheet)
+            path, _, _ = xlsx_to_csv(original, work, xo.sheet, xo.cell_range)
             o = CsvImportOptions(encoding="utf-8", delimiter=",", quote='"', header=xo.header, skip_rows=xo.skip_rows)
         else:
             o = options.csv or CsvImportOptions()

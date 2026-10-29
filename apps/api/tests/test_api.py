@@ -364,3 +364,29 @@ def test_templates_crud_and_subflow_from_template(client: TestClient) -> None:
     assert client.delete(f"/templates/{tpl['id']}").status_code == 204
     assert client.get(f"/templates/{tpl['id']}").status_code == 404
     assert "subflow_input" not in [n["type"] for n in client.get("/nodes").json()]
+
+
+def test_xlsx_cell_range(client: TestClient) -> None:
+    """Report-style sheet: title in A1, table in B3:D5, total row below (CLAUDE.md §12)."""
+    up = upload(client, "relatorio.xlsx")
+    sid = up["source"]["id"]
+    opts = up["detection"]["options"]
+    opts["xlsx"]["cell_range"] = "b3:d5"
+    det = client.post(f"/sources/{sid}/detect", json={"options": opts}).json()
+    assert [c["name"] for c in det["columns"]] == ["uf", "valor", "obs"]
+    assert {c["name"]: c["suggested_type"] for c in det["columns"]}["valor"] == "decimal"
+    out = client.post(f"/sources/{sid}/confirm", json=det["options"]).json()
+    assert out["report"]["row_count"] == 2  # the "Total" row is outside the range
+
+    # Open-ended ranges, on a sheet whose used area starts at C4.
+    opts = {**det["options"], "xlsx": {**det["options"]["xlsx"], "sheet": "Deslocada", "cell_range": "C4:D"}}
+    det = client.post(f"/sources/{sid}/detect", json={"options": opts}).json()
+    assert [c["name"] for c in det["columns"]] == ["produto", "qtd"]
+    assert [r[0] for r in det["sample_rows"]] == ["caneta", "lápis"]
+
+    opts["xlsx"]["cell_range"] = "F3:B1"
+    r = client.post(f"/sources/{sid}/detect", json={"options": opts})
+    assert r.status_code == 422
+    assert "invertido" in r.json()["message"]
+    opts["xlsx"]["cell_range"] = "3B"
+    assert "Use o formato do Excel" in client.post(f"/sources/{sid}/detect", json={"options": opts}).json()["message"]

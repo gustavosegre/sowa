@@ -1,5 +1,5 @@
 # Forja — ambiente completo: API + web + Postgres (metadados). Arquivos em volume local (FileStorage local).
-# `docker compose up --build` e abra http://localhost:5173
+# `docker compose up --build` e abra http://localhost:5173 (portas do host: FORJA_API_PORT, FORJA_WEB_PORT)
 # Arquivos no MinIO (S3): `docker compose --profile s3 up --build` com FORJA_STORAGE=s3 (ver .env.example).
 services:
   api:
@@ -18,7 +18,7 @@ services:
     volumes:
       - forja-data:/data
     ports:
-      - "8000:8000"
+      - "${FORJA_API_PORT:-8000}:8000"
     depends_on:
       postgres:
         condition: service_healthy
@@ -28,7 +28,7 @@ services:
     environment:
       FORJA_API_URL: http://api:8000
     ports:
-      - "5173:5173"
+      - "${FORJA_WEB_PORT:-5173}:5173"
     depends_on:
       - api
 

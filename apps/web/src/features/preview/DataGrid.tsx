@@ -55,21 +55,21 @@ const DARK: Partial<Theme> = {
   accentFg: "#063d32",
   accentLight: "rgba(196, 181, 253, 0.16)",
   textDark: "#f4f1fa",
-  textMedium: "#9db0a9",
-  textLight: "#62756f",
-  textHeader: "#dde3e0",
-  bgCell: "#0a241f",
-  bgCellMedium: "#0d2a24",
-  bgHeader: "#0f2e28",
-  bgHeaderHasFocus: "#163a33",
-  bgHeaderHovered: "#163a33",
-  borderColor: "rgba(196, 220, 210, 0.12)",
-  horizontalBorderColor: "rgba(196, 220, 210, 0.08)",
+  textMedium: "#a1a1aa",
+  textLight: "#6b6b74",
+  textHeader: "#e4e4e7",
+  bgCell: "#19191c",
+  bgCellMedium: "#1d1d21",
+  bgHeader: "#232327",
+  bgHeaderHasFocus: "#2c2c31",
+  bgHeaderHovered: "#2c2c31",
+  borderColor: "rgba(220, 220, 230, 0.12)",
+  horizontalBorderColor: "rgba(220, 220, 230, 0.08)",
 };
 
 // New/changed columns (comparison mode): a Lima tint.
 const HIGHLIGHT_LIGHT = { bgHeader: "#e4f4d0", bgCell: "#f6fbef" };
-const HIGHLIGHT_DARK = { bgHeader: "#24451a", bgCell: "#10301f" };
+const HIGHLIGHT_DARK = { bgHeader: "#2b3a1e", bgCell: "#1c2118" };
 
 export interface DataGridProps {
   columns: Column[];
@@ -124,7 +124,7 @@ export function DataGrid({ columns, pages, highlight, onHeaderMenu, onCellMenu, 
           displayData: "∅",
           allowOverlay: false,
           contentAlign: type === "integer" || type === "decimal" ? "right" : "left",
-          themeOverride: { textDark: dark ? "#3f5751" : "#c6cdca" },
+          themeOverride: { textDark: dark ? "#55555e" : "#c6cdca" },
         };
       }
       const text = formatCell(v, type);

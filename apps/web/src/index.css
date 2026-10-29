@@ -6,7 +6,7 @@
 
 /* Calm, dense UI. Colors as tokens so light/dark switch in one place.
    Brand palette: Floresta #063d32 · Lima #82d42b · Violeta #805ad5 · Lavanda #c4b5fd · Neve #f4f1fa.
-   Light: Neve surfaces, Floresta actions, Violeta focus. Dark: Floresta surfaces, Lima actions, Lavanda focus. */
+   Light: Neve surfaces, Floresta actions, Violeta focus. Dark: neutral gray surfaces, Lima actions, Lavanda focus. */
 :root {
   --background: #f4f1fa; /* Neve */
   --foreground: #13241f;
@@ -38,13 +38,13 @@
 }
 
 .dark {
-  --background: #061a16;
+  --background: #111113;
   --foreground: #f4f1fa; /* Neve */
-  --card: #0a241f;
-  --muted: #0f2e28;
-  --muted-foreground: #9db0a9;
-  --border: #1b3b34;
-  --input: #26493f;
+  --card: #19191c;
+  --muted: #232327;
+  --muted-foreground: #a1a1aa;
+  --border: #2c2c31;
+  --input: #3a3a41;
   --ring: #c4b5fd; /* Lavanda */
   --primary: #82d42b; /* Lima */
   --primary-foreground: #063d32; /* Floresta */
@@ -52,8 +52,8 @@
   --danger-soft: oklch(0.3 0.06 27);
   --warning-soft: oklch(0.32 0.06 85);
   --success: #82d42b;
-  --canvas: #04140f;
-  --canvas-dot: #1d3a33;
+  --canvas: #0c0c0e;
+  --canvas-dot: #2a2a30;
 
   --cat-input: #2fb38f;
   --cat-columns: #a487f0;
